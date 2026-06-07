@@ -1,21 +1,9 @@
-﻿{
-  "name": "comphelp-service-business-manager",
+{
+  "name": "comphelp-service",
   "version": "1.0.0",
   "private": true,
-  "description": "AI business manager agent for CompHelp Service.",
-  "main": "agent.js",
   "scripts": {
-    "agent": "node agent.js agent",
-    "market-report": "node agent.js market-report",
-    "create-social-calendar": "node agent.js create-social-calendar",
-    "create-seo-page": "node agent.js create-seo-page",
-    "create-blog-post": "node agent.js create-blog-post",
-    "update-website": "node agent.js update-website",
-    "daily-report": "node agent.js daily-report",
-    "media-agent": "node media-agent.js media-agent",
-    "process-uploads": "node media-agent.js process-uploads",
-    "preview-gallery-update": "node media-agent.js preview-gallery-update",
-    "approve-publish": "node media-agent.js approve-publish",
+    "start": "node agent.js",
     "check": "node --check agent.js"
   },
   "engines": {
