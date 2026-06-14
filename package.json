@@ -5,19 +5,11 @@
 "scripts": {
 "start": "node agent.js",
 "check": "node --check agent.js",
-
-```
 "agent": "node agent.js",
-
 "media-agent": "node media-agent.js",
-
 "process-uploads": "node media-agent.js process-uploads",
-
 "preview-gallery-update": "node media-agent.js preview",
-
 "approve-publish": "node media-agent.js approve"
-```
-
 },
 "engines": {
 "node": ">=18"
