@@ -1,0 +1,19 @@
+﻿Blog Post Mode
+
+Create practical, local blog articles for CompHelp Service.
+
+Topics:
+- Security camera tips
+- Smart home tips
+- WiFi troubleshooting
+- Computer repair education
+- Local service guides
+- Small business tech support
+
+Rules:
+- Write helpful, plain-language content.
+- Use local keywords naturally.
+- Include CompHelp Service offerings and service areas where relevant.
+- Do not make medical, legal, licensing, or warranty claims.
+- Do not invent fake customer stories.
+- End with a free-estimate CTA.

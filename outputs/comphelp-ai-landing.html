@@ -1,0 +1,938 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CompHelp Service | Smart Tech Installation, Repair & WiFi Support</title>
+  <meta name="description" content="CompHelp Service provides professional security camera installation, smart home setup, network and WiFi installation, and computer repair with fast local support.">
+  <meta name="keywords" content="security camera installation, smart home setup, WiFi installation, network installation, computer repair, tech support, CompHelp Service">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#071016">
+  <meta property="og:title" content="CompHelp Service | Professional Tech Help At Home & Work">
+  <meta property="og:description" content="Security cameras, smart homes, WiFi networks, and computer repair handled by friendly tech pros.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1600&q=80">
+  <link rel="canonical" href="https://comphelp.ai/">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "CompHelp Service",
+      "sameAs": [
+        "https://www.instagram.com/comphelp_service/"
+      ],
+      "description": "Security camera installation, smart home setup, network and WiFi installation, and computer repair.",
+      "telephone": "+1-747-295-1440",
+      "url": "https://comphelp.ai/",
+      "areaServed": "Local homes and small businesses",
+      "serviceType": [
+        "Security Camera Installation",
+        "Smart Home Setup",
+        "Network & WiFi Installation",
+        "Computer Repair"
+      ]
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #071016;
+      --panel: #0f1d25;
+      --panel-strong: #152a35;
+      --text: #f2f7f8;
+      --muted: #a8bcc2;
+      --line: rgba(255, 255, 255, .12);
+      --accent: #42d9b6;
+      --accent-2: #75a7ff;
+      --warn: #f6c867;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .35);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      letter-spacing: 0;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+
+    .page {
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 80% 10%, rgba(66, 217, 182, .12), transparent 34rem),
+        linear-gradient(180deg, #071016 0%, #08151c 44%, #071016 100%);
+    }
+
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem clamp(1rem, 4vw, 4rem);
+      background: rgba(7, 16, 22, .78);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: .5rem;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #041014;
+      font-weight: 900;
+      box-shadow: 0 12px 28px rgba(66, 217, 182, .25);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: clamp(.8rem, 2vw, 1.6rem);
+      color: var(--muted);
+      font-size: .94rem;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .call-btn,
+    .primary-btn,
+    .secondary-btn {
+      min-height: 2.8rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .55rem;
+      border-radius: .55rem;
+      padding: .78rem 1rem;
+      border: 1px solid transparent;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease;
+      white-space: nowrap;
+    }
+
+    .call-btn, .primary-btn {
+      background: var(--accent);
+      color: #041014;
+      box-shadow: 0 18px 34px rgba(66, 217, 182, .22);
+    }
+
+    .secondary-btn {
+      background: rgba(255, 255, 255, .06);
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    .call-btn:hover,
+    .primary-btn:hover,
+    .secondary-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, .28);
+    }
+
+    .hero {
+      min-height: 96vh;
+      display: grid;
+      align-items: center;
+      padding: 7.2rem clamp(1rem, 4vw, 4rem) 3rem;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(90deg, rgba(7, 16, 22, .96) 0%, rgba(7, 16, 22, .82) 42%, rgba(7, 16, 22, .5) 100%),
+        url("https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1800&q=82") center right / cover;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 10rem;
+      z-index: -1;
+      background: linear-gradient(180deg, transparent, var(--bg));
+    }
+
+    .hero-inner {
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.03fr) minmax(320px, .58fr);
+      gap: clamp(1.6rem, 5vw, 5rem);
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      color: var(--accent);
+      background: rgba(66, 217, 182, .1);
+      border: 1px solid rgba(66, 217, 182, .22);
+      padding: .45rem .65rem;
+      border-radius: 999px;
+      font-size: .88rem;
+      font-weight: 800;
+    }
+
+    h1 {
+      max-width: 760px;
+      margin: 1.1rem 0 .9rem;
+      font-size: clamp(2.5rem, 7vw, 5.9rem);
+      line-height: .94;
+    }
+
+    .hero-copy {
+      max-width: 680px;
+      color: #c6d7dc;
+      font-size: clamp(1.06rem, 2vw, 1.25rem);
+      line-height: 1.7;
+      margin: 0 0 1.6rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .8rem;
+      margin-bottom: 1.7rem;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .75rem;
+      max-width: 680px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .055);
+      border-radius: .5rem;
+      padding: .9rem;
+      backdrop-filter: blur(16px);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.35rem;
+      color: var(--text);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .lead-panel {
+      background: rgba(15, 29, 37, .9);
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: .5rem;
+      box-shadow: var(--shadow);
+      padding: clamp(1.1rem, 3vw, 1.5rem);
+      backdrop-filter: blur(22px);
+    }
+
+    .lead-panel h2 {
+      margin: 0 0 .35rem;
+      font-size: 1.45rem;
+    }
+
+    .lead-panel p {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: .8rem;
+    }
+
+    label {
+      display: grid;
+      gap: .35rem;
+      color: #d9e8eb;
+      font-size: .88rem;
+      font-weight: 700;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 2.9rem;
+      border-radius: .45rem;
+      border: 1px solid rgba(255, 255, 255, .16);
+      background: rgba(4, 12, 17, .74);
+      color: var(--text);
+      padding: .78rem .85rem;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 6.2rem;
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(66, 217, 182, .14);
+    }
+
+    .submit-note {
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.45;
+      margin: -.25rem 0 0;
+    }
+
+    section {
+      padding: clamp(3.4rem, 7vw, 6rem) clamp(1rem, 4vw, 4rem);
+    }
+
+    .section-inner {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: 1.08;
+    }
+
+    .section-heading p {
+      max-width: 500px;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .9rem;
+    }
+
+    .service-card,
+    .testimonial,
+    .info-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .035));
+      border: 1px solid var(--line);
+      border-radius: .5rem;
+    }
+
+    .service-card {
+      min-height: 245px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .service-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(66, 217, 182, .14), transparent 52%);
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+
+    .service-card:hover::before { opacity: 1; }
+
+    .icon {
+      width: 2.7rem;
+      height: 2.7rem;
+      border-radius: .45rem;
+      display: grid;
+      place-items: center;
+      background: rgba(66, 217, 182, .12);
+      color: var(--accent);
+      font-size: .62rem;
+      font-weight: 900;
+      position: relative;
+      z-index: 1;
+    }
+
+    .service-card h3,
+    .testimonial h3,
+    .info-card h3 {
+      margin: 1rem 0 .55rem;
+      font-size: 1.1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .service-card p,
+    .testimonial p,
+    .info-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      position: relative;
+      z-index: 1;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(320px, 1.1fr);
+      gap: clamp(1rem, 4vw, 2rem);
+      align-items: stretch;
+    }
+
+    .map-wrap {
+      min-height: 430px;
+      border: 1px solid var(--line);
+      border-radius: .5rem;
+      overflow: hidden;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .map-wrap iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 430px;
+      border: 0;
+      filter: grayscale(1) invert(.9) contrast(.95);
+    }
+
+    .info-stack {
+      display: grid;
+      gap: .8rem;
+    }
+
+    .info-card {
+      padding: 1.1rem;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .9rem;
+    }
+
+    .testimonial {
+      padding: 1.1rem;
+      min-height: 230px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stars {
+      color: var(--warn);
+      letter-spacing: .08rem;
+      font-size: 1rem;
+      margin-bottom: .75rem;
+    }
+
+    .person {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      color: var(--muted);
+      font-size: .92rem;
+      margin-top: 1rem;
+    }
+
+    .avatar {
+      width: 2.3rem;
+      height: 2.3rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--panel-strong);
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .cta-band {
+      background:
+        linear-gradient(90deg, rgba(7, 16, 22, .95), rgba(7, 16, 22, .68)),
+        url("https://images.unsplash.com/photo-1600267204091-5c1ab8b10c02?auto=format&fit=crop&w=1800&q=80") center / cover;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .cta-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .cta-content h2 {
+      margin: 0 0 .45rem;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+    }
+
+    .cta-content p {
+      margin: 0;
+      color: #c6d7dc;
+      line-height: 1.55;
+      max-width: 640px;
+    }
+
+    footer {
+      padding: 2rem clamp(1rem, 4vw, 4rem);
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-inner {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: .9rem;
+    }
+
+    .chat-launcher {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      z-index: 30;
+      width: 3.65rem;
+      height: 3.65rem;
+      border-radius: 50%;
+      border: 0;
+      background: var(--accent);
+      color: #041014;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, .35);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 1.55rem;
+    }
+
+    .chat-widget {
+      position: fixed;
+      right: 1rem;
+      bottom: 5.2rem;
+      z-index: 29;
+      width: min(380px, calc(100vw - 2rem));
+      background: rgba(15, 29, 37, .98);
+      border: 1px solid rgba(255, 255, 255, .17);
+      border-radius: .55rem;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transform: translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .chat-widget.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .chat-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      padding: .95rem 1rem;
+      background: rgba(66, 217, 182, .1);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .chat-head strong { display: block; }
+    .chat-head span {
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    .chat-close {
+      width: 2rem;
+      height: 2rem;
+      border-radius: .4rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .05);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .chat-body {
+      padding: 1rem;
+      display: grid;
+      gap: .75rem;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+
+    .bubble {
+      width: fit-content;
+      max-width: 88%;
+      padding: .7rem .82rem;
+      border-radius: .65rem;
+      line-height: 1.45;
+      font-size: .92rem;
+    }
+
+    .bubble.ai {
+      background: rgba(255, 255, 255, .08);
+      color: #dbe9ec;
+    }
+
+    .bubble.user {
+      justify-self: end;
+      background: var(--accent);
+      color: #041014;
+      font-weight: 700;
+    }
+
+    .quick-replies {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+      padding: 0 1rem 1rem;
+    }
+
+    .quick-replies button {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .06);
+      color: var(--text);
+      border-radius: 999px;
+      padding: .48rem .65rem;
+      cursor: pointer;
+      font-size: .82rem;
+    }
+
+    @media (max-width: 980px) {
+      .nav-links { display: none; }
+      .hero-inner,
+      .split {
+        grid-template-columns: 1fr;
+      }
+      .lead-panel {
+        max-width: 620px;
+      }
+      .services-grid,
+      .testimonials-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .section-heading,
+      .cta-content {
+        align-items: start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .nav {
+        padding: .75rem 1rem;
+      }
+      .brand span { max-width: 42vw; overflow: hidden; text-overflow: ellipsis; }
+      .call-btn { padding-inline: .75rem; }
+      .hero {
+        min-height: auto;
+        padding-top: 6.3rem;
+      }
+      .hero::before {
+        background:
+          linear-gradient(180deg, rgba(7, 16, 22, .94), rgba(7, 16, 22, .78)),
+          url("https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1200&q=78") center / cover;
+      }
+      .metrics,
+      .services-grid,
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+      .metric { padding: .8rem; }
+      .hero-actions a {
+        width: 100%;
+      }
+      .lead-panel { padding: 1rem; }
+      .chat-launcher {
+        right: .85rem;
+        bottom: .85rem;
+      }
+      .chat-widget {
+        right: .75rem;
+        bottom: 4.85rem;
+        width: calc(100vw - 1.5rem);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="CompHelp Service home">
+        <span class="brand-mark">CH</span>
+        <span>CompHelp Service</span>
+      </a>
+      <div class="nav-links">
+        <a href="#services">Services</a>
+        <a href="#map">Service Area</a>
+        <a href="#testimonials">Reviews</a>
+        <a href="#quote">Get Help</a>
+        <a href="https://www.instagram.com/comphelp_service/" target="_blank" rel="noopener">Instagram</a>
+      </div>
+      <a class="call-btn" href="tel:+17472951440" aria-label="Call CompHelp Service now">Call Now</a>
+    </nav>
+
+    <main id="top">
+      <header class="hero">
+        <div class="hero-inner">
+          <div>
+            <span class="eyebrow">Same-week tech installs and repairs</span>
+            <h1>CompHelp Service</h1>
+            <p class="hero-copy">Professional security cameras, smart home devices, stronger WiFi, and computer repair for homes and small businesses. Clear recommendations, clean installs, and support that meets you where you are.</p>
+            <div class="hero-actions">
+              <a class="primary-btn" href="#quote">Request a Free Quote</a>
+              <a class="secondary-btn" href="#services">View Services</a>
+            </div>
+            <div class="metrics" aria-label="Company highlights">
+              <div class="metric"><strong>4.9/5</strong><span>Average client rating</span></div>
+              <div class="metric"><strong>24 hr</strong><span>Typical response time</span></div>
+              <div class="metric"><strong>AI guided</strong><span>Smarter diagnostics</span></div>
+            </div>
+          </div>
+
+          <aside class="lead-panel" id="quote" aria-label="Lead capture form">
+            <h2>Get a Fast Quote</h2>
+            <p>Tell us what you need and a CompHelp Service specialist will follow up with next steps.</p>
+            <form class="form-grid" onsubmit="event.preventDefault(); showFormSuccess();">
+              <label>Full name
+                <input name="name" autocomplete="name" placeholder="Your name" required>
+              </label>
+              <label>Phone
+                <input name="phone" type="tel" autocomplete="tel" placeholder="+1 (747) 295-1440" required>
+              </label>
+              <label>Email
+                <input name="email" type="email" autocomplete="email" placeholder="Email address" required>
+              </label>
+              <label>Service needed
+                <select name="service" required>
+                  <option value="">Choose a service</option>
+                  <option>Security Camera Installation</option>
+                  <option>Smart Home Setup</option>
+                  <option>Network & WiFi Installation</option>
+                  <option>Computer Repair</option>
+                </select>
+              </label>
+              <label>Project details
+                <textarea name="message" placeholder="Briefly describe your setup, issue, or preferred appointment window."></textarea>
+              </label>
+              <button class="primary-btn" type="submit">Send Request</button>
+              <p class="submit-note" id="form-status" role="status">No spam. Just a quick follow-up from a real technician.</p>
+            </form>
+          </aside>
+        </div>
+      </header>
+
+      <section id="services">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2>Tech services built for real homes and busy teams.</h2>
+            <p>From first walkthrough to final testing, CompHelp Service handles the practical details so your devices, network, and computers work together.</p>
+          </div>
+          <div class="services-grid">
+            <article class="service-card">
+              <div>
+                <div class="icon" aria-hidden="true">CAM</div>
+                <h3>Security Camera Installation</h3>
+                <p>Camera placement, mounting, wiring guidance, mobile app setup, recording checks, and secure account configuration.</p>
+              </div>
+            </article>
+            <article class="service-card">
+              <div>
+                <div class="icon" aria-hidden="true">HOME</div>
+                <h3>Smart Home Setup</h3>
+                <p>Doorbells, locks, lights, speakers, hubs, sensors, and automations configured for reliable everyday use.</p>
+              </div>
+            </article>
+            <article class="service-card">
+              <div>
+                <div class="icon" aria-hidden="true">WIFI</div>
+                <h3>Network & WiFi Installation</h3>
+                <p>Router upgrades, mesh WiFi, access points, dead-zone fixes, device onboarding, and small office network cleanup.</p>
+              </div>
+            </article>
+            <article class="service-card">
+              <div>
+                <div class="icon" aria-hidden="true">PC</div>
+                <h3>Computer Repair</h3>
+                <p>Slow computers, malware checks, data transfer, software setup, hardware troubleshooting, and practical tune-ups.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-band" aria-label="Call to action">
+        <div class="section-inner cta-content">
+          <div>
+            <h2>Need help today?</h2>
+            <p>Talk with a technician about your camera install, WiFi issue, smart device setup, or computer problem.</p>
+          </div>
+          <a class="call-btn" href="tel:+17472951440">Call Now</a>
+        </div>
+      </section>
+
+      <section id="map">
+        <div class="section-inner split">
+          <div class="info-stack">
+            <div class="section-heading" style="display:block;margin-bottom:.4rem">
+              <h2>Local service, clear arrival windows.</h2>
+            </div>
+            <article class="info-card">
+              <h3>Service Area</h3>
+              <p>CompHelp Service supports nearby residential and small business customers. Replace the map query with your office address or target city for launch.</p>
+            </article>
+            <article class="info-card">
+              <h3>What to Expect</h3>
+              <p>A quick intake, practical recommendations, upfront pricing, clean work, and a final walkthrough before the job is complete.</p>
+            </article>
+            <article class="info-card">
+              <h3>Business Hours</h3>
+              <p>Monday-Friday: 8 AM-7 PM<br>Saturday: 9 AM-4 PM<br>Emergency calls by appointment.</p>
+            </article>
+          </div>
+          <div class="map-wrap" aria-label="Google Maps service area">
+            <iframe
+              title="CompHelp Service Google Maps service area"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps?q=technology%20support%20near%20me&output=embed">
+            </iframe>
+          </div>
+        </div>
+      </section>
+
+      <section id="testimonials">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2>Trusted by people who just need the tech to work.</h2>
+            <p>Fast communication, tidy installs, and patient support are the standard.</p>
+          </div>
+          <div class="testimonials-grid">
+            <article class="testimonial">
+              <div>
+                <div class="stars" aria-label="Five stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <p>"CompHelp Service installed our outdoor cameras, cleaned up the wiring, and made sure every family member could use the app before leaving."</p>
+              </div>
+              <div class="person"><span class="avatar">M</span><span>Maria S., Homeowner</span></div>
+            </article>
+            <article class="testimonial">
+              <div>
+                <div class="stars" aria-label="Five stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <p>"Our office WiFi finally reaches every room. They explained the options without overselling and got everything online the same afternoon."</p>
+              </div>
+              <div class="person"><span class="avatar">D</span><span>Derek L., Studio Owner</span></div>
+            </article>
+            <article class="testimonial">
+              <div>
+                <div class="stars" aria-label="Five stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <p>"My laptop was crawling. They diagnosed the issue, saved my files, and had it running smoothly again faster than I expected."</p>
+              </div>
+              <div class="person"><span class="avatar">A</span><span>Angela R., Remote Worker</span></div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <span>&copy; <span id="year"></span> CompHelp Service. All rights reserved.</span>
+        <span>Security Cameras &middot; Smart Homes &middot; WiFi &middot; Computer Repair</span>
+        <span>Follow us: <a href="https://www.instagram.com/comphelp_service/" target="_blank" rel="noopener">Instagram</a></span>
+      </div>
+    </footer>
+
+    <aside class="chat-widget" id="chat-widget" aria-label="AI chat widget">
+      <div class="chat-head">
+        <div>
+          <strong>CompHelp Service Assistant</strong>
+          <span>Ask about services, pricing, or scheduling.</span>
+        </div>
+        <button class="chat-close" type="button" aria-label="Close chat" onclick="toggleChat(false)">&times;</button>
+      </div>
+      <div class="chat-body" id="chat-body">
+        <div class="bubble ai">Hi, I'm the CompHelp Service assistant. What can we help you set up or fix?</div>
+      </div>
+      <div class="quick-replies" aria-label="Quick chat replies">
+        <button type="button" onclick="sendQuickReply('I need cameras installed')">Cameras</button>
+        <button type="button" onclick="sendQuickReply('My WiFi is weak')">WiFi help</button>
+        <button type="button" onclick="sendQuickReply('I need computer repair')">Computer repair</button>
+        <button type="button" onclick="sendQuickReply('I want smart home setup')">Smart home</button>
+      </div>
+    </aside>
+    <button class="chat-launcher" type="button" aria-label="Open AI chat widget" onclick="toggleChat()">CH</button>
+  </div>
+
+  <script>
+    const chatWidget = document.getElementById("chat-widget");
+    const chatBody = document.getElementById("chat-body");
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    function toggleChat(force) {
+      const shouldOpen = typeof force === "boolean" ? force : !chatWidget.classList.contains("open");
+      chatWidget.classList.toggle("open", shouldOpen);
+    }
+
+    function addBubble(text, type) {
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + type;
+      bubble.textContent = text;
+      chatBody.appendChild(bubble);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function sendQuickReply(text) {
+      toggleChat(true);
+      addBubble(text, "user");
+      const lower = text.toLowerCase();
+      let reply = "Great. Share your name, phone, and a few details in the quote form, and a technician will follow up with the best next step.";
+      if (lower.includes("camera")) reply = "We can help with camera placement, mounting, app setup, and recording checks. Use the quote form and include how many cameras you want installed.";
+      if (lower.includes("wifi")) reply = "We troubleshoot weak WiFi, dead zones, router upgrades, and mesh systems. Tell us your space size and current router if you know it.";
+      if (lower.includes("computer")) reply = "We handle slow systems, setup, malware checks, data transfer, and troubleshooting. Add your device model and the main symptom in the form.";
+      if (lower.includes("smart")) reply = "We set up locks, doorbells, lights, hubs, speakers, and automations. List your devices and we will help plan the visit.";
+      window.setTimeout(() => addBubble(reply, "ai"), 360);
+    }
+
+    function showFormSuccess() {
+      document.getElementById("form-status").textContent = "Thanks. Your request is ready to send once this form is connected to your CRM or email service.";
+    }
+  </script>
+</body>
+</html>

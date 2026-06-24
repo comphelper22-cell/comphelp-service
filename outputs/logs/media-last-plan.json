@@ -1,0 +1,181 @@
+{
+  "ok": true,
+  "createdAt": "2026-06-14T17:56:20.867Z",
+  "approvalRequired": true,
+  "message": "Media has been analyzed and staged. Review the diff and drafts before publishing.",
+  "analyzed": 27,
+  "selected": 6,
+  "rejected": [
+    {
+      "fileName": "photo_5451907004961521263_y.jpg",
+      "reason": "Low quality score."
+    },
+    {
+      "fileName": "photo_5451907004961521264_y.jpg",
+      "reason": "Low quality score."
+    },
+    {
+      "fileName": "photo_5451907004961521265_y.jpg",
+      "reason": "Low quality score."
+    },
+    {
+      "fileName": "photo_5451907004961521266_y.jpg",
+      "reason": "Low quality score."
+    },
+    {
+      "fileName": "photo_5451907004961521267_y.jpg",
+      "reason": "Low quality score."
+    },
+    {
+      "fileName": "IMG_0250.MOV",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "IMG_0236.MOV",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "IMG_0249.MOV",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "IMG_0258.MOV",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "IMG_0235.MOV",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "photo_5451907004961521270_y.jpg",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "photo_5451907004961521271_y.jpg",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "photo_5451907004961521275_y.jpg",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "photo_5451907004961521274_y.jpg",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "photo_5451907004961521269_y.jpg",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "photo_5451907004961521268_y.jpg",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "IMG_0242.MOV",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "IMG_0239.MOV",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "IMG_0259.MOV",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "IMG_0240.MOV",
+      "reason": "Not selected; stronger media was available."
+    },
+    {
+      "fileName": "IMG_0260.MOV",
+      "reason": "Not selected; stronger media was available."
+    }
+  ],
+  "privacySkipped": [],
+  "updates": [
+    {
+      "serviceKey": "security-camera-installation",
+      "page": "security-camera-installation.html",
+      "media": [
+        {
+          "fileName": "IMG_0231.MOV",
+          "mediaUrl": "assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-821Z.mov",
+          "thumbnailUrl": "",
+          "backupPath": "uploads/original-backups/2026-06-14/IMG_0231.MOV",
+          "optimizer": "copy-only-install-sharp-for-webp"
+        },
+        {
+          "fileName": "IMG_0253.MOV",
+          "mediaUrl": "assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-835Z.mov",
+          "thumbnailUrl": "",
+          "backupPath": "uploads/original-backups/2026-06-14/IMG_0253.MOV",
+          "optimizer": "copy-only-install-sharp-for-webp"
+        },
+        {
+          "fileName": "IMG_0228.MOV",
+          "mediaUrl": "assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-843Z.mov",
+          "thumbnailUrl": "",
+          "backupPath": "uploads/original-backups/2026-06-14/IMG_0228.MOV",
+          "optimizer": "copy-only-install-sharp-for-webp"
+        },
+        {
+          "fileName": "IMG_0243.MOV",
+          "mediaUrl": "assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-849Z.mov",
+          "thumbnailUrl": "",
+          "backupPath": "uploads/original-backups/2026-06-14/IMG_0243.MOV",
+          "optimizer": "copy-only-install-sharp-for-webp"
+        },
+        {
+          "fileName": "IMG_0232.MOV",
+          "mediaUrl": "assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-855Z.mov",
+          "thumbnailUrl": "",
+          "backupPath": "uploads/original-backups/2026-06-14/IMG_0232.MOV",
+          "optimizer": "copy-only-install-sharp-for-webp"
+        },
+        {
+          "fileName": "IMG_0227.MOV",
+          "mediaUrl": "assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-860Z.mov",
+          "thumbnailUrl": "",
+          "backupPath": "uploads/original-backups/2026-06-14/IMG_0227.MOV",
+          "optimizer": "copy-only-install-sharp-for-webp"
+        }
+      ],
+      "galleryItem": {
+        "json": {
+          "title": "Security Camera Installation job in Los Angeles",
+          "description": "Completed security camera installation project in Los Angeles.",
+          "service": "Security Camera Installation",
+          "city": "Los Angeles",
+          "date": "2026",
+          "mediaType": "video",
+          "mediaUrl": "assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-821Z.mov",
+          "beforeMediaUrl": "",
+          "afterMediaUrl": "",
+          "caption": "Completed job media added by CompHelp Service media manager.",
+          "altText": "Security Camera Installation project in Los Angeles by CompHelp Service",
+          "thumbnailUrl": ""
+        },
+        "html": "<article class=\"card\" data-media-id=\"security-camera-installation-job-in-los-angeles\"><video class=\"media-box\" controls preload=\"metadata\" aria-label=\"Security Camera Installation project in Los Angeles by CompHelp Service\"><source src=\"assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-821Z.mov\"></video><h3>Security Camera Installation job in Los Angeles</h3><p>Completed security camera installation project in Los Angeles.</p><span class=\"pill\">Security Camera Installation</span><span class=\"pill\">Los Angeles</span><span class=\"pill\">2026</span><p>Completed job media added by CompHelp Service media manager.</p></article>"
+      },
+      "diff": "--- security-camera-installation.html\n+++ security-camera-installation.html\n-    <section class=\"section\"><div class=\"wrap\"><h2>Work Gallery</h2><script type=\"application/json\" class=\"gallery-data\">[{\"title\":\"Front entry camera setup\",\"description\":\"Configured camera coverage for a home entry area.\",\"service\":\"Security Camera Installation\",\"city\":\"Los Angeles\",\"date\":\"2026\",\"mediaType\":\"image\",\"mediaUrl\":\"assets/gallery/security-camera-installation/placeholder-service.jpg\",\"caption\":\"Entry coverage placeholder\"}]</script><div class=\"cards\"><article class=\"card\"><div class=\"media-box\">Image placeholder</div><h3>Front entry camera setup</h3><p>Configured camera coverage for a home entry area.</p><span class=\"pill\">Security Camera Installation</span><span class=\"pill\">Los Angeles</span><span class=\"pill\">2026</span><p>Entry coverage placeholder</p></article><!-- ADD NEW JOB MEDIA ITEM HERE --></div></div></section>\n+    <section class=\"section\"><div class=\"wrap\"><h2>Work Gallery</h2><script type=\"application/json\" class=\"gallery-data\">[{\"title\":\"Front entry camera setup\",\"description\":\"Configured camera coverage for a home entry area.\",\"service\":\"Security Camera Installation\",\"city\":\"Los Angeles\",\"date\":\"2026\",\"mediaType\":\"image\",\"mediaUrl\":\"assets/gallery/security-camera-installation/placeholder-service.jpg\",\"caption\":\"Entry coverage placeholder\"},{\"title\":\"Security Camera Installation job in Los Angeles\",\"description\":\"Completed security camera installation project in Los Angeles.\",\"service\":\"Security Camera Installation\",\"city\":\"Los Angeles\",\"date\":\"2026\",\"mediaType\":\"video\",\"mediaUrl\":\"assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-821Z.mov\",\"beforeMediaUrl\":\"\",\"afterMediaUrl\":\"\",\"caption\":\"Completed job media added by CompHelp Service media manager.\",\"altText\":\"Security Camera Installation project in Los Angeles by CompHelp Service\",\"thumbnailUrl\":\"\"}]</script><div class=\"cards\"><article class=\"card\"><div class=\"media-box\">Image placeholder</div><h3>Front entry camera setup</h3><p>Configured camera coverage for a home entry area.</p><span class=\"pill\">Security Camera Installation</span><span class=\"pill\">Los Angeles</span><span class=\"pill\">2026</span><p>Entry coverage placeholder</p></article><article class=\"card\" data-media-id=\"security-camera-installation-job-in-los-angeles\"><video class=\"media-box\" controls preload=\"metadata\" aria-label=\"Security Camera Installation project in Los Angeles by CompHelp Service\"><source src=\"assets/gallery/security-camera-installation/los-angeles-security-camera-installation-2026-06-14T17-56-20-821Z.mov\"></video><h3>Security Camera Installation job in Los Angeles</h3><p>Completed security camera installation project in Los Angeles.</p><span class=\"pill\">Security Camera Installation</span><span class=\"pill\">Los Angeles</span><span class=\"pill\">2026</span><p>Completed job media added by CompHelp Service media manager.</p></article><!-- ADD NEW JOB MEDIA ITEM HERE --></div></div></section>",
+      "socialDrafts": {
+        "instagramCaption": "Completed security camera installation project in Los Angeles.\n\nNeed help with security camera installation? CompHelp Service offers local support across Los Angeles County.\n\n#CompHelpService #LosAngelesTech #LosAngeles #SecurityCameraInstallation #SmallBusiness",
+        "facebookCaption": "Completed security camera installation project in Los Angeles.\n\nCompHelp Service helps local homes and small businesses with security camera installation, smart home setup, WiFi, computer repair, and data recovery. Call +1 (747) 295-1440 for a free estimate.",
+        "tiktokScript": [
+          "Opening shot: show the finished security camera installation setup.",
+          "Voiceover: \"Another local Los Angeles project completed by CompHelp Service.\"",
+          "Cut to close-up details, clean cable/device placement, or final customer-ready result.",
+          "End card: Need help? Call +1 (747) 295-1440 for a free estimate."
+        ],
+        "googleBusinessPost": "Security Camera Installation Los Angeles: Completed security camera installation project in Los Angeles. Contact CompHelp Service for local tech service and free estimates in Los Angeles County.",
+        "hashtags": [
+          "#CompHelpService",
+          "#LosAngelesTech",
+          "#LosAngeles",
+          "#SecurityCameraInstallation",
+          "#SmallBusiness"
+        ]
+      }
+    }
+  ]
+}

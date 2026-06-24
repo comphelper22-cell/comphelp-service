@@ -59,22 +59,6 @@
       "destination": "/api/admin-test.js"
     },
     {
-      "source": "/api/outreach",
-      "destination": "/api/outreach.js"
-    },
-    {
-      "source": "/api/vendor-dispatch",
-      "destination": "/api/vendor-dispatch.js"
-    },
-    {
-      "source": "/api/estimate",
-      "destination": "/api/estimate.js"
-    },
-    {
-      "source": "/api/followups",
-      "destination": "/api/followups.js"
-    },
-    {
       "source": "/admin-test",
       "destination": "/admin-test.html"
     },
