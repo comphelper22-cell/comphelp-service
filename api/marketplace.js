@@ -1,9 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const ROOT = path.resolve(__dirname, "..");
-const DATA_FILE = path.join(ROOT, "data", "marketplace.json");
-const GALLERY_FILE = path.join(ROOT, "data", "gallery.json");
+const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
+const GALLERY_FILE = path.join(process.cwd(), "data", "gallery.json");
 const DEFAULT_MARKETPLACE = {
   version: 1,
   business: {
@@ -48,12 +47,9 @@ const TABLES = {
   followUps: "marketplace_followups"
 };
 
-function json(res, status, body) {
-  res.statusCode = status;
+function sendJson(res, statusCode, body) {
+  res.statusCode = statusCode;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
-  res.setHeader("Access-Control-Allow-Origin", process.env.ALLOWED_ORIGIN || "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-marketplace-admin-secret");
   res.setHeader("Cache-Control", "no-store");
   res.end(JSON.stringify(body));
 }
@@ -71,6 +67,7 @@ function id(prefix) {
 }
 
 function logError(where, error) {
+  console.error("marketplace_api_error", error);
   console.error("[marketplace]", where, {
     message: error && error.message ? error.message : String(error),
     stack: error && error.stack ? error.stack : undefined
@@ -753,45 +750,45 @@ const PERMISSIONS = {
 };
 
 module.exports = async function handler(req, res) {
-  if (req.method === "OPTIONS") return json(res, 204, {});
+  if (req.method === "OPTIONS") return sendJson(res, 204, {});
   try {
     if (req.method === "GET") {
       try {
-        return json(res, 200, await dashboard(req));
+        return sendJson(res, 200, await dashboard(req));
       } catch (error) {
         logError("handler:GET:dashboard", error);
-        return json(res, 500, safeError("handler:GET:dashboard", error));
+        return sendJson(res, 500, { ok: false, error: "server_error", message: clean(error.message || "Dashboard request failed.", 500), where: "handler:GET:dashboard" });
       }
     }
-    if (req.method !== "POST") return json(res, 405, { ok: false, error: "Method not allowed.", where: "handler:method" });
+    if (req.method !== "POST") return sendJson(res, 405, { ok: false, error: "method_not_allowed", message: "Method not allowed.", where: "handler:method" });
     let body;
     try {
       body = await readBody(req);
     } catch (error) {
       logError("handler:POST:parseBody", error);
-      return json(res, 400, safeError("handler:POST:parseBody", error, "Invalid JSON body."));
+      return sendJson(res, 400, { ok: false, error: "invalid_json", message: clean(error.message || "Invalid JSON body.", 500), where: "handler:POST:parseBody" });
     }
     const action = clean(body.action, 80);
     if (action === "login") {
       try {
         const login = loginStatus(req);
-        return json(res, login.ok ? 200 : login.status, login.ok ? { ok: true, role: login.role } : { ok: false, error: login.error, where: "handler:POST:login" });
+        return sendJson(res, login.ok ? 200 : login.status, login.ok ? { ok: true, role: login.role } : { ok: false, error: login.error, where: "handler:POST:login" });
       } catch (error) {
         logError("handler:POST:login", error);
-        return json(res, 500, safeError("handler:POST:login", error));
+        return sendJson(res, 500, { ok: false, error: "server_error", message: clean(error.message || "Login failed.", 500), where: "handler:POST:login" });
       }
     }
     const roleCheck = requireRole(req, ["admin", "manager", "viewer"]);
-    if (!roleCheck.ok) return json(res, roleCheck.status, { ok: false, error: roleCheck.error, where: "handler:POST:requireRole" });
-    if (!PERMISSIONS[roleCheck.role].includes(action)) return json(res, 403, { ok: false, error: "Role does not have permission for this action.", where: "handler:POST:permission" });
+    if (!roleCheck.ok) return sendJson(res, roleCheck.status, { ok: false, error: roleCheck.error, where: "handler:POST:requireRole" });
+    if (!PERMISSIONS[roleCheck.role].includes(action)) return sendJson(res, 403, { ok: false, error: "Role does not have permission for this action.", where: "handler:POST:permission" });
     try {
-      return json(res, 200, await handleAction(action, body.payload || {}));
+      return sendJson(res, 200, await handleAction(action, body.payload || {}));
     } catch (error) {
       logError(`handler:POST:action:${action || "missing"}`, error);
-      return json(res, 500, safeError(`handler:POST:action:${action || "missing"}`, error));
+      return sendJson(res, 500, { ok: false, error: "server_error", message: clean(error.message || "Marketplace action failed.", 500), where: `handler:POST:action:${action || "missing"}` });
     }
   } catch (error) {
     logError("handler:top", error);
-    return json(res, 500, safeError("handler:top", error));
+    return sendJson(res, 500, { ok: false, error: "server_error", message: clean(error.message || "Marketplace request failed.", 500), where: "handler:top" });
   }
 };
