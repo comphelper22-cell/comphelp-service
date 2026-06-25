@@ -39,6 +39,7 @@
         <button data-target="commissions">Commissions</button>
         <button data-target="followups">Follow-ups</button>
         <button data-target="compliance">Compliance</button>
+        <button data-target="analytics">Analytics</button>
         <button data-target="marketing">Marketing</button>
         <button data-target="seo">SEO Manager</button>
         <button data-target="smm">SMM Manager</button>
@@ -81,9 +82,10 @@
 
       <section data-view="leadFinder">
         <div class="two">
-          <form class="panel" data-action="leadFinder" data-endpoint="/api/outreach" data-api-action="findLeads" data-output="leadFinderResult">
+          <form class="panel" data-action="leadSourceSearch" data-output="leadFinderResult">
             <h2>Lead Finder Agent</h2>
-            <p class="muted">Creates local lead records for approval. It does not contact anyone automatically.</p>
+            <p class="muted">Creates approval-ready public source searches. It does not scrape private data or contact anyone automatically.</p>
+            <input name="sources" value="Google Maps,Yelp,Facebook,Craigslist,Angi,Thumbtack" placeholder="Sources">
             <select name="category">
               <option>liquor stores</option>
               <option>smoke shops</option>
@@ -132,7 +134,7 @@
 
       <section data-view="vendorFinder">
         <div class="two">
-          <form class="panel" data-action="vendorFinder" data-endpoint="/api/vendor-dispatch" data-api-action="saveVendor" data-output="vendorFinderResult">
+          <form class="panel" data-action="vendorSearch" data-output="vendorFinderResult">
             <h2>Vendor Finder Agent</h2>
             <p class="muted">Stores partner vendors as approval-ready profiles. No outreach is sent from this form.</p>
             <input name="name" placeholder="Vendor name" required>
@@ -165,13 +167,17 @@
 
       <section data-view="dispatcher">
         <div class="two">
-          <form class="panel" data-action="dispatcher" data-endpoint="/api/vendor-dispatch" data-api-action="dispatch" data-output="dispatcherResult">
+          <form class="panel" data-action="dispatcher" data-output="dispatcherResult">
             <h2>AI Dispatcher</h2>
             <input name="customerName" placeholder="Customer name">
             <select name="service" required></select>
             <input name="city" placeholder="City" value="Los Angeles">
             <input name="address" placeholder="Project address">
             <input name="budget" type="number" min="0" step="1" placeholder="Customer budget">
+            <input name="units" type="number" min="1" step="1" value="1" placeholder="Cameras/devices/jobs">
+            <input name="laborHours" type="number" min="0" step=".5" placeholder="Labor hours">
+            <input name="materialEstimate" type="number" min="0" step="1" placeholder="Materials">
+            <input name="commissionPercent" type="number" min="0" max="60" step=".1" value="10" placeholder="Commission %">
             <input name="availability" placeholder="Preferred date or timing">
             <textarea name="scope" placeholder="Job notes, size, and constraints"></textarea>
             <button class="btn primary">Recommend Dispatch Plan</button>
@@ -263,7 +269,7 @@
 
       <section data-view="followups">
         <div class="two">
-          <form class="panel" data-action="followups" data-endpoint="/api/followups" data-api-action="draftFollowups" data-output="followupResult">
+          <form class="panel" data-action="followupPlan" data-output="followupResult">
             <h2>Customer Follow-up Agent</h2>
             <p class="muted">Creates Day 0, Day 1, Day 3, and Day 7 drafts. It does not send without approval.</p>
             <input name="name" placeholder="Customer name" required>
@@ -302,6 +308,20 @@
             <p class="status"></p>
             <pre id="complianceResult"></pre>
           </form>
+        </div>
+      </section>
+
+      <section data-view="analytics">
+        <div class="two">
+          <div class="panel">
+            <h2>Analytics Dashboard</h2>
+            <p class="muted">Revenue, commissions, leads, conversions, vendor performance, and marketing activity.</p>
+            <div class="grid" id="analyticsMetrics"></div>
+          </div>
+          <div class="panel">
+            <h2>Performance Notes</h2>
+            <pre id="analyticsResult"></pre>
+          </div>
         </div>
       </section>
 

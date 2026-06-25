@@ -1,8 +1,39 @@
 const fs = require("fs");
 const path = require("path");
 
-const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
-const GALLERY_FILE = path.join(process.cwd(), "data", "gallery.json");
+const ROOT = path.resolve(__dirname, "..");
+const DATA_FILE = path.join(ROOT, "data", "marketplace.json");
+const GALLERY_FILE = path.join(ROOT, "data", "gallery.json");
+const DEFAULT_MARKETPLACE = {
+  version: 1,
+  business: {
+    name: "CompHelp Service",
+    phone: "+1 (747) 295-1440",
+    email: "comphelper22@gmail.com",
+    serviceAreas: ["Los Angeles", "Burbank", "Glendale", "North Hollywood", "Studio City"]
+  },
+  services: ["Security Camera Installation", "Smart Home Setup", "WiFi & Network Installation", "Computer Repair", "Data Recovery"],
+  vendorCategories: ["Cameras", "WiFi", "Computer Repair", "Data Recovery", "Smart Home", "Electrician", "HVAC", "Plumbing", "Roofing"],
+  estimateRules: {
+    "Security Camera Installation": { base: 299, unit: "camera", perUnit: 125, questions: ["Property type", "Number of cameras", "Wiring needed", "Preferred installation date"] },
+    "Smart Home Setup": { base: 149, unit: "device", perUnit: 55, questions: ["Device types", "Number of devices", "WiFi readiness", "Preferred setup date"] },
+    "WiFi & Network Installation": { base: 199, unit: "access point", perUnit: 90, questions: ["Property size", "Dead zones", "Router location", "Preferred installation date"] },
+    "Computer Repair": { base: 89, unit: "device", perUnit: 60, questions: ["Device type", "Issue symptoms", "Urgency", "Preferred service date"] },
+    "Data Recovery": { base: 149, unit: "drive", perUnit: 120, questions: ["Device or drive type", "What happened", "Files needed", "Preferred service date"] }
+  },
+  vendors: [],
+  leads: [],
+  estimates: [],
+  quoteRequests: [],
+  commissions: [],
+  projects: [],
+  marketingIdeas: [],
+  mediaReviews: [],
+  sourceLeads: [],
+  dispatches: [],
+  followUps: []
+};
+const DEFAULT_GALLERY = { version: 1, items: [] };
 const TABLES = {
   leads: "marketplace_leads",
   vendors: "marketplace_vendors",
@@ -11,7 +42,10 @@ const TABLES = {
   commissions: "marketplace_commissions",
   projects: "marketplace_projects",
   marketingIdeas: "marketplace_marketing_ideas",
-  mediaReviews: "marketplace_media_reviews"
+  mediaReviews: "marketplace_media_reviews",
+  sourceLeads: "marketplace_source_leads",
+  dispatches: "marketplace_dispatches",
+  followUps: "marketplace_followups"
 };
 
 function json(res, status, body) {
@@ -36,10 +70,27 @@ function id(prefix) {
   return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
 }
 
+function logError(where, error) {
+  console.error("[marketplace]", where, {
+    message: error && error.message ? error.message : String(error),
+    stack: error && error.stack ? error.stack : undefined
+  });
+}
+
+function safeError(where, error, fallback = "Marketplace request failed.") {
+  return {
+    ok: false,
+    error: clean(error && error.message ? error.message : fallback, 500),
+    where
+  };
+}
+
 function readJson(file, fallback) {
   try {
     return JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
-  } catch (_) {
+  } catch (error) {
+    logError(`readJson:${path.basename(file)}`, error);
+    tryWriteJson(file, fallback);
     return fallback;
   }
 }
@@ -54,12 +105,32 @@ function tryWriteJson(file, data) {
     writeJson(file, data);
     return { ok: true };
   } catch (error) {
+    logError(`writeJson:${path.basename(file)}`, error);
     return { ok: false, warning: "Database not connected and local JSON could not be written in this environment." };
   }
 }
 
 function readSeed() {
-  return readJson(DATA_FILE, { leads: [], vendors: [], estimates: [], quoteRequests: [], commissions: [], projects: [], marketingIdeas: [], mediaReviews: [] });
+  const seed = readJson(DATA_FILE, DEFAULT_MARKETPLACE);
+  return {
+    ...DEFAULT_MARKETPLACE,
+    ...seed,
+    business: { ...DEFAULT_MARKETPLACE.business, ...(seed.business || {}) },
+    estimateRules: { ...DEFAULT_MARKETPLACE.estimateRules, ...(seed.estimateRules || {}) },
+    services: Array.isArray(seed.services) && seed.services.length ? seed.services : DEFAULT_MARKETPLACE.services,
+    vendorCategories: Array.isArray(seed.vendorCategories) && seed.vendorCategories.length ? seed.vendorCategories : DEFAULT_MARKETPLACE.vendorCategories,
+    vendors: Array.isArray(seed.vendors) ? seed.vendors : [],
+    leads: Array.isArray(seed.leads) ? seed.leads : [],
+    estimates: Array.isArray(seed.estimates) ? seed.estimates : [],
+    quoteRequests: Array.isArray(seed.quoteRequests) ? seed.quoteRequests : [],
+    commissions: Array.isArray(seed.commissions) ? seed.commissions : [],
+    projects: Array.isArray(seed.projects) ? seed.projects : [],
+    marketingIdeas: Array.isArray(seed.marketingIdeas) ? seed.marketingIdeas : [],
+    mediaReviews: Array.isArray(seed.mediaReviews) ? seed.mediaReviews : [],
+    sourceLeads: Array.isArray(seed.sourceLeads) ? seed.sourceLeads : [],
+    dispatches: Array.isArray(seed.dispatches) ? seed.dispatches : [],
+    followUps: Array.isArray(seed.followUps) ? seed.followUps : []
+  };
 }
 
 function resolveRole(req) {
@@ -156,8 +227,13 @@ function fromDbRecord(record) {
 async function list(tableKey) {
   const seed = readSeed();
   if (!supabaseConfigured()) return seed[tableKey] || [];
-  const rows = await supabase(`${TABLES[tableKey]}?select=*&order=created_at.desc`);
-  return rows.map(fromDbRecord);
+  try {
+    const rows = await supabase(`${TABLES[tableKey]}?select=*&order=created_at.desc`);
+    return rows.map(fromDbRecord);
+  } catch (error) {
+    logError(`supabase:list:${tableKey}`, error);
+    return seed[tableKey] || [];
+  }
 }
 
 async function insert(tableKey, record) {
@@ -170,8 +246,18 @@ async function insert(tableKey, record) {
     const write = tryWriteJson(DATA_FILE, seed);
     return { ...created, storage: write.ok ? "data/marketplace.json" : "memory_only", warning: write.warning };
   }
-  const rows = await supabase(TABLES[tableKey], { method: "POST", body: JSON.stringify(toDbRecord(created)) });
-  return fromDbRecord(rows[0]) || created;
+  try {
+    const rows = await supabase(TABLES[tableKey], { method: "POST", body: JSON.stringify(toDbRecord(created)) });
+    return fromDbRecord(rows[0]) || created;
+  } catch (error) {
+    logError(`supabase:insert:${tableKey}`, error);
+    const seed = readSeed();
+    seed[tableKey] = Array.isArray(seed[tableKey]) ? seed[tableKey] : [];
+    seed[tableKey].unshift(created);
+    seed.updatedAt = new Date().toISOString();
+    const write = tryWriteJson(DATA_FILE, seed);
+    return { ...created, storage: write.ok ? "data/marketplace.json" : "memory_only", warning: `Supabase unavailable; ${write.warning || "saved to local fallback."}` };
+  }
 }
 
 async function updateRecord(tableKey, recordId, patch) {
@@ -183,11 +269,19 @@ async function updateRecord(tableKey, recordId, patch) {
     if (!write.ok) return { ...patch, id: recordId, storage: "memory_only", warning: write.warning };
     return seed[tableKey].find((item) => item.id === recordId);
   }
-  const rows = await supabase(`${TABLES[tableKey]}?id=eq.${encodeURIComponent(recordId)}`, {
-    method: "PATCH",
-    body: JSON.stringify(toDbRecord({ ...patch, updatedAt: new Date().toISOString() }))
-  });
-  return fromDbRecord(rows[0]);
+  try {
+    const rows = await supabase(`${TABLES[tableKey]}?id=eq.${encodeURIComponent(recordId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(toDbRecord({ ...patch, updatedAt: new Date().toISOString() }))
+    });
+    return fromDbRecord(rows[0]);
+  } catch (error) {
+    logError(`supabase:update:${tableKey}`, error);
+    const seed = readSeed();
+    seed[tableKey] = (seed[tableKey] || []).map((item) => item.id === recordId ? { ...item, ...patch, updatedAt: new Date().toISOString() } : item);
+    const write = tryWriteJson(DATA_FILE, seed);
+    return { ...patch, id: recordId, storage: write.ok ? "data/marketplace.json" : "memory_only", warning: `Supabase unavailable; ${write.warning || "saved to local fallback."}` };
+  }
 }
 
 async function deleteRecord(tableKey, recordId) {
@@ -198,26 +292,44 @@ async function deleteRecord(tableKey, recordId) {
     const write = tryWriteJson(DATA_FILE, seed);
     return { deleted: write.ok, id: recordId, warning: write.warning };
   }
-  await supabase(`${TABLES[tableKey]}?id=eq.${encodeURIComponent(recordId)}`, { method: "DELETE" });
-  return { deleted: true, id: recordId };
+  try {
+    await supabase(`${TABLES[tableKey]}?id=eq.${encodeURIComponent(recordId)}`, { method: "DELETE" });
+    return { deleted: true, id: recordId };
+  } catch (error) {
+    logError(`supabase:delete:${tableKey}`, error);
+    const seed = readSeed();
+    seed[tableKey] = (seed[tableKey] || []).filter((item) => item.id !== recordId);
+    const write = tryWriteJson(DATA_FILE, seed);
+    return { deleted: write.ok, id: recordId, warning: `Supabase unavailable; ${write.warning || "deleted in local fallback."}` };
+  }
 }
 
 async function callWebhook(name, payload) {
   const url = process.env[name];
   if (!url) return { skipped: true };
-  const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-  return { ok: response.ok, status: response.status };
+  try {
+    const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    return { ok: response.ok, status: response.status };
+  } catch (error) {
+    logError(`webhook:${name}`, error);
+    return { ok: false, error: "Webhook request failed." };
+  }
 }
 
 async function createHubSpotContact(lead) {
   if (!process.env.HUBSPOT_ACCESS_TOKEN) return { skipped: true };
-  const response = await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
-    method: "POST",
-    headers: { "Authorization": `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ properties: { firstname: lead.name, email: lead.email, phone: lead.phone, city: lead.city || lead.address, message: lead.notes || lead.message } })
-  });
-  const body = await response.json().catch(() => ({}));
-  return { ok: response.ok, id: body.id || "" };
+  try {
+    const response = await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ properties: { firstname: lead.name, email: lead.email, phone: lead.phone, city: lead.city || lead.address, message: lead.notes || lead.message } })
+    });
+    const body = await response.json().catch(() => ({}));
+    return { ok: response.ok, id: body.id || "" };
+  } catch (error) {
+    logError("hubspot:createContact", error);
+    return { ok: false, error: "HubSpot request failed." };
+  }
 }
 
 function qualification(service, message) {
@@ -235,11 +347,18 @@ function calculateEstimate(payload) {
   const units = Math.max(1, Number(payload.units || payload.quantity || 1));
   const laborHours = Math.max(0, Number(payload.laborHours || 0));
   const materialEstimate = money(payload.materialEstimate);
+  const laborCost = money(payload.laborCost || laborHours * 45);
+  const profitMargin = Math.min(80, Math.max(0, Number(payload.profitMargin || 30)));
+  const commissionPercent = Math.min(60, Math.max(0, Number(payload.commissionPercent || 10)));
   const urgencyMultiplier = /same|urgent|today|emergency/i.test(payload.urgency || "") ? 1.25 : 1;
   const baseLow = rules.base + Math.max(0, units - 1) * rules.perUnit + laborHours * 65 + materialEstimate;
   const low = Math.round(baseLow * urgencyMultiplier);
   const high = Math.round((baseLow * 1.45 + 75) * urgencyMultiplier);
   const recommended = Math.round((low + high) / 2);
+  const internalCost = Math.round(laborCost + materialEstimate + Math.max(0, units - 1) * rules.perUnit * 0.3);
+  const commission = Math.round(recommended * (commissionPercent / 100));
+  const targetProfit = Math.round(recommended * (profitMargin / 100));
+  const expectedProfit = Math.max(0, recommended - internalCost - commission);
   return {
     id: id("estimate"),
     customerName: clean(payload.customerName, 120),
@@ -250,14 +369,21 @@ function calculateEstimate(payload) {
     units,
     unitLabel: rules.unit,
     laborHours,
+    laborCost,
     materialEstimate,
+    profitMargin,
+    commissionPercent,
+    commission,
+    internalCost,
+    targetProfit,
+    expectedProfit,
     urgency: clean(payload.urgency, 100),
     low,
     high,
     recommended,
     range: `$${low} - $${high}`,
     customerQuoteText: `Based on the details provided, your ${clean(payload.service, 120).toLowerCase()} estimate is approximately $${low} - $${high}. A recommended planning number is $${recommended}. Final pricing depends on site conditions and equipment.`,
-    internalNotes: `Units: ${units}; labor hours: ${laborHours}; materials: $${materialEstimate}; urgency: ${clean(payload.urgency, 100) || "standard"}.`,
+    internalNotes: `Units: ${units}; labor hours: ${laborHours}; labor cost: $${laborCost}; materials: $${materialEstimate}; profit target: ${profitMargin}%; commission: ${commissionPercent}%; urgency: ${clean(payload.urgency, 100) || "standard"}.`,
     notes: clean(payload.notes, 1500),
     disclaimer: "Final pricing depends on site conditions, equipment, wiring, access, urgency, and vendor availability.",
     createdAt: new Date().toISOString()
@@ -360,6 +486,78 @@ function seoPlan(payload) {
   };
 }
 
+const PUBLIC_LEAD_SOURCES = {
+  "Google Maps": "https://www.google.com/maps/search/",
+  Yelp: "https://www.yelp.com/search?find_desc=",
+  Facebook: "https://www.facebook.com/search/pages/?q=",
+  Craigslist: "https://losangeles.craigslist.org/search/sss?query=",
+  Angi: "https://www.angi.com/companylist/",
+  Thumbtack: "https://www.thumbtack.com/search/"
+};
+
+function sourceSearchUrl(source, query, city) {
+  const base = PUBLIC_LEAD_SOURCES[source] || PUBLIC_LEAD_SOURCES["Google Maps"];
+  return base + encodeURIComponent(`${query} ${city}`);
+}
+
+function leadSourceSearchPlan(payload) {
+  const city = clean(payload.city || "Los Angeles", 80);
+  const category = clean(payload.category || "small businesses", 120);
+  const serviceNeed = clean(payload.serviceNeed || "security camera installation", 160);
+  const selectedSources = clean(payload.sources, 500)
+    ? clean(payload.sources, 500).split(",").map((source) => clean(source, 80)).filter(Boolean)
+    : Object.keys(PUBLIC_LEAD_SOURCES);
+  return selectedSources.map((source) => ({
+    source,
+    query: `${category} ${city}`,
+    city,
+    category,
+    serviceNeed,
+    searchUrl: sourceSearchUrl(source, category, city),
+    status: "needs_approval",
+    approved: false,
+    notes: "Use public business listing information only. Do not scrape private personal data. Review before contact."
+  }));
+}
+
+function followupPlan(payload) {
+  const name = clean(payload.name || payload.customerName || "Customer", 120);
+  const service = clean(payload.service || "service request", 140);
+  const channel = clean(payload.channel || "sms", 40);
+  const businessHours = "Send only Monday-Friday, 9:00 AM-5:30 PM local time.";
+  const smsStop = channel === "sms" ? " Reply STOP to opt out." : "";
+  return [
+    { day: 0, label: "thank_you", channel, timing: businessHours, status: "needs_approval", message: `Hi ${name}, thanks for contacting CompHelp Service about ${service}. What day works best for a quick estimate?${smsStop}` },
+    { day: 1, label: "estimate_reminder", channel, timing: businessHours, status: "needs_approval", message: `Hi ${name}, just checking if you still want a free estimate for ${service}. What city is the job in?${smsStop}` },
+    { day: 3, label: "soft_follow_up", channel, timing: businessHours, status: "needs_approval", message: `Hi ${name}, no rush. Do you still need help with ${service}?${smsStop}` },
+    { day: 7, label: "final_check_in", channel, timing: businessHours, status: "needs_approval", message: `Hi ${name}, final check-in from CompHelp Service. Should I close this request for now?${smsStop}` }
+  ];
+}
+
+async function dispatcherPlan(payload) {
+  const estimate = calculateEstimate(payload);
+  const recommendation = await recommendVendors(payload);
+  const topVendor = (recommendation.top3 && recommendation.top3[0]) || (recommendation.top3Summary && recommendation.top3Summary[0]) || null;
+  const commissionPercent = money(payload.commissionPercent || topVendor?.commissionPercent || 10);
+  const customerPrice = Math.round(estimate.recommended + estimate.recommended * (commissionPercent / 100));
+  return {
+    service: clean(payload.service, 120),
+    customerName: clean(payload.customerName, 120),
+    city: clean(payload.city || "Los Angeles", 80),
+    routeType: topVendor ? "vendor_marketplace" : "direct_or_manual_review",
+    selectedVendorDraft: topVendor,
+    topVendors: recommendation.top3 || recommendation.top3Summary || [],
+    vendorQuoteRequestDraft: `Please quote ${clean(payload.service, 120)} in ${clean(payload.city || "Los Angeles", 80)}. Scope: ${clean(payload.scope || payload.notes, 1200)}`,
+    customerPrice,
+    vendorExpectedPrice: estimate.recommended,
+    commissionPercent,
+    expectedCommission: Math.round(customerPrice - estimate.recommended),
+    status: "needs_owner_approval",
+    ownerApprovalRequired: true,
+    recommendation: topVendor ? "Request vendor confirmation before sending final customer quote." : "No matching vendor found. Handle directly or add vendor profiles."
+  };
+}
+
 async function emailEstimate(payload) {
   if (!payload.approved) return { skipped: true, reason: "Email not sent. Approval is required." };
   if (!process.env.RESEND_API_KEY || !process.env.LEAD_FROM_EMAIL) return { skipped: true, reason: "RESEND_API_KEY and LEAD_FROM_EMAIL are required." };
@@ -375,7 +573,16 @@ async function emailEstimate(payload) {
 }
 
 function galleryCount() {
-  return (readJson(GALLERY_FILE, { items: [] }).items || []).length;
+  return (readJson(GALLERY_FILE, DEFAULT_GALLERY).items || []).length;
+}
+
+async function readBody(req) {
+  if (typeof req.body === "object" && req.body) return req.body;
+  if (typeof req.body === "string") return JSON.parse(req.body || "{}");
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  const text = Buffer.concat(chunks).toString("utf8");
+  return JSON.parse(text || "{}");
 }
 
 async function dashboard(req) {
@@ -396,7 +603,16 @@ async function dashboard(req) {
       projects: []
     };
   }
-  const [leads, vendors, commissions, projects, mediaReviews] = await Promise.all([list("leads"), list("vendors"), list("commissions"), list("projects"), list("mediaReviews")]);
+  const [leads, vendors, commissions, projects, mediaReviews, sourceLeads, dispatches, followUps] = await Promise.all([
+    list("leads"),
+    list("vendors"),
+    list("commissions"),
+    list("projects"),
+    list("mediaReviews"),
+    list("sourceLeads"),
+    list("dispatches"),
+    list("followUps")
+  ]);
   const revenue = commissions.reduce((sum, item) => sum + money(item.revenue || item.projectValue), 0);
   const expectedCommission = commissions.reduce((sum, item) => sum + money(item.expectedCommission || item.expected_commission), 0);
   const openProjects = projects.filter((project) => !["completed", "cancelled", "closed"].includes(clean(project.status, 40))).length;
@@ -405,7 +621,22 @@ async function dashboard(req) {
     role,
     warnings: dbConnected ? [] : ["Database not connected"],
     config: { services: seed.services, vendorCategories: seed.vendorCategories, estimateRules: seed.estimateRules },
-    summary: { leads: leads.length, vendors: vendors.length, projects: projects.length, openProjects, revenue: Math.round(revenue), expectedCommission: Math.round(expectedCommission), publishedGalleryItems: galleryCount(), smmDrafts: mediaReviews.length, conversionRate: leads.length ? Math.round((projects.length / leads.length) * 100) : 0 },
+    summary: {
+      leads: leads.length,
+      sourceLeads: sourceLeads.length,
+      vendors: vendors.length,
+      projects: projects.length,
+      openProjects,
+      dispatches: dispatches.length,
+      followUps: followUps.length,
+      revenue: Math.round(revenue),
+      expectedCommission: Math.round(expectedCommission),
+      publishedGalleryItems: galleryCount(),
+      smmDrafts: mediaReviews.length,
+      conversionRate: leads.length ? Math.round((projects.length / leads.length) * 100) : 0,
+      vendorPerformance: vendors.slice().sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0)).slice(0, 5),
+      marketingPerformance: { smmDrafts: mediaReviews.length, seoPlans: (await list("marketingIdeas")).length }
+    },
     recentLeads: leads.slice(0, 8),
     topVendors: vendors.slice().sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0)).slice(0, 8),
     vendors,
@@ -433,6 +664,16 @@ function vendorPayload(payload) {
 }
 
 async function handleAction(action, payload) {
+  if (action === "leadSourceSearch") {
+    const plans = leadSourceSearchPlan(payload);
+    const saved = [];
+    for (const plan of plans) saved.push(await insert("sourceLeads", plan));
+    return {
+      ok: true,
+      sourceLeads: saved,
+      note: "Lead source searches were saved for review. No scraping or contact was performed."
+    };
+  }
   if (action === "lead") {
     const lead = { name: clean(payload.name, 120), phone: clean(payload.phone, 60), email: clean(payload.email, 160), address: clean(payload.address, 300), service: clean(payload.service, 120), notes: clean(payload.notes || payload.message, 1500), message: clean(payload.notes || payload.message, 1500), status: clean(payload.status, 80) || "new", preferredDate: clean(payload.preferredDate, 60), qualification: qualification(payload.service, payload.notes || payload.message), source: "marketplace_manager" };
     const saved = await insert("leads", lead);
@@ -444,6 +685,10 @@ async function handleAction(action, payload) {
     return { ok: true, estimate: saved, quoteUrl: `/api/marketplace-quote?id=${encodeURIComponent(saved.id || estimate.id)}` };
   }
   if (action === "emailEstimate") return { ok: true, email: await emailEstimate(payload) };
+  if (action === "vendorSearch") {
+    const vendor = await insert("vendors", { ...vendorPayload(payload), source: "vendor_finder", status: "needs_approval" });
+    return { ok: true, vendor, note: "Vendor profile saved for approval and ranking." };
+  }
   if (action === "vendor") return { ok: true, vendor: await insert("vendors", vendorPayload(payload)) };
   if (action === "vendorUpdate") return { ok: true, vendor: await updateRecord("vendors", clean(payload.id, 120), vendorPayload(payload)) };
   if (action === "vendorDelete") return { ok: true, vendor: await deleteRecord("vendors", clean(payload.id, 120)) };
@@ -457,6 +702,19 @@ async function handleAction(action, payload) {
   if (action === "vendorResponse") {
     const response = { vendorName: clean(payload.vendorName, 140), price: money(payload.price), availability: clean(payload.availability, 120), notes: clean(payload.notes, 1200), receivedAt: new Date().toISOString() };
     return { ok: true, response };
+  }
+  if (action === "dispatcher") {
+    const plan = await dispatcherPlan(payload);
+    const saved = await insert("dispatches", plan);
+    const quoteRequest = await insert("quoteRequests", {
+      service: plan.service,
+      city: plan.city,
+      scope: clean(payload.scope || payload.notes, 1600),
+      status: "draft",
+      vendorResponses: [],
+      vendorOptions: plan.topVendors
+    });
+    return { ok: true, dispatch: saved, quoteRequest, plan };
   }
   if (action === "recommendation") return { ok: true, recommendation: await recommendVendors(payload) };
   if (action === "commission") {
@@ -474,6 +732,12 @@ async function handleAction(action, payload) {
     const plan = await smmPlan(payload);
     return { ok: true, mediaReview: await insert("mediaReviews", { ...payload, plan, status: process.env.AUTO_POST === "true" ? "ready_for_auto_post_review" : "draft" }), plan, autoPost: process.env.AUTO_POST === "true" };
   }
+  if (action === "followupPlan") {
+    const plan = followupPlan(payload);
+    const saved = [];
+    for (const item of plan) saved.push(await insert("followUps", { ...item, customerName: clean(payload.name || payload.customerName, 120), service: clean(payload.service, 120), recipient: clean(payload.phone || payload.email, 180) }));
+    return { ok: true, followUps: saved, note: "Follow-up drafts saved. Sending still requires approval and business-hours checks." };
+  }
   if (action === "project") {
     const project = { customerName: clean(payload.customerName, 120), service: clean(payload.service, 120), title: clean(payload.title, 160), city: clean(payload.city, 80), status: clean(payload.status, 80), completionDate: clean(payload.completionDate, 60), followUpDate: clean(payload.followUpDate, 60), beforeAfterNotes: clean(payload.beforeAfterNotes, 1000), customerReview: clean(payload.customerReview, 1200), notes: clean(payload.notes, 1500), reminders: [payload.followUpDate ? `Follow up on ${payload.followUpDate}.` : "Set follow-up date.", "Confirm customer has estimate and next step.", "Send review request only after completed work and approval."] };
     const saved = await insert("projects", project);
@@ -483,27 +747,51 @@ async function handleAction(action, payload) {
 }
 
 const PERMISSIONS = {
-  admin: ["lead", "estimate", "emailEstimate", "vendor", "vendorUpdate", "vendorDelete", "quoteRequest", "vendorResponse", "recommendation", "commission", "marketing", "seo", "smm", "project"],
-  manager: ["lead", "estimate", "vendor", "vendorUpdate", "quoteRequest", "recommendation", "marketing", "seo", "smm", "project"],
+  admin: ["leadSourceSearch", "lead", "estimate", "emailEstimate", "vendorSearch", "vendor", "vendorUpdate", "vendorDelete", "quoteRequest", "vendorResponse", "dispatcher", "recommendation", "commission", "marketing", "seo", "smm", "followupPlan", "project"],
+  manager: ["leadSourceSearch", "lead", "estimate", "vendorSearch", "vendor", "vendorUpdate", "quoteRequest", "dispatcher", "recommendation", "marketing", "seo", "smm", "followupPlan", "project"],
   viewer: ["recommendation"]
 };
 
 module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return json(res, 204, {});
   try {
-    if (req.method === "GET") return json(res, 200, await dashboard(req));
-    if (req.method !== "POST") return json(res, 405, { ok: false, error: "Method not allowed." });
-    const body = typeof req.body === "object" && req.body ? req.body : JSON.parse(req.body || "{}");
+    if (req.method === "GET") {
+      try {
+        return json(res, 200, await dashboard(req));
+      } catch (error) {
+        logError("handler:GET:dashboard", error);
+        return json(res, 500, safeError("handler:GET:dashboard", error));
+      }
+    }
+    if (req.method !== "POST") return json(res, 405, { ok: false, error: "Method not allowed.", where: "handler:method" });
+    let body;
+    try {
+      body = await readBody(req);
+    } catch (error) {
+      logError("handler:POST:parseBody", error);
+      return json(res, 400, safeError("handler:POST:parseBody", error, "Invalid JSON body."));
+    }
     const action = clean(body.action, 80);
     if (action === "login") {
-      const login = loginStatus(req);
-      return json(res, login.ok ? 200 : login.status, login.ok ? { ok: true, role: login.role } : { ok: false, error: login.error });
+      try {
+        const login = loginStatus(req);
+        return json(res, login.ok ? 200 : login.status, login.ok ? { ok: true, role: login.role } : { ok: false, error: login.error, where: "handler:POST:login" });
+      } catch (error) {
+        logError("handler:POST:login", error);
+        return json(res, 500, safeError("handler:POST:login", error));
+      }
     }
     const roleCheck = requireRole(req, ["admin", "manager", "viewer"]);
-    if (!roleCheck.ok) return json(res, roleCheck.status, { ok: false, error: roleCheck.error });
-    if (!PERMISSIONS[roleCheck.role].includes(action)) return json(res, 403, { ok: false, error: "Role does not have permission for this action." });
-    return json(res, 200, await handleAction(action, body.payload || {}));
+    if (!roleCheck.ok) return json(res, roleCheck.status, { ok: false, error: roleCheck.error, where: "handler:POST:requireRole" });
+    if (!PERMISSIONS[roleCheck.role].includes(action)) return json(res, 403, { ok: false, error: "Role does not have permission for this action.", where: "handler:POST:permission" });
+    try {
+      return json(res, 200, await handleAction(action, body.payload || {}));
+    } catch (error) {
+      logError(`handler:POST:action:${action || "missing"}`, error);
+      return json(res, 500, safeError(`handler:POST:action:${action || "missing"}`, error));
+    }
   } catch (error) {
-    return json(res, 500, { ok: false, error: error.message || "Marketplace request failed." });
+    logError("handler:top", error);
+    return json(res, 500, safeError("handler:top", error));
   }
 };

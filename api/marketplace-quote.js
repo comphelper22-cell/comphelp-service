@@ -10,7 +10,24 @@ function escapeHtml(value) {
 }
 
 function quoteHtml(estimate) {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>CompHelp Service Quote</title><style>body{font-family:Arial,sans-serif;margin:2rem;color:#111}.box{border:1px solid #ddd;border-radius:10px;padding:1rem}h1{color:#0a5}table{width:100%;border-collapse:collapse;margin:1rem 0}td{border-top:1px solid #ddd;padding:.65rem}.total{font-size:1.4rem;font-weight:800}@media print{button,a.print-hide{display:none}}</style></head><body><button onclick="print()">Save as PDF</button> <a class="print-hide" href="?id=${encodeURIComponent(estimate.id || "")}&format=pdf">Download PDF</a><h1>CompHelp Service Quote</h1><p>Phone: +1 (747) 295-1440<br>Email: comphelper22@gmail.com</p><div class="box"><h2>${escapeHtml(estimate.service || "Service Estimate")}</h2><table><tr><td>Customer</td><td>${escapeHtml(estimate.customerName)}</td></tr><tr><td>City</td><td>${escapeHtml(estimate.city)}</td></tr><tr><td>Property Type</td><td>${escapeHtml(estimate.propertyType)}</td></tr><tr><td>Units</td><td>${escapeHtml(estimate.units)} ${escapeHtml(estimate.unitLabel)}</td></tr><tr><td>Labor Hours</td><td>${escapeHtml(estimate.laborHours)}</td></tr><tr><td>Material Estimate</td><td>$${escapeHtml(estimate.materialEstimate)}</td></tr><tr><td>Estimate Range</td><td class="total">${escapeHtml(estimate.range || ("$" + estimate.low + " - $" + estimate.high))}</td></tr><tr><td>Recommended Estimate</td><td class="total">$${escapeHtml(estimate.recommended || "")}</td></tr><tr><td>Customer Quote</td><td>${escapeHtml(estimate.customerQuoteText)}</td></tr><tr><td>Notes</td><td>${escapeHtml(estimate.notes)}</td></tr></table><p>${escapeHtml(estimate.disclaimer || "Final pricing depends on project details.")}</p></div></body></html>`;
+  const rows = [
+    ["Customer", estimate.customerName],
+    ["City", estimate.city],
+    ["Property Type", estimate.propertyType],
+    ["Units", `${estimate.units || ""} ${estimate.unitLabel || ""}`],
+    ["Labor Hours", estimate.laborHours],
+    ["Labor Cost", estimate.laborCost ? `$${estimate.laborCost}` : ""],
+    ["Material Estimate", estimate.materialEstimate ? `$${estimate.materialEstimate}` : ""],
+    ["Profit Target", estimate.profitMargin ? `${estimate.profitMargin}%` : ""],
+    ["Commission", estimate.commission ? `$${estimate.commission} (${estimate.commissionPercent || 0}%)` : ""],
+    ["Internal Cost", estimate.internalCost ? `$${estimate.internalCost}` : ""],
+    ["Expected Profit", estimate.expectedProfit ? `$${estimate.expectedProfit}` : ""],
+    ["Estimate Range", estimate.range || (`$${estimate.low || ""} - $${estimate.high || ""}`)],
+    ["Recommended Estimate", estimate.recommended ? `$${estimate.recommended}` : ""],
+    ["Customer Quote", estimate.customerQuoteText],
+    ["Notes", estimate.notes]
+  ].map((row) => `<tr><td>${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td></tr>`).join("");
+  return `<!doctype html><html><head><meta charset="utf-8"><title>CompHelp Service Quote</title><style>body{font-family:Arial,sans-serif;margin:2rem;color:#111}.box{border:1px solid #ddd;border-radius:10px;padding:1rem}h1{color:#0a5}table{width:100%;border-collapse:collapse;margin:1rem 0}td{border-top:1px solid #ddd;padding:.65rem}.total{font-size:1.4rem;font-weight:800}.muted{color:#555;font-size:.92rem}@media print{button,a.print-hide{display:none}}</style></head><body><button onclick="print()">Save as PDF</button> <a class="print-hide" href="?id=${encodeURIComponent(estimate.id || "")}&format=pdf">Download PDF</a><h1>CompHelp Service Quote</h1><p>Phone: +1 (747) 295-1440<br>Email: comphelper22@gmail.com</p><div class="box"><h2>${escapeHtml(estimate.service || "Service Estimate")}</h2><table>${rows}</table><p class="muted">${escapeHtml(estimate.internalNotes)}</p><p>${escapeHtml(estimate.disclaimer || "Final pricing depends on project details.")}</p></div></body></html>`;
 }
 
 function pdfEscape(value) {
@@ -28,6 +45,13 @@ function quotePdf(estimate) {
     `City: ${estimate.city || "Los Angeles"}`,
     `Property Type: ${estimate.propertyType || ""}`,
     `Units: ${estimate.units || 1} ${estimate.unitLabel || "project"}`,
+    `Labor Hours: ${estimate.laborHours || ""}`,
+    `Labor Cost: $${estimate.laborCost || ""}`,
+    `Material Estimate: $${estimate.materialEstimate || ""}`,
+    `Profit Target: ${estimate.profitMargin || ""}%`,
+    `Commission: $${estimate.commission || ""} (${estimate.commissionPercent || ""}%)`,
+    `Internal Cost: $${estimate.internalCost || ""}`,
+    `Expected Profit: $${estimate.expectedProfit || ""}`,
     `Estimate Range: ${estimate.range || ("$" + estimate.low + " - $" + estimate.high)}`,
     `Recommended Estimate: $${estimate.recommended || ""}`,
     `Customer Quote: ${estimate.customerQuoteText || ""}`,

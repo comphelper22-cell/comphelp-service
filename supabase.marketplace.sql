@@ -44,7 +44,14 @@ create table if not exists marketplace_estimates (
   units numeric,
   unit_label text,
   labor_hours numeric,
+  labor_cost numeric,
   material_estimate numeric,
+  profit_margin numeric,
+  commission_percent numeric,
+  commission numeric,
+  internal_cost numeric,
+  target_profit numeric,
+  expected_profit numeric,
   urgency text,
   low numeric,
   high numeric,
@@ -122,4 +129,51 @@ create table if not exists marketplace_media_reviews (
   media_type text,
   notes text,
   plan jsonb
+);
+
+create table if not exists marketplace_source_leads (
+  id text primary key,
+  created_at timestamptz default now(),
+  source text,
+  query text,
+  city text,
+  category text,
+  service_need text,
+  search_url text,
+  status text,
+  approved boolean default false,
+  notes text
+);
+
+create table if not exists marketplace_dispatches (
+  id text primary key,
+  created_at timestamptz default now(),
+  service text,
+  customer_name text,
+  city text,
+  route_type text,
+  selected_vendor_draft jsonb,
+  top_vendors jsonb,
+  vendor_quote_request_draft text,
+  customer_price numeric,
+  vendor_expected_price numeric,
+  commission_percent numeric,
+  expected_commission numeric,
+  status text,
+  owner_approval_required boolean default true,
+  recommendation text
+);
+
+create table if not exists marketplace_followups (
+  id text primary key,
+  created_at timestamptz default now(),
+  customer_name text,
+  service text,
+  recipient text,
+  day numeric,
+  label text,
+  channel text,
+  timing text,
+  status text,
+  message text
 );

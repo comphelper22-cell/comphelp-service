@@ -130,10 +130,13 @@
     $("#metrics").innerHTML = [
       ["Total Leads", summary.leads],
       ["Total Vendors", summary.vendors],
+      ["Source Leads", summary.sourceLeads || 0],
       ["Total Projects", summary.projects],
       ["Open Projects", summary.openProjects || summary.projects],
+      ["Dispatches", summary.dispatches || 0],
       ["Estimated Revenue", "$" + summary.revenue],
       ["Expected Commissions", "$" + summary.expectedCommission],
+      ["Conversion", (summary.conversionRate || 0) + "%"],
       ["Gallery Items", summary.publishedGalleryItems || 0],
       ["SMM Drafts", summary.smmDrafts || 0]
     ].map(function (metric) {
@@ -170,6 +173,29 @@
     $("#vendorList").innerHTML = vendors.map(function (vendor) {
       return '<div class="row"><strong>' + escapeHtml(vendor.name) + '</strong><span>' + escapeHtml(vendor.category) + '</span><span>' + escapeHtml(vendor.serviceArea || vendor.city || "") + '</span><span class="pill">' + escapeHtml(vendor.rating || "") + ' stars</span></div>';
     }).join("");
+  }
+
+  function renderAnalytics(summary) {
+    var target = $("#analyticsMetrics");
+    if (!target || !summary) return;
+    var metrics = [
+      ["Revenue", "$" + (summary.revenue || 0)],
+      ["Commissions", "$" + (summary.expectedCommission || 0)],
+      ["Leads", summary.leads || 0],
+      ["Source Leads", summary.sourceLeads || 0],
+      ["Conversions", (summary.conversionRate || 0) + "%"],
+      ["Vendors", summary.vendors || 0],
+      ["Dispatches", summary.dispatches || 0],
+      ["Follow-ups", summary.followUps || 0],
+      ["Marketing Drafts", summary.smmDrafts || 0]
+    ];
+    target.innerHTML = metrics.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    $("#analyticsResult").textContent = JSON.stringify({
+      vendorPerformance: summary.vendorPerformance || [],
+      marketingPerformance: summary.marketingPerformance || {}
+    }, null, 2);
   }
 
   function renderCompliance(summary) {
@@ -218,6 +244,7 @@
     renderRecentLeads(dashboard.recentLeads);
     renderTopVendors(dashboard.topVendors);
     renderVendors(dashboard.vendors);
+    renderAnalytics(dashboard.summary);
     renderQuestions($("select[name='service']").value);
     await refreshCompliance().catch(function () {});
   }

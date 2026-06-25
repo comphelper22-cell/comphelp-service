@@ -228,6 +228,63 @@ Safety behavior:
 - The compliance dashboard shows sent messages, pending approvals, opt-outs, failures, bounced emails, waiting leads, waiting vendors, and due follow-ups.
 - The marketplace dashboard includes Lead Finder, Vendor Finder, Dispatcher, Follow-ups, and Compliance tabs.
 
+## AI Business Operating System
+
+The Marketplace Manager is now the CompHelp Service business operating system. It runs from `marketplace.html` and the Supabase-aware API route `api/marketplace.js`.
+
+Core modules:
+
+- Lead Finder: creates approval-ready public source searches for Google Maps, Yelp, Facebook, Craigslist, Angi, and Thumbtack. It does not scrape private data or contact leads automatically.
+- Vendor Finder: stores vendor profiles by service category, rating, service area, and commission percentage.
+- AI Estimate Generator: calculates labor, materials, profit margin, commission, low/high/recommended estimate, printable quote page, and PDF download.
+- AI Dispatcher: drafts job routing, vendor quote requests, vendor comparison, customer price, and commission revenue.
+- Follow-up Agent: creates business-hours SMS/email drafts with human-like timing and approval requirements.
+- SMM Manager: creates reels, captions, hashtags, voiceovers, and posting schedules.
+- SEO Manager: creates city page ideas, service page ideas, blog ideas, metadata, FAQ ideas, and schema direction.
+- Project Manager: stores project details, gallery notes, before/after notes, reviews, and follow-up reminders.
+- Commission Marketplace: tracks project value, selected vendor, commission percentage, expected commission, paid commission, and payment status.
+- Analytics Dashboard: shows revenue, commissions, leads, conversion rate, vendor performance, marketing drafts, source leads, dispatches, and follow-ups.
+
+Run `supabase.marketplace.sql` in Supabase before production launch. The required production tables are:
+
+- `marketplace_leads`
+- `marketplace_source_leads`
+- `marketplace_vendors`
+- `marketplace_estimates`
+- `marketplace_quote_requests`
+- `marketplace_dispatches`
+- `marketplace_commissions`
+- `marketplace_projects`
+- `marketplace_followups`
+- `marketplace_marketing_ideas`
+- `marketplace_media_reviews`
+
+Vercel environment variables:
+
+```env
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+MARKETPLACE_ADMIN_SECRET=
+MARKETPLACE_MANAGER_SECRET=
+MARKETPLACE_VIEWER_SECRET=
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
+PUBLIC_SITE_URL=https://comphelp-service.vercel.app
+```
+
+Optional integrations:
+
+```env
+GOOGLE_MAPS_API_KEY=
+YELP_API_KEY=
+META_ACCESS_TOKEN=
+RESEND_API_KEY=
+LEAD_FROM_EMAIL=
+N8N_LEAD_WEBHOOK_URL=
+N8N_VENDOR_QUOTE_WEBHOOK_URL=
+VAPI_PROJECT_WEBHOOK_URL=
+```
+
 ## Safety Rules
 
 - Never delete files automatically.
