@@ -1074,15 +1074,15 @@ async function handleAction(action, payload) {
 }
 
 const PERMISSIONS = {
-<<<<<<< HEAD
+ HEAD
   admin: ["leadSourceSearch", "lead", "estimate", "emailEstimate", "vendorSearch", "vendor", "vendorUpdate", "vendorDelete", "vendorMatch", "quoteRequest", "vendorResponse", "dispatcher", "recommendation", "commission", "marketing", "seo", "smm", "followupPlan", "project"],
   manager: ["leadSourceSearch", "lead", "estimate", "vendorSearch", "vendor", "vendorUpdate", "vendorMatch", "quoteRequest", "dispatcher", "recommendation", "marketing", "seo", "smm", "followupPlan", "project"],
   viewer: ["recommendation", "vendorMatch"]
-=======
+
   admin: ["queueMessage", "optOut", "approveMessage", "activityLogs", "deploymentStatus", "leadSourceSearch", "lead", "estimate", "emailEstimate", "vendorSearch", "vendor", "vendorUpdate", "vendorDelete", "quoteRequest", "vendorResponse", "dispatcher", "recommendation", "commission", "marketing", "seo", "smm", "followupPlan", "project"],
   manager: ["queueMessage", "optOut", "activityLogs", "deploymentStatus", "leadSourceSearch", "lead", "estimate", "vendorSearch", "vendor", "vendorUpdate", "quoteRequest", "dispatcher", "recommendation", "marketing", "seo", "smm", "followupPlan", "project"],
   viewer: ["recommendation", "activityLogs", "deploymentStatus"]
->>>>>>> 4e1a10a (update by phase 4)
+ 4e1a10a (update by phase 4)
 };
 
 module.exports = async function handler(req, res) {
