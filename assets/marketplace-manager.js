@@ -199,6 +199,21 @@
     }).join("");
   }
 
+  function renderEstimate(estimate) {
+    var target = $("#estimateMetrics");
+    if (!target || !estimate) return;
+    var metrics = [
+      ["Low", "$" + (estimate.low || 0)],
+      ["High", "$" + (estimate.high || 0)],
+      ["Recommended", "$" + (estimate.recommended || 0)],
+      ["Internal Cost", "$" + (estimate.internalCost || 0)],
+      ["Expected Profit", "$" + (estimate.expectedProfit || 0)]
+    ];
+    target.innerHTML = metrics.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+  }
+
   function renderAnalytics(summary) {
     var target = $("#analyticsMetrics");
     if (!target || !summary) return;
@@ -409,6 +424,7 @@
           if (action === "estimate") {
             state.lastEstimateId = result.estimate.id;
             state.lastEstimateEmail = form.email.value || "";
+            renderEstimate(result.estimate);
             $("#estimateResult").textContent = JSON.stringify(result, null, 2);
           }
           if (action === "quoteRequest") $("#quoteResult").textContent = JSON.stringify(result, null, 2);

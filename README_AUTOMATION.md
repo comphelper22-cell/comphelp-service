@@ -268,6 +268,7 @@ The Marketplace Manager is now the CompHelp Service business operating system. I
 Core modules:
 
 - CRM Pipeline: tracks leads through New Lead, Contacted, Quote Sent, Follow-up, Won, and Lost. Lead records include name, phone, email, Instagram, TikTok, source, service, city, notes, and status.
+- AI Estimate Generator: accepts service, city, job size, cameras/devices, labor hours, material cost, urgency, and notes. It returns low/high/recommended pricing, customer quote text, internal cost, expected profit, and a printable/PDF quote page.
 - Lead Finder: creates approval-ready public source searches for Google Maps, Yelp, Facebook, Craigslist, Angi, and Thumbtack. It does not scrape private data or contact leads automatically.
 - Vendor Finder: stores vendor profiles by service category, rating, service area, and commission percentage.
 - AI Estimate Generator: calculates labor, materials, profit margin, commission, low/high/recommended estimate, printable quote page, and PDF download.

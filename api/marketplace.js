@@ -124,6 +124,10 @@ function money(value) {
   return Math.max(0, Number(value || 0));
 }
 
+function estimateUnits(payload) {
+  return Math.max(1, Number(payload.units || payload.quantity || payload.numberOfCamerasDevices || payload.camerasDevices || payload.deviceCount || payload.cameraCount || 1));
+}
+
 function id(prefix) {
   return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
 }
@@ -402,16 +406,18 @@ function qualification(service, message) {
   };
 }
 
-function calculateEstimate(payload) {
+function estimateFallback(payload) {
   const rules = readSeed().estimateRules?.[payload.service] || { base: 99, perUnit: 50, unit: "unit" };
-  const units = Math.max(1, Number(payload.units || payload.quantity || 1));
+  const units = estimateUnits(payload);
   const laborHours = Math.max(0, Number(payload.laborHours || 0));
-  const materialEstimate = money(payload.materialEstimate);
+  const materialEstimate = money(payload.materialEstimate || payload.materialCost);
   const laborCost = money(payload.laborCost || laborHours * 45);
   const profitMargin = Math.min(80, Math.max(0, Number(payload.profitMargin || 30)));
   const commissionPercent = Math.min(60, Math.max(0, Number(payload.commissionPercent || 10)));
   const urgencyMultiplier = /same|urgent|today|emergency/i.test(payload.urgency || "") ? 1.25 : 1;
-  const baseLow = rules.base + Math.max(0, units - 1) * rules.perUnit + laborHours * 65 + materialEstimate;
+  const jobSize = clean(payload.jobSize || payload.size, 120) || (units > 1 ? `${units} ${rules.unit || "units"}` : "Small job");
+  const sizeMultiplier = /large|multi|commercial|warehouse|office|restaurant/i.test(jobSize) ? 1.18 : /small|simple|basic/i.test(jobSize) ? 0.95 : 1;
+  const baseLow = (rules.base + Math.max(0, units - 1) * rules.perUnit + laborHours * 65 + materialEstimate) * sizeMultiplier;
   const low = Math.round(baseLow * urgencyMultiplier);
   const high = Math.round((baseLow * 1.45 + 75) * urgencyMultiplier);
   const recommended = Math.round((low + high) / 2);
@@ -425,12 +431,15 @@ function calculateEstimate(payload) {
     email: clean(payload.email, 180),
     service: clean(payload.service, 120),
     city: clean(payload.city, 80),
+    jobSize,
     propertyType: clean(payload.propertyType, 120),
     units,
     unitLabel: rules.unit,
+    numberOfCamerasDevices: units,
     laborHours,
     laborCost,
     materialEstimate,
+    materialCost: materialEstimate,
     profitMargin,
     commissionPercent,
     commission,
@@ -442,11 +451,26 @@ function calculateEstimate(payload) {
     high,
     recommended,
     range: `$${low} - $${high}`,
-    customerQuoteText: `Based on the details provided, your ${clean(payload.service, 120).toLowerCase()} estimate is approximately $${low} - $${high}. A recommended planning number is $${recommended}. Final pricing depends on site conditions and equipment.`,
+    customerQuoteText: `Based on the details provided, your ${clean(payload.service, 120).toLowerCase()} estimate in ${clean(payload.city, 80) || "Los Angeles"} is approximately $${low} - $${high}. A recommended planning number is $${recommended}. Final pricing depends on site conditions, equipment, access, and final scope.`,
     internalNotes: `Units: ${units}; labor hours: ${laborHours}; labor cost: $${laborCost}; materials: $${materialEstimate}; profit target: ${profitMargin}%; commission: ${commissionPercent}%; urgency: ${clean(payload.urgency, 100) || "standard"}.`,
     notes: clean(payload.notes, 1500),
     disclaimer: "Final pricing depends on site conditions, equipment, wiring, access, urgency, and vendor availability.",
     createdAt: new Date().toISOString()
+  };
+}
+
+async function calculateEstimate(payload) {
+  const fallback = estimateFallback(payload);
+  const ai = await openaiJson(
+    "Return JSON for a CompHelp Service estimate with customerQuoteText and internalNotes only. Be concise, professional, and do not invent site facts. Keep prices from the provided estimate.",
+    { input: payload, estimate: fallback },
+    {}
+  );
+  return {
+    ...fallback,
+    customerQuoteText: clean(ai.customerQuoteText, 1500) || fallback.customerQuoteText,
+    internalNotes: clean(ai.internalNotes, 1500) || fallback.internalNotes,
+    aiEnhanced: Boolean(ai.customerQuoteText || ai.internalNotes)
   };
 }
 
@@ -595,7 +619,7 @@ function followupPlan(payload) {
 }
 
 async function dispatcherPlan(payload) {
-  const estimate = calculateEstimate(payload);
+  const estimate = await calculateEstimate(payload);
   const recommendation = await recommendVendors(payload);
   const topVendor = (recommendation.top3 && recommendation.top3[0]) || (recommendation.top3Summary && recommendation.top3Summary[0]) || null;
   const commissionPercent = money(payload.commissionPercent || topVendor?.commissionPercent || 10);
@@ -748,7 +772,7 @@ async function handleAction(action, payload) {
     return { ok: true, lead: saved, hubspot: await createHubSpotContact(lead), n8n: await callWebhook("N8N_LEAD_WEBHOOK_URL", { lead }) };
   }
   if (action === "estimate") {
-    const estimate = calculateEstimate(payload);
+    const estimate = await calculateEstimate(payload);
     const saved = await insert("estimates", estimate);
     return { ok: true, estimate: saved, quoteUrl: `/api/marketplace-quote?id=${encodeURIComponent(saved.id || estimate.id)}` };
   }

@@ -47,12 +47,15 @@ create table if not exists marketplace_estimates (
   email text,
   service text,
   city text,
+  job_size text,
   property_type text,
   units numeric,
   unit_label text,
+  number_of_cameras_devices numeric,
   labor_hours numeric,
   labor_cost numeric,
   material_estimate numeric,
+  material_cost numeric,
   profit_margin numeric,
   commission_percent numeric,
   commission numeric,
@@ -69,6 +72,10 @@ create table if not exists marketplace_estimates (
   notes text,
   disclaimer text
 );
+
+alter table marketplace_estimates add column if not exists job_size text;
+alter table marketplace_estimates add column if not exists number_of_cameras_devices numeric;
+alter table marketplace_estimates add column if not exists material_cost numeric;
 
 create table if not exists marketplace_quote_requests (
   id text primary key,

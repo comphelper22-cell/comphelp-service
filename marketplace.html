@@ -190,16 +190,22 @@
             <input name="email" type="email" placeholder="Customer email for estimate">
             <select name="service" required></select>
             <input name="city" placeholder="City" value="Los Angeles">
+            <input name="jobSize" placeholder="Job size" value="Small job">
             <input name="propertyType" placeholder="Property type">
             <input name="units" type="number" min="1" value="1" placeholder="Number of cameras/devices">
             <input name="laborHours" type="number" min="0" step=".5" placeholder="Labor hours">
-            <input name="materialEstimate" type="number" min="0" step="1" placeholder="Material estimate">
+            <input name="materialCost" type="number" min="0" step="1" placeholder="Material cost">
             <select name="urgency"><option>standard</option><option>same-day</option><option>urgent</option></select>
             <textarea name="notes" placeholder="Project details"></textarea>
             <button class="btn primary">Create Estimate</button>
             <p class="status"></p>
           </form>
-          <div class="panel"><h2>Estimate Output</h2><pre id="estimateResult"></pre><div class="actions"><button class="btn" id="downloadQuote">Open PDF Quote</button><button class="btn" id="emailEstimate" type="button">Email Estimate</button></div></div>
+          <div class="panel">
+            <h2>Estimate Output</h2>
+            <div class="grid" id="estimateMetrics"></div>
+            <pre id="estimateResult"></pre>
+            <div class="actions"><button class="btn" id="downloadQuote">Open PDF Quote</button><button class="btn" id="emailEstimate" type="button">Email Estimate</button></div>
+          </div>
         </div>
       </section>
 
