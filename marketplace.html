@@ -30,6 +30,7 @@
         <button class="is-active" data-target="dashboard">Dashboard</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
+        <button data-target="socialLeads">Social Leads</button>
         <button data-target="estimates">Estimate Manager</button>
         <button data-target="vendors">Vendor Manager</button>
         <button data-target="vendorFinder">Vendor Finder</button>
@@ -38,8 +39,11 @@
         <button data-target="recommendations">AI Recommendations</button>
         <button data-target="commissions">Commissions</button>
         <button data-target="followups">Follow-ups</button>
+        <button data-target="messageQueue">SMS/Email Queue</button>
         <button data-target="compliance">Compliance</button>
         <button data-target="analytics">Analytics</button>
+        <button data-target="activity">Activity Logs</button>
+        <button data-target="deployment">Deployment</button>
         <button data-target="marketing">Marketing</button>
         <button data-target="seo">SEO Manager</button>
         <button data-target="smm">SMM Manager</button>
@@ -108,6 +112,65 @@
             <h2>Lead Finder Output</h2>
             <pre id="leadFinderResult"></pre>
           </div>
+        </div>
+      </section>
+
+      <section data-view="socialLeads">
+        <div class="two">
+          <form class="panel" data-action="socialFinder" data-endpoint="/api/social-leads" data-api-action="findSocialLeads" data-output="socialLeadResult">
+            <h2>Instagram and TikTok Lead Finder</h2>
+            <p class="muted">Creates review records from public hashtag/search targets only. No scraping, no auto-DMs.</p>
+            <select name="platform"><option>Instagram</option><option>TikTok</option></select>
+            <select name="city"><option>Los Angeles</option><option>Burbank</option><option>Glendale</option><option>North Hollywood</option><option>Studio City</option></select>
+            <select name="hashtag">
+              <option>#losangelesbusiness</option>
+              <option>#burbankbusiness</option>
+              <option>#glendalebusiness</option>
+              <option>#securitycamera</option>
+              <option>#cctvinstallation</option>
+              <option>#smallbusinessla</option>
+              <option>#restaurantla</option>
+              <option>#smokeshopla</option>
+              <option>#autorepairla</option>
+              <option>#laundromatla</option>
+            </select>
+            <select name="possibleServiceNeed"><option>Security Camera Installation</option><option>WiFi & Network Installation</option><option>Smart Home Setup</option><option>Computer Repair</option><option>Data Recovery</option></select>
+            <input name="profileName" placeholder="Optional profile or business name">
+            <input name="profileUrl" placeholder="Optional public profile URL">
+            <textarea name="reason" placeholder="Why this looks like a lead"></textarea>
+            <button class="btn primary">Find / Save Social Leads</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Social Lead Summary</h2>
+            <div class="grid" id="socialLeadMetrics"></div>
+            <div class="actions" style="margin:.85rem 0">
+              <button class="btn warn" id="pauseSocialOutreach" type="button">Pause Outreach</button>
+              <button class="btn" id="refreshSocialLeads" type="button">Refresh</button>
+            </div>
+            <pre id="socialLeadResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <form class="panel" data-action="socialDraft" data-endpoint="/api/social-leads" data-api-action="createSocialDraft" data-output="socialDraftResult">
+            <h2>Create Outreach Draft</h2>
+            <p class="muted">Draft only. Owner approval required before any message is sent.</p>
+            <select name="platform"><option>Instagram</option><option>TikTok</option></select>
+            <input name="profileName" placeholder="Profile name" required>
+            <input name="profileUrl" placeholder="Profile URL">
+            <select name="city"><option>Los Angeles</option><option>Burbank</option><option>Glendale</option><option>North Hollywood</option><option>Studio City</option></select>
+            <select name="possibleServiceNeed"><option>Security Camera Installation</option><option>WiFi & Network Installation</option><option>Smart Home Setup</option><option>Computer Repair</option><option>Data Recovery</option></select>
+            <textarea name="body" placeholder="Optional custom short draft"></textarea>
+            <button class="btn primary">Create Draft</button>
+            <p class="status"></p>
+          </form>
+          <form class="panel" data-action="socialContentPlan" data-endpoint="/api/social-leads" data-api-action="contentPlan" data-output="socialDraftResult">
+            <h2>7-Day Instagram / TikTok Plan</h2>
+            <select name="city"><option>Los Angeles</option><option>Burbank</option><option>Glendale</option><option>North Hollywood</option><option>Studio City</option></select>
+            <button class="btn primary">Generate Content Plan</button>
+            <p class="status"></p>
+            <pre id="socialDraftResult"></pre>
+          </form>
         </div>
       </section>
 
@@ -289,6 +352,27 @@
         </div>
       </section>
 
+      <section data-view="messageQueue">
+        <div class="two">
+          <form class="panel" data-action="queueMessage" data-output="messageQueueResult">
+            <h2>SMS and Email Queue</h2>
+            <p class="muted">Creates approval-controlled queue records with rate limits, opt-out checks, duplicate protection, and 7-day spacing.</p>
+            <select name="channel"><option>sms</option><option>email</option><option>draft</option></select>
+            <select name="kind"><option>outreach</option><option>followup</option><option>customer</option></select>
+            <input name="recipient" placeholder="Phone or email" required>
+            <input name="source" placeholder="Source" value="marketplace">
+            <label class="muted"><input name="approved" type="checkbox" value="true"> Approved to queue if safety checks pass</label>
+            <textarea name="body" placeholder="Message body" required></textarea>
+            <button class="btn primary">Create Queue Draft</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Queue Output</h2>
+            <pre id="messageQueueResult"></pre>
+          </div>
+        </div>
+      </section>
+
       <section data-view="compliance">
         <div class="two">
           <div class="panel">
@@ -322,6 +406,30 @@
             <h2>Performance Notes</h2>
             <pre id="analyticsResult"></pre>
           </div>
+        </div>
+      </section>
+
+      <section data-view="activity">
+        <div class="panel">
+          <h2>Activity Logs</h2>
+          <p class="muted">Recent marketplace actions, queue events, lead activity, and project updates.</p>
+          <div class="list" id="activityLogList"></div>
+        </div>
+      </section>
+
+      <section data-view="deployment">
+        <div class="two">
+          <div class="panel">
+            <h2>GitHub and Vercel Automation</h2>
+            <p class="muted">Deployment workflow status, required configuration, and recent automation logs.</p>
+            <div class="grid" id="deploymentMetrics"></div>
+          </div>
+          <form class="panel" data-action="deploymentStatus" data-output="deploymentResult">
+            <h2>Deployment Status</h2>
+            <button class="btn primary">Refresh Deployment Status</button>
+            <p class="status"></p>
+            <pre id="deploymentResult"></pre>
+          </form>
         </div>
       </section>
 

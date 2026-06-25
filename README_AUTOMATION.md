@@ -24,6 +24,7 @@ TWILIO_FROM_NUMBER=
 RESEND_API_KEY=
 LEAD_FROM_EMAIL=
 OUTREACH_DAILY_LIMIT=10
+SOCIAL_OUTREACH_DAILY_LIMIT=10
 FOLLOWUP_DAILY_LIMIT=20
 OUTREACH_PAUSED=true
 ```
@@ -72,6 +73,8 @@ Run business agents:
 ```bash
 npm run marketplace-agent
 npm run lead-finder-agent
+npm run social-lead-finder-agent
+npm run social-outreach-agent
 npm run smm-agent
 npm run seo-agent
 npm run estimate-agent
@@ -228,6 +231,36 @@ Safety behavior:
 - The compliance dashboard shows sent messages, pending approvals, opt-outs, failures, bounced emails, waiting leads, waiting vendors, and due follow-ups.
 - The marketplace dashboard includes Lead Finder, Vendor Finder, Dispatcher, Follow-ups, and Compliance tabs.
 
+## Instagram and TikTok Customer Finder
+
+Files:
+
+- `agents/social-lead-finder-agent.js`
+- `agents/social-outreach-agent.js`
+- `api/social-leads.js`
+- `data/social-leads.json`
+- `data/social-outreach-queue.json`
+
+Dashboard tab: `Social Leads`
+
+What it does:
+
+- Creates review records from public Instagram/TikTok hashtag and profile targets.
+- Saves platform, profile name, profile URL, business type, city, possible service need, lead reason, and `needs_review` status.
+- Creates short outreach drafts only.
+- Generates a 7-day Instagram/TikTok content plan with reels, captions, hashtags, voiceover notes, schedule, and free-estimate CTAs.
+- Shows Instagram leads, TikTok leads, draft count, daily limit, sent today, and paused status.
+
+Safety behavior:
+
+- No auto-DMs, auto-comments, likes, follows, or platform scraping.
+- No private data collection or platform-limit bypassing.
+- Social outreach drafts require owner approval before sending.
+- Default cap is 10 new social outreach drafts per day.
+- Duplicate draft messages are blocked.
+- Spammy or overpromising wording is rejected.
+- Outreach can be paused from the Social Leads dashboard tab.
+
 ## AI Business Operating System
 
 The Marketplace Manager is now the CompHelp Service business operating system. It runs from `marketplace.html` and the Supabase-aware API route `api/marketplace.js`.
@@ -244,6 +277,7 @@ Core modules:
 - Project Manager: stores project details, gallery notes, before/after notes, reviews, and follow-up reminders.
 - Commission Marketplace: tracks project value, selected vendor, commission percentage, expected commission, paid commission, and payment status.
 - Analytics Dashboard: shows revenue, commissions, leads, conversion rate, vendor performance, marketing drafts, source leads, dispatches, and follow-ups.
+- Deployment Dashboard: shows GitHub/Vercel automation readiness, branch, repo, and recent deployment logs.
 
 Run `supabase.marketplace.sql` in Supabase before production launch. The required production tables are:
 
@@ -256,6 +290,9 @@ Run `supabase.marketplace.sql` in Supabase before production launch. The require
 - `marketplace_commissions`
 - `marketplace_projects`
 - `marketplace_followups`
+- `marketplace_message_queue`
+- `marketplace_opt_outs`
+- `marketplace_activity_logs`
 - `marketplace_marketing_ideas`
 - `marketplace_media_reviews`
 
@@ -284,6 +321,40 @@ N8N_LEAD_WEBHOOK_URL=
 N8N_VENDOR_QUOTE_WEBHOOK_URL=
 VAPI_PROJECT_WEBHOOK_URL=
 ```
+
+Production mode checklist:
+
+1. Run `supabase.marketplace.sql` in Supabase.
+2. Add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
+3. Add admin role secrets in Vercel.
+4. Open `/marketplace` and log in with the admin code.
+5. Add a lead and confirm it appears in `marketplace_leads`.
+6. Add a vendor and confirm it appears in `marketplace_vendors`.
+7. Add a project or upload media and confirm it appears in `marketplace_projects`.
+8. Create an estimate and open the quote URL.
+9. Create a queue draft and confirm it appears in `marketplace_message_queue`.
+10. Check Activity Logs for saved lead, estimate, vendor, project, and queue events.
+11. Check the Deployment tab for GitHub/Vercel automation readiness.
+
+SMS/email queue safety:
+
+- Queue records are stored in Supabase when configured.
+- Cold outreach requires approval.
+- Default outreach limit is 10 per day.
+- Default follow-up limit is 20 per day.
+- Duplicate messages are blocked.
+- Recipients contacted within 7 days are blocked unless they replied.
+- Opt-outs are checked before queueing.
+- SMS queue drafts automatically include STOP opt-out language.
+- The system creates drafts/queue records only. Actual sending requires approved integrations and owner-controlled workflow.
+
+Provider compliance:
+
+- Do not use the system to evade Gmail, Facebook, Google, Twilio, Meta, or other provider rules.
+- Keep messages permission-based whenever possible.
+- Use approval, opt-outs, low daily limits, human review, and business-hours sending.
+- Do not bulk-send or repeatedly contact people who did not respond.
+- Keep all outreach logs for audits and customer preference tracking.
 
 ## Safety Rules
 

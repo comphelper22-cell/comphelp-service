@@ -134,6 +134,7 @@
       ["Total Projects", summary.projects],
       ["Open Projects", summary.openProjects || summary.projects],
       ["Dispatches", summary.dispatches || 0],
+      ["Queued Messages", summary.queuedMessages || 0],
       ["Estimated Revenue", "$" + summary.revenue],
       ["Expected Commissions", "$" + summary.expectedCommission],
       ["Conversion", (summary.conversionRate || 0) + "%"],
@@ -187,6 +188,9 @@
       ["Vendors", summary.vendors || 0],
       ["Dispatches", summary.dispatches || 0],
       ["Follow-ups", summary.followUps || 0],
+      ["Queued", summary.queuedMessages || 0],
+      ["Sent Today", summary.messagesSentToday || 0],
+      ["Activity", summary.activityLogs || 0],
       ["Marketing Drafts", summary.smmDrafts || 0]
     ];
     target.innerHTML = metrics.map(function (metric) {
@@ -217,6 +221,56 @@
     }).join("");
   }
 
+  function renderSocialLeads(social) {
+    var target = $("#socialLeadMetrics");
+    if (!target || !social) return;
+    var metrics = [
+      ["Instagram Leads", social.instagramLeads || 0],
+      ["TikTok Leads", social.tiktokLeads || 0],
+      ["Draft Messages", social.pendingDrafts || 0],
+      ["Daily Limit", social.dailyLimit || 10],
+      ["Sent Today", social.sentToday || 0],
+      ["Paused", social.paused ? "Yes" : "No"]
+    ];
+    target.innerHTML = metrics.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#socialLeadResult")) {
+      $("#socialLeadResult").textContent = JSON.stringify({
+        leads: social.leads || [],
+        drafts: social.drafts || []
+      }, null, 2);
+    }
+  }
+
+  function renderActivityLogs(logs) {
+    var target = $("#activityLogList");
+    if (!target) return;
+    logs = logs || [];
+    target.innerHTML = logs.length ? logs.map(function (item) {
+      return '<div class="row"><strong>' + escapeHtml(item.type || "activity") + '</strong><span>' + escapeHtml(item.message || "") + '</span><span>' + escapeHtml(item.status || "") + '</span><span class="pill">' + escapeHtml(item.createdAt || item.created_at || "") + '</span></div>';
+    }).join("") : '<p class="muted">No activity yet.</p>';
+  }
+
+  function renderDeployment(deployment) {
+    var target = $("#deploymentMetrics");
+    if (!target || !deployment) return;
+    var latest = deployment.latest || {};
+    var metrics = [
+      ["GitHub", deployment.githubConfigured ? "Ready" : "Missing"],
+      ["Vercel", deployment.vercelConfigured ? "Ready" : "Missing"],
+      ["Auto Deploy", deployment.autoDeploy ? "On" : "Off"],
+      ["Branch", deployment.branch || "main"],
+      ["Latest", latest.action || "No logs"]
+    ];
+    target.innerHTML = metrics.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#deploymentResult")) {
+      $("#deploymentResult").textContent = JSON.stringify(deployment, null, 2);
+    }
+  }
+
   async function refreshCompliance() {
     var response = await fetch("/api/outreach", {
       cache: "no-store",
@@ -225,6 +279,17 @@
     var body = await response.json().catch(function () { return {}; });
     if (body.ok === false) throw new Error(body.error || "Compliance request failed.");
     renderCompliance(body.compliance);
+    return body;
+  }
+
+  async function refreshSocialLeads() {
+    var response = await fetch("/api/social-leads", {
+      cache: "no-store",
+      headers: { "x-marketplace-admin-secret": adminSecret() }
+    });
+    var body = await response.json().catch(function () { return {}; });
+    if (!response.ok || body.ok === false) throw new Error(body.error || "Social leads request failed.");
+    renderSocialLeads(body.social);
     return body;
   }
 
@@ -245,8 +310,11 @@
     renderTopVendors(dashboard.topVendors);
     renderVendors(dashboard.vendors);
     renderAnalytics(dashboard.summary);
+    renderActivityLogs(dashboard.activityLogs);
+    renderDeployment(dashboard.deployment);
     renderQuestions($("select[name='service']").value);
     await refreshCompliance().catch(function () {});
+    await refreshSocialLeads().catch(function () {});
   }
 
   function attachNavigation() {
@@ -326,6 +394,7 @@
           if (action === "smm") $("#smmResult").textContent = JSON.stringify(result, null, 2);
           if (action === "seo") $("#seoResult").textContent = JSON.stringify(result, null, 2);
           if (action === "project") $("#projectResult").textContent = JSON.stringify(result, null, 2);
+          if (action === "socialFinder" || action === "socialDraft") await refreshSocialLeads();
           await refresh();
         } catch (error) {
           status.innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
@@ -369,6 +438,33 @@
         button.disabled = false;
       }
     });
+
+    if ($("#pauseSocialOutreach")) {
+      $("#pauseSocialOutreach").addEventListener("click", async function () {
+        var button = $("#pauseSocialOutreach");
+        button.disabled = true;
+        try {
+          var result = await routeApi("/api/social-leads", "pause", {});
+          $("#socialLeadResult").textContent = JSON.stringify(result, null, 2);
+          await refreshSocialLeads();
+        } catch (error) {
+          $("#socialLeadResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    if ($("#refreshSocialLeads")) {
+      $("#refreshSocialLeads").addEventListener("click", async function () {
+        try {
+          var result = await refreshSocialLeads();
+          $("#socialLeadResult").textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          $("#socialLeadResult").textContent = error.message;
+        }
+      });
+    }
 
     $("#refreshCompliance").addEventListener("click", async function () {
       try {

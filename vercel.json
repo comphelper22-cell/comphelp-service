@@ -75,6 +75,10 @@
       "destination": "/api/followups.js"
     },
     {
+      "source": "/api/social-leads",
+      "destination": "/api/social-leads.js"
+    },
+    {
       "source": "/admin-test",
       "destination": "/admin-test.html"
     },
