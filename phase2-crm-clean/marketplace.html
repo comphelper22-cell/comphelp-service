@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Marketplace Manager V1 | CompHelp Service</title>
+  <meta name="description" content="Admin dashboard for CompHelp Service marketplace, vendors, leads, estimates, commissions, marketing, and projects.">
+  <style>
+    :root{--bg:#070b10;--panel:#0b141d;--panel2:#101b27;--text:#f5f8fb;--muted:#a9b8c6;--line:rgba(255,255,255,.14);--accent:#25e1b1;--blue:#7db2ff;--gold:#ffd166;--danger:#ff7a90;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 82% 0,rgba(37,225,177,.13),transparent 28rem),linear-gradient(180deg,#070b10,#0a1118 52%,#070b10);color:var(--text)}a{color:inherit}.login{min-height:100vh;display:grid;place-items:center;padding:1rem}.login-card{width:min(460px,100%);border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));border-radius:8px;padding:1.2rem}.shell{display:none;grid-template-columns:260px 1fr;min-height:100vh}.shell.is-authenticated{display:grid}.side{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);background:rgba(7,11,16,.86);backdrop-filter:blur(18px);padding:1rem}.brand{display:flex;gap:.7rem;align-items:center;font-weight:950}.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--blue));color:#03100d}.sub{color:var(--muted);font-size:.86rem;margin:.2rem 0 1rem}.nav{display:grid;gap:.35rem}.nav button{width:100%;text-align:left;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:8px;padding:.75rem;font-weight:850;cursor:pointer}.nav button.is-active,.nav button:hover{border-color:var(--line);background:rgba(255,255,255,.055);color:var(--text)}main{padding:1rem 1rem 5rem}.top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}.top h1{margin:0;font-size:clamp(1.6rem,4vw,3rem)}.admin-code{display:flex;gap:.5rem;align-items:center}.admin-code input{max-width:220px}.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.85rem}.two{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}.card,.panel{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.035));border-radius:8px;padding:1rem}.metric{font-size:2rem;font-weight:950;color:var(--accent)}.muted{color:var(--muted)}section[data-view]{display:none}section[data-view].is-active{display:block}input,select,textarea{width:100%;min-height:44px;margin:.3rem 0 .65rem;border:1px solid var(--line);border-radius:8px;background:#071016;color:var(--text);padding:.75rem}textarea{min-height:110px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;border-radius:8px;border:1px solid var(--line);background:#0c1722;color:var(--text);font-weight:900;padding:.65rem .9rem;cursor:pointer}.btn.primary{border:0;background:var(--accent);color:#03100d}.btn.warn{border-color:rgba(255,122,144,.45);color:#ffd4dc}.actions{display:flex;gap:.5rem;flex-wrap:wrap}.list{display:grid;gap:.65rem}.row{display:grid;grid-template-columns:1.2fr .85fr .8fr .7fr;gap:.65rem;align-items:center;border-top:1px solid var(--line);padding:.7rem 0}.pill{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:.2rem .55rem;color:var(--muted);font-size:.84rem;margin:.12rem}.status{min-height:1.4rem;color:var(--accent);font-weight:850}.danger{color:var(--danger)}pre{white-space:pre-wrap;overflow:auto;background:#05090d;border:1px solid var(--line);border-radius:8px;padding:.8rem;color:#d6e1e8}.media-choice{display:grid;grid-template-columns:repeat(5,1fr);gap:.65rem}.media-choice label{border:1px solid var(--line);border-radius:8px;padding:.75rem;color:#d6e1e8}@media(max-width:980px){.shell{grid-template-columns:1fr}.side{position:relative;height:auto}.nav{grid-template-columns:repeat(2,1fr)}.grid,.two,.media-choice{grid-template-columns:1fr}.row{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.admin-code{width:100%;align-items:stretch;flex-direction:column}.admin-code input{max-width:none}} 
+  </style>
+</head>
+<body>
+  <div class="login" id="loginPanel">
+    <form class="login-card" id="loginForm">
+      <div class="brand"><span class="mark">CH</span><span>CompHelp Service</span></div>
+      <h1>Admin Login</h1>
+      <p class="muted">Enter your Marketplace Manager admin, manager, or viewer code. Demo codes work only in local development when server env secrets are not configured.</p>
+      <input id="loginSecret" type="password" autocomplete="current-password" placeholder="Admin code" required>
+      <button class="btn primary" type="submit">Log In</button>
+      <p class="status" id="loginStatus"></p>
+    </form>
+  </div>
+  <div class="shell" id="appShell">
+    <aside class="side">
+      <div class="brand"><span class="mark">CH</span><span>CompHelp Service</span></div>
+      <p class="sub">Marketplace Manager V1</p>
+      <nav class="nav" aria-label="Dashboard modules">
+        <button class="is-active" data-target="dashboard">Dashboard</button>
+        <button data-target="leads">Lead Manager</button>
+        <button data-target="leadFinder">Lead Finder</button>
+        <button data-target="socialLeads">Social Leads</button>
+        <button data-target="estimates">Estimate Manager</button>
+        <button data-target="vendors">Vendor Manager</button>
+        <button data-target="vendorFinder">Vendor Finder</button>
+        <button data-target="dispatcher">Dispatcher</button>
+        <button data-target="quotes">Quote Requests</button>
+        <button data-target="recommendations">AI Recommendations</button>
+        <button data-target="commissions">Commissions</button>
+        <button data-target="followups">Follow-ups</button>
+        <button data-target="messageQueue">SMS/Email Queue</button>
+        <button data-target="compliance">Compliance</button>
+        <button data-target="analytics">Analytics</button>
+        <button data-target="activity">Activity Logs</button>
+        <button data-target="deployment">Deployment</button>
+        <button data-target="marketing">Marketing</button>
+        <button data-target="seo">SEO Manager</button>
+        <button data-target="smm">SMM Manager</button>
+        <button data-target="projects">Projects</button>
+      </nav>
+    </aside>
+    <main>
+      <div class="top">
+        <div><h1>AI-Powered Service Marketplace</h1><p class="muted">Lead intake, estimates, vendors, quotes, commissions, content, and project follow-up.</p></div>
+        <div class="admin-code"><span class="muted">Current role</span><span class="pill" id="rolePill">Not logged in</span><button class="btn warn" id="logoutButton" type="button">Log Out</button><input id="adminSecret" type="password" autocomplete="current-password" aria-label="Admin code"></div>
+      </div>
+
+      <section data-view="dashboard" class="is-active">
+        <div class="panel" id="dashboardWarnings" style="display:none;margin-bottom:.85rem"></div>
+        <div class="grid" id="metrics"></div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>CRM Pipeline</h2>
+          <div class="grid" id="crmMetrics"></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Recent Leads</h2><div class="list" id="recentLeads"></div></div>
+          <div class="panel"><h2>Top Vendors</h2><div class="list" id="topVendors"></div></div>
+        </div>
+      </section>
+
+      <section data-view="leads">
+        <div class="two">
+          <form class="panel" data-action="lead">
+            <h2>Add Lead</h2>
+            <input name="name" placeholder="Customer name" required>
+            <input name="phone" placeholder="Phone" required>
+            <input name="email" type="email" placeholder="Email">
+            <input name="instagram" placeholder="Instagram profile URL or handle">
+            <input name="tiktok" placeholder="TikTok profile URL or handle">
+            <input name="source" placeholder="Lead source" value="marketplace_manager">
+            <input name="address" placeholder="Address">
+            <input name="city" placeholder="City" value="Los Angeles">
+            <select name="service" required></select>
+            <textarea name="notes" placeholder="Project notes"></textarea>
+            <select name="status"><option>New Lead</option><option>Contacted</option><option>Quote Sent</option><option>Follow-up</option><option>Won</option><option>Lost</option></select>
+            <input name="preferredDate" type="date">
+            <button class="btn primary">Save Lead</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel"><h2>Qualification Questions</h2><div id="leadQuestions"></div><pre id="leadResult"></pre></div>
+        </div>
+      </section>
+
+      <section data-view="leadFinder">
+        <div class="two">
+          <form class="panel" data-action="leadSourceSearch" data-output="leadFinderResult">
+            <h2>Lead Finder Agent</h2>
+            <p class="muted">Creates approval-ready public source searches. It does not scrape private data or contact anyone automatically.</p>
+            <input name="sources" value="Google Maps,Yelp,Facebook,Craigslist,Angi,Thumbtack" placeholder="Sources">
+            <select name="category">
+              <option>liquor stores</option>
+              <option>smoke shops</option>
+              <option>restaurants</option>
+              <option>laundromats</option>
+              <option>auto repair shops</option>
+              <option>small markets</option>
+              <option>offices</option>
+            </select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <input name="businessName" placeholder="Business name or search note">
+            <input name="phone" placeholder="Phone if already known">
+            <input name="website" placeholder="Website if already known">
+            <input name="serviceNeed" placeholder="Likely service need" value="security camera installation">
+            <input name="source" placeholder="Lead source" value="owner research">
+            <button class="btn primary">Create Approval Draft</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Lead Finder Output</h2>
+            <pre id="leadFinderResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="socialLeads">
+        <div class="two">
+          <form class="panel" data-action="socialFinder" data-endpoint="/api/social-leads" data-api-action="findSocialLeads" data-output="socialLeadResult">
+            <h2>Instagram and TikTok Lead Finder</h2>
+            <p class="muted">Creates review records from public hashtag/search targets only. No scraping, no auto-DMs.</p>
+            <select name="platform"><option>Instagram</option><option>TikTok</option></select>
+            <select name="city"><option>Los Angeles</option><option>Burbank</option><option>Glendale</option><option>North Hollywood</option><option>Studio City</option></select>
+            <select name="hashtag">
+              <option>#losangelesbusiness</option>
+              <option>#burbankbusiness</option>
+              <option>#glendalebusiness</option>
+              <option>#securitycamera</option>
+              <option>#cctvinstallation</option>
+              <option>#smallbusinessla</option>
+              <option>#restaurantla</option>
+              <option>#smokeshopla</option>
+              <option>#autorepairla</option>
+              <option>#laundromatla</option>
+            </select>
+            <select name="possibleServiceNeed"><option>Security Camera Installation</option><option>WiFi & Network Installation</option><option>Smart Home Setup</option><option>Computer Repair</option><option>Data Recovery</option></select>
+            <input name="profileName" placeholder="Optional profile or business name">
+            <input name="profileUrl" placeholder="Optional public profile URL">
+            <textarea name="reason" placeholder="Why this looks like a lead"></textarea>
+            <button class="btn primary">Find / Save Social Leads</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Social Lead Summary</h2>
+            <div class="grid" id="socialLeadMetrics"></div>
+            <div class="actions" style="margin:.85rem 0">
+              <button class="btn warn" id="pauseSocialOutreach" type="button">Pause Outreach</button>
+              <button class="btn" id="refreshSocialLeads" type="button">Refresh</button>
+            </div>
+            <pre id="socialLeadResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <form class="panel" data-action="socialDraft" data-endpoint="/api/social-leads" data-api-action="createSocialDraft" data-output="socialDraftResult">
+            <h2>Create Outreach Draft</h2>
+            <p class="muted">Draft only. Owner approval required before any message is sent.</p>
+            <select name="platform"><option>Instagram</option><option>TikTok</option></select>
+            <input name="profileName" placeholder="Profile name" required>
+            <input name="profileUrl" placeholder="Profile URL">
+            <select name="city"><option>Los Angeles</option><option>Burbank</option><option>Glendale</option><option>North Hollywood</option><option>Studio City</option></select>
+            <select name="possibleServiceNeed"><option>Security Camera Installation</option><option>WiFi & Network Installation</option><option>Smart Home Setup</option><option>Computer Repair</option><option>Data Recovery</option></select>
+            <textarea name="body" placeholder="Optional custom short draft"></textarea>
+            <button class="btn primary">Create Draft</button>
+            <p class="status"></p>
+          </form>
+          <form class="panel" data-action="socialContentPlan" data-endpoint="/api/social-leads" data-api-action="contentPlan" data-output="socialDraftResult">
+            <h2>7-Day Instagram / TikTok Plan</h2>
+            <select name="city"><option>Los Angeles</option><option>Burbank</option><option>Glendale</option><option>North Hollywood</option><option>Studio City</option></select>
+            <button class="btn primary">Generate Content Plan</button>
+            <p class="status"></p>
+            <pre id="socialDraftResult"></pre>
+          </form>
+        </div>
+      </section>
+
+      <section data-view="estimates">
+        <div class="two">
+          <form class="panel" data-action="estimate">
+            <h2>Generate Estimate</h2>
+            <input name="customerName" placeholder="Customer name" required>
+            <input name="email" type="email" placeholder="Customer email for estimate">
+            <select name="service" required></select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <input name="jobSize" placeholder="Job size" value="Small job">
+            <input name="propertyType" placeholder="Property type">
+            <input name="units" type="number" min="1" value="1" placeholder="Number of cameras/devices">
+            <input name="laborHours" type="number" min="0" step=".5" placeholder="Labor hours">
+            <input name="materialCost" type="number" min="0" step="1" placeholder="Material cost">
+            <select name="urgency"><option>standard</option><option>same-day</option><option>urgent</option></select>
+            <textarea name="notes" placeholder="Project details"></textarea>
+            <button class="btn primary">Create Estimate</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Estimate Output</h2>
+            <div class="grid" id="estimateMetrics"></div>
+            <pre id="estimateResult"></pre>
+            <div class="actions"><button class="btn" id="downloadQuote">Open PDF Quote</button><button class="btn" id="emailEstimate" type="button">Email Estimate</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="vendorFinder">
+        <div class="two">
+          <form class="panel" data-action="vendorSearch" data-output="vendorFinderResult">
+            <h2>Vendor Finder Agent</h2>
+            <p class="muted">Stores partner vendors as approval-ready profiles. No outreach is sent from this form.</p>
+            <input name="name" placeholder="Vendor name" required>
+            <select name="category">
+              <option>camera installers</option>
+              <option>electricians</option>
+              <option>low voltage contractors</option>
+              <option>IT support</option>
+              <option>data recovery</option>
+              <option>WiFi/network installers</option>
+              <option>handymen</option>
+            </select>
+            <input name="phone" placeholder="Phone">
+            <input name="email" type="email" placeholder="Email">
+            <input name="website" placeholder="Website">
+            <input name="serviceArea" placeholder="Service area" value="Los Angeles County">
+            <input name="rating" type="number" min="1" max="5" step=".1" placeholder="Rating">
+            <input name="commissionPercent" type="number" min="0" max="100" step=".1" placeholder="Commission %">
+            <select name="status"><option>needs_approval</option><option>approved</option><option>active</option><option>paused</option></select>
+            <textarea name="notes" placeholder="Vendor notes"></textarea>
+            <button class="btn primary">Save Vendor Profile</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Vendor Finder Output</h2>
+            <pre id="vendorFinderResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="dispatcher">
+        <div class="two">
+          <form class="panel" data-action="dispatcher" data-output="dispatcherResult">
+            <h2>AI Dispatcher</h2>
+            <input name="customerName" placeholder="Customer name">
+            <select name="service" required></select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <input name="address" placeholder="Project address">
+            <input name="budget" type="number" min="0" step="1" placeholder="Customer budget">
+            <input name="units" type="number" min="1" step="1" value="1" placeholder="Cameras/devices/jobs">
+            <input name="laborHours" type="number" min="0" step=".5" placeholder="Labor hours">
+            <input name="materialEstimate" type="number" min="0" step="1" placeholder="Materials">
+            <input name="commissionPercent" type="number" min="0" max="60" step=".1" value="10" placeholder="Commission %">
+            <input name="availability" placeholder="Preferred date or timing">
+            <textarea name="scope" placeholder="Job notes, size, and constraints"></textarea>
+            <button class="btn primary">Recommend Dispatch Plan</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Dispatcher Output</h2>
+            <p class="muted">Customer final quotes still require owner approval.</p>
+            <pre id="dispatcherResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="vendors">
+        <div class="two">
+          <form class="panel" data-action="vendor">
+            <h2>Add Vendor</h2>
+            <select name="crudMode"><option value="vendor">Add Vendor</option><option value="vendorUpdate">Update Vendor</option><option value="vendorDelete">Delete Vendor</option></select>
+            <input name="id" placeholder="Vendor ID for update/delete">
+            <input name="name" placeholder="Vendor name">
+            <select name="category" required></select>
+            <input name="phone" placeholder="Phone">
+            <input name="email" type="email" placeholder="Email">
+            <input name="website" type="url" placeholder="Website">
+            <input name="city" placeholder="City" value="Los Angeles">
+            <input name="serviceArea" placeholder="Service area">
+            <input name="commissionPercent" type="number" min="0" max="100" step=".1" placeholder="Commission %">
+            <input name="rating" type="number" min="1" max="5" step=".1" placeholder="Rating">
+            <input name="availability" placeholder="Availability">
+            <textarea name="notes" placeholder="Vendor notes"></textarea>
+            <select name="status"><option>active</option><option>pending</option><option>paused</option><option>inactive</option></select>
+            <input name="distanceMiles" type="number" min="0" step=".1" placeholder="Distance miles">
+            <button class="btn primary">Save Vendor</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel"><h2>Vendor Directory</h2><div id="vendorList" class="list"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <form class="panel" data-action="vendorMatch" data-output="vendorMatchResult">
+            <h2>Match Vendor to Project</h2>
+            <select name="service" required></select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <input name="projectValue" type="number" min="0" step="1" placeholder="Project value">
+            <input name="commissionPercent" type="number" min="0" max="100" step=".1" placeholder="Commission %" value="10">
+            <textarea name="scope" placeholder="Project scope and notes"></textarea>
+            <button class="btn primary">Rank and Match Vendor</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Vendor Match Output</h2>
+            <pre id="vendorMatchResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="quotes">
+        <div class="two">
+          <form class="panel" data-action="quoteRequest">
+            <h2>Send Quote Request</h2>
+            <input name="leadId" placeholder="Lead ID">
+            <input name="projectId" placeholder="Project ID">
+            <select name="service" required></select>
+            <select name="category" required></select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <textarea name="scope" placeholder="Scope of work" required></textarea>
+            <label class="muted"><input name="approved" type="checkbox"> Approved to send through n8n if configured</label>
+            <button class="btn primary">Create Vendor Request</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel"><h2>Quote Comparison</h2><pre id="quoteResult"></pre></div>
+        </div>
+      </section>
+
+      <section data-view="recommendations">
+        <div class="panel">
+          <h2>AI Recommendation Engine</h2>
+          <p class="muted">Selects top vendors by service match, rating, distance, availability, and expected cost.</p>
+          <form data-action="recommendation">
+            <select name="service" required></select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <textarea name="project" placeholder="Project summary"></textarea>
+            <button class="btn primary">Recommend Top 3</button>
+            <p class="status"></p>
+          </form>
+          <pre id="recommendationResult"></pre>
+        </div>
+      </section>
+
+      <section data-view="commissions">
+        <div class="two">
+          <form class="panel" data-action="commission">
+            <h2>Track Commission</h2>
+            <input name="jobName" placeholder="Job name" required>
+            <input name="vendorSelected" placeholder="Vendor selected" required>
+            <input name="projectValue" type="number" min="0" step="1" placeholder="Project value">
+            <input name="commissionPercent" type="number" min="0" max="100" step=".1" placeholder="Commission %" value="10">
+            <input name="paidCommission" type="number" min="0" step="1" placeholder="Paid commission">
+            <select name="paymentStatus"><option>expected</option><option>paid</option><option>overdue</option></select>
+            <input name="followUpDate" type="date">
+            <button class="btn primary">Save Commission</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel"><h2>Commission Summary</h2><pre id="commissionResult"></pre></div>
+        </div>
+      </section>
+
+      <section data-view="followups">
+        <div class="two">
+          <form class="panel" data-action="followupPlan" data-output="followupResult">
+            <h2>Customer Follow-up Agent</h2>
+            <p class="muted">Creates Day 0, Day 1, Day 3, and Day 7 drafts. It does not send without approval.</p>
+            <input name="name" placeholder="Customer name" required>
+            <input name="phone" placeholder="Phone">
+            <input name="email" type="email" placeholder="Email">
+            <select name="service" required></select>
+            <input name="preferredDate" type="date">
+            <select name="channel"><option>sms</option><option>email</option><option>draft</option></select>
+            <textarea name="notes" placeholder="Estimate or job notes"></textarea>
+            <button class="btn primary">Create Follow-up Drafts</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Follow-up Output</h2>
+            <pre id="followupResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="messageQueue">
+        <div class="two">
+          <form class="panel" data-action="queueMessage" data-output="messageQueueResult">
+            <h2>SMS and Email Queue</h2>
+            <p class="muted">Creates approval-controlled queue records with rate limits, opt-out checks, duplicate protection, and 7-day spacing.</p>
+            <select name="channel"><option>sms</option><option>email</option><option>draft</option></select>
+            <select name="kind"><option>outreach</option><option>followup</option><option>customer</option></select>
+            <input name="recipient" placeholder="Phone or email" required>
+            <input name="source" placeholder="Source" value="marketplace">
+            <label class="muted"><input name="approved" type="checkbox" value="true"> Approved to queue if safety checks pass</label>
+            <textarea name="body" placeholder="Message body" required></textarea>
+            <button class="btn primary">Create Queue Draft</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Queue Output</h2>
+            <pre id="messageQueueResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="compliance">
+        <div class="two">
+          <div class="panel">
+            <h2>Compliance Dashboard</h2>
+            <p class="muted">Outreach starts paused by default and cold messages require approval.</p>
+            <div class="actions">
+              <button class="btn warn" id="pauseOutreach" type="button">Pause all outreach</button>
+              <button class="btn" id="refreshCompliance" type="button">Refresh</button>
+            </div>
+            <div class="grid" id="complianceMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <form class="panel" data-action="manualOptout" data-endpoint="/api/outreach" data-api-action="optout" data-output="complianceResult">
+            <h2>Add Opt-out</h2>
+            <input name="recipient" placeholder="Phone or email" required>
+            <textarea name="reason" placeholder="Reason" required></textarea>
+            <button class="btn primary">Save Opt-out</button>
+            <p class="status"></p>
+            <pre id="complianceResult"></pre>
+          </form>
+        </div>
+      </section>
+
+      <section data-view="analytics">
+        <div class="two">
+          <div class="panel">
+            <h2>Analytics Dashboard</h2>
+            <p class="muted">Revenue, commissions, leads, conversions, vendor performance, and marketing activity.</p>
+            <div class="grid" id="analyticsMetrics"></div>
+          </div>
+          <div class="panel">
+            <h2>Performance Notes</h2>
+            <pre id="analyticsResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="activity">
+        <div class="panel">
+          <h2>Activity Logs</h2>
+          <p class="muted">Recent marketplace actions, queue events, lead activity, and project updates.</p>
+          <div class="list" id="activityLogList"></div>
+        </div>
+      </section>
+
+      <section data-view="deployment">
+        <div class="two">
+          <div class="panel">
+            <h2>GitHub and Vercel Automation</h2>
+            <p class="muted">Deployment workflow status, required configuration, and recent automation logs.</p>
+            <div class="grid" id="deploymentMetrics"></div>
+          </div>
+          <form class="panel" data-action="deploymentStatus" data-output="deploymentResult">
+            <h2>Deployment Status</h2>
+            <button class="btn primary">Refresh Deployment Status</button>
+            <p class="status"></p>
+            <pre id="deploymentResult"></pre>
+          </form>
+        </div>
+      </section>
+
+      <section data-view="marketing">
+        <div class="panel">
+          <h2>Marketing Manager</h2>
+          <form data-action="marketing">
+            <select name="service" required></select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <textarea name="competitors" placeholder="Competitors or notes"></textarea>
+            <button class="btn primary">Generate Ideas</button>
+            <p class="status"></p>
+          </form>
+          <pre id="marketingResult"></pre>
+        </div>
+      </section>
+
+      <section data-view="seo">
+        <div class="panel">
+          <h2>SEO Manager</h2>
+          <form data-action="seo">
+            <select name="service" required></select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <select name="pageType"><option>city_page</option><option>service_page</option><option>blog_ideas</option></select>
+            <textarea name="notes" placeholder="SEO notes or target neighborhoods"></textarea>
+            <button class="btn primary">Generate SEO Plan</button>
+            <p class="status"></p>
+          </form>
+          <pre id="seoResult"></pre>
+        </div>
+      </section>
+
+      <section data-view="smm">
+        <div class="panel">
+          <h2>SMM Manager</h2>
+          <form data-action="smm">
+            <select name="service" required></select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <div class="media-choice">
+              <label><input type="radio" name="mediaType" value="reel" checked> Reel</label>
+              <label><input type="radio" name="mediaType" value="slideshow"> Slideshow</label>
+              <label><input type="radio" name="mediaType" value="before-after"> Before/After</label>
+              <label><input type="radio" name="mediaType" value="tiktok"> TikTok</label>
+              <label><input type="radio" name="mediaType" value="talking-video"> Talking Video</label>
+            </div>
+            <textarea name="notes" placeholder="Uploaded media notes"></textarea>
+            <button class="btn primary">Create Social Drafts</button>
+            <p class="status"></p>
+          </form>
+          <pre id="smmResult"></pre>
+        </div>
+      </section>
+
+      <section data-view="projects">
+        <div class="two">
+          <form class="panel" data-action="project" enctype="multipart/form-data">
+            <h2>Add Project</h2>
+            <input name="customerName" placeholder="Customer name" required>
+            <select name="service" required></select>
+            <input name="title" placeholder="Project title">
+            <input name="city" placeholder="City" value="Los Angeles">
+            <input name="completionDate" type="date">
+            <select name="status"><option>new</option><option>qualified</option><option>estimate_sent</option><option>vendor_selected</option><option>scheduled</option><option>completed</option><option>follow_up</option></select>
+            <input name="followUpDate" type="date">
+            <label>Upload photos<input name="photos" type="file" accept="image/*" multiple></label>
+            <label>Upload videos<input name="videos" type="file" accept="video/*" multiple></label>
+            <label class="muted"><input name="privacyConfirmed" type="checkbox" required> I confirm no private faces, addresses, license plates, passwords, serial numbers, documents, or customer personal information are visible.</label>
+            <textarea name="beforeAfterNotes" placeholder="Before/after gallery notes"></textarea>
+            <textarea name="customerReview" placeholder="Customer review"></textarea>
+            <textarea name="notes" placeholder="Customer communication notes"></textarea>
+            <button class="btn primary">Save Project</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel"><h2>Follow-Up Plan</h2><pre id="projectResult"></pre></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="/assets/marketplace-manager.js" defer></script>
+</body>
+</html>

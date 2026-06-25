@@ -1,0 +1,138 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/chat",
+      "destination": "/api/chat.js"
+    },
+    {
+      "source": "/api/lead",
+      "destination": "/api/lead.js"
+    },
+    {
+      "source": "/api/vapi-webhook",
+      "destination": "/api/vapi-webhook.js"
+    },
+    {
+      "source": "/api/gallery-upload",
+      "destination": "/api/gallery-upload.js"
+    },
+    {
+      "source": "/api/marketplace",
+      "destination": "/api/marketplace.js"
+    },
+    {
+      "source": "/api/marketplace-quote",
+      "destination": "/api/marketplace-quote.js"
+    },
+    {
+      "source": "/api/marketplace-project-upload",
+      "destination": "/api/marketplace-project-upload.js"
+    },
+    {
+      "source": "/api/admin-test",
+      "destination": "/api/admin-test.js"
+    },
+    {
+      "source": "/api/outreach",
+      "destination": "/api/outreach.js"
+    },
+    {
+      "source": "/api/vendor-dispatch",
+      "destination": "/api/vendor-dispatch.js"
+    },
+    {
+      "source": "/api/estimate",
+      "destination": "/api/estimate.js"
+    },
+    {
+      "source": "/api/followups",
+      "destination": "/api/followups.js"
+    },
+    {
+      "source": "/api/social-leads",
+      "destination": "/api/social-leads.js"
+    },
+    {
+      "source": "/admin-test",
+      "destination": "/admin-test.html"
+    },
+    {
+      "source": "/marketplace",
+      "destination": "/marketplace.html"
+    },
+    {
+      "source": "/marketplace-setup",
+      "destination": "/marketplace-setup.html"
+    },
+    {
+      "source": "/security-camera-installation",
+      "destination": "/security-camera-installation.html"
+    },
+    {
+      "source": "/smart-home-setup",
+      "destination": "/smart-home-setup.html"
+    },
+    {
+      "source": "/wifi-network-installation",
+      "destination": "/wifi-network-installation.html"
+    },
+    {
+      "source": "/computer-repair",
+      "destination": "/computer-repair.html"
+    },
+    {
+      "source": "/security-camera-installation-los-angeles",
+      "destination": "/security-camera-installation-los-angeles.html"
+    },
+    {
+      "source": "/security-camera-installation-burbank",
+      "destination": "/security-camera-installation-burbank.html"
+    },
+    {
+      "source": "/security-camera-installation-glendale",
+      "destination": "/security-camera-installation-glendale.html"
+    },
+    {
+      "source": "/security-camera-installation-north-hollywood",
+      "destination": "/security-camera-installation-north-hollywood.html"
+    },
+    {
+      "source": "/security-camera-installation-studio-city",
+      "destination": "/security-camera-installation-studio-city.html"
+    },
+    {
+      "source": "/data-recovery",
+      "destination": "/data-recovery.html"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
+    }
+  ]
+}

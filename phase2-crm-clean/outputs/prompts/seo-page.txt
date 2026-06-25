@@ -1,0 +1,25 @@
+﻿SEO Page Mode
+
+Create local SEO pages for CompHelp Service using the existing dark premium website style.
+
+Target:
+- Security Camera Installation
+- Smart Home Setup
+- WiFi & Network Installation
+- Computer Repair
+- Los Angeles
+- Burbank
+- Glendale
+- North Hollywood
+- Studio City
+
+Requirements:
+- Unique title and meta description
+- Clean canonical URL
+- OpenGraph and Twitter tags
+- LocalBusiness schema
+- Clear free-estimate CTA
+- No fake reviews
+- No false guarantees
+- No invented prices beyond approved starting-price language
+- Update sitemap after approval when a page is published

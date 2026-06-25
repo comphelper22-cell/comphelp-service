@@ -1,0 +1,105 @@
+﻿{
+  "name": "CompHelp Service 24/7 Voice Sales Assistant",
+  "firstMessage": "Thanks for calling CompHelp Service. I can help with security cameras, smart home setup, WiFi installation, and computer repair. What service do you need today?",
+  "server": {
+    "url": "https://comphelp.ai/api/vapi-webhook"
+  },
+  "serverMessages": [
+    "tool-calls",
+    "end-of-call-report",
+    "status-update"
+  ],
+  "model": {
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are the 24/7 phone sales assistant for CompHelp Service in Los Angeles and Burbank. Services: Security Camera Installation, Smart Home Setup, WiFi & Network Installation, and Computer Repair. Your goal is to qualify callers and save a lead. Always collect customer name, service needed, installation or service address, and preferred date. Use the caller phone number when available; if unavailable, ask for the best phone number. Be concise, friendly, and professional. For security camera calls, you may also ask property type and number of cameras. Once you have name, phone, service, address, and preferred date, call the saveLeadAndSendSms tool. After the tool succeeds, tell the caller their request was saved and that they will receive an SMS confirmation."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "saveLeadAndSendSms",
+          "description": "Save a qualified CompHelp Service phone lead to the CRM and send an SMS confirmation.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Customer full name"
+              },
+              "phone": {
+                "type": "string",
+                "description": "Customer phone number. Use caller ID when available."
+              },
+              "service": {
+                "type": "string",
+                "enum": [
+                  "Security Camera Installation",
+                  "Smart Home Setup",
+                  "WiFi & Network Installation",
+                  "Computer Repair"
+                ]
+              },
+              "address": {
+                "type": "string",
+                "description": "Customer property or service address"
+              },
+              "preferredDate": {
+                "type": "string",
+                "description": "Preferred installation or service date"
+              },
+              "propertyType": {
+                "type": "string",
+                "description": "Optional property type such as home, apartment, office, or retail"
+              },
+              "numberOfCameras": {
+                "type": "string",
+                "description": "Optional number of cameras for camera installation leads"
+              },
+              "notes": {
+                "type": "string",
+                "description": "Brief call notes or extra customer details"
+              }
+            },
+            "required": [
+              "name",
+              "phone",
+              "service",
+              "address",
+              "preferredDate"
+            ]
+          }
+        },
+        "server": {
+          "url": "https://comphelp.ai/api/vapi-webhook"
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "sendFinishedWorkReviewSms",
+          "description": "Send the post-job review SMS after CompHelp Service work is finished.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "phone": {
+                "type": "string",
+                "description": "Customer phone number to receive the review request SMS"
+              }
+            },
+            "required": [
+              "phone"
+            ]
+          }
+        },
+        "server": {
+          "url": "https://comphelp.ai/api/vapi-webhook"
+        }
+      }
+    ]
+  }
+}

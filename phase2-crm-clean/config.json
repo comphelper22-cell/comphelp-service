@@ -1,0 +1,45 @@
+﻿{
+  "agentName": "CompHelp Service Business Manager",
+  "business": {
+    "name": "CompHelp Service",
+    "phone": "+1 (747) 295-1440",
+    "phoneE164": "+17472951440",
+    "email": "comphelper22@gmail.com",
+    "services": [
+      "Security Camera Installation",
+      "Smart Home Setup",
+      "WiFi & Network Installation",
+      "Computer Repair"
+    ],
+    "serviceAreas": [
+      "Los Angeles",
+      "Burbank",
+      "Glendale",
+      "North Hollywood",
+      "Studio City"
+    ]
+  },
+  "safety": {
+    "approvalRequired": true,
+    "autoPost": false,
+    "neverDeleteFilesAutomatically": true,
+    "showDiffBeforeCommit": true,
+    "doNotInventPrices": true,
+    "doNotInventReviews": true,
+    "doNotSpamCustomers": true,
+    "respectOptOuts": true,
+    "logActions": true
+  },
+  "defaultModel": "gpt-4.1-mini",
+  "website": {
+    "root": ".",
+    "sitemap": "sitemap.xml",
+    "homepage": "index.html"
+  },
+  "approvedStartingPrices": {
+    "Security Camera Installation": "$299+",
+    "Smart Home Setup": "Free estimate required",
+    "WiFi & Network Installation": "Free estimate required",
+    "Computer Repair": "Free diagnostic guidance before quote"
+  }
+}

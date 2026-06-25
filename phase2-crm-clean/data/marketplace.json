@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "business": {
+    "name": "CompHelp Service",
+    "phone": "+1 (747) 295-1440",
+    "email": "comphelper22@gmail.com",
+    "serviceAreas": [
+      "Los Angeles",
+      "Burbank",
+      "Glendale",
+      "North Hollywood",
+      "Studio City"
+    ]
+  },
+  "services": [
+    "Security Camera Installation",
+    "Smart Home Setup",
+    "WiFi & Network Installation",
+    "Computer Repair",
+    "Data Recovery"
+  ],
+  "crmStages": [
+    "New Lead",
+    "Contacted",
+    "Quote Sent",
+    "Follow-up",
+    "Won",
+    "Lost"
+  ],
+  "vendorCategories": [
+    "Cameras",
+    "WiFi",
+    "Computer Repair",
+    "Data Recovery",
+    "Smart Home",
+    "Electrician",
+    "HVAC",
+    "Plumbing",
+    "Roofing"
+  ],
+  "estimateRules": {
+    "Security Camera Installation": {
+      "base": 299,
+      "unit": "camera",
+      "perUnit": 125,
+      "questions": [
+        "Property type",
+        "Number of cameras",
+        "Wiring needed",
+        "Preferred installation date"
+      ]
+    },
+    "Smart Home Setup": {
+      "base": 149,
+      "unit": "device",
+      "perUnit": 55,
+      "questions": [
+        "Device types",
+        "Number of devices",
+        "WiFi readiness",
+        "Preferred setup date"
+      ]
+    },
+    "WiFi & Network Installation": {
+      "base": 199,
+      "unit": "access point",
+      "perUnit": 90,
+      "questions": [
+        "Property size",
+        "Dead zones",
+        "Router location",
+        "Preferred installation date"
+      ]
+    },
+    "Computer Repair": {
+      "base": 89,
+      "unit": "device",
+      "perUnit": 60,
+      "questions": [
+        "Device type",
+        "Issue symptoms",
+        "Urgency",
+        "Preferred service date"
+      ]
+    },
+    "Data Recovery": {
+      "base": 149,
+      "unit": "drive",
+      "perUnit": 120,
+      "questions": [
+        "Device or drive type",
+        "What happened",
+        "Files needed",
+        "Preferred service date"
+      ]
+    }
+  },
+  "vendors": [
+    {
+      "id": "vendor-camera-001",
+      "name": "Preferred Camera Installer",
+      "category": "Cameras",
+      "services": [
+        "Security Camera Installation"
+      ],
+      "city": "Los Angeles",
+      "phone": "",
+      "email": "",
+      "website": "",
+      "serviceArea": "Los Angeles County",
+      "commissionPercent": 10,
+      "distanceMiles": 8,
+      "rating": 4.8,
+      "availability": "Same week",
+      "contact": "vendor@example.com",
+      "notes": "Preferred camera installation partner. Confirm availability before assigning jobs.",
+      "status": "active"
+    },
+    {
+      "id": "vendor-network-001",
+      "name": "Preferred Network Technician",
+      "category": "WiFi",
+      "services": [
+        "WiFi & Network Installation",
+        "Smart Home Setup"
+      ],
+      "city": "Burbank",
+      "phone": "",
+      "email": "",
+      "website": "",
+      "serviceArea": "Burbank, Glendale, Los Angeles",
+      "commissionPercent": 10,
+      "distanceMiles": 11,
+      "rating": 4.7,
+      "availability": "Next 3 days",
+      "contact": "network@example.com",
+      "notes": "Good fit for WiFi, networking, and smart home setup projects.",
+      "status": "active"
+    },
+    {
+      "id": "vendor-data-001",
+      "name": "Preferred Data Recovery Partner",
+      "category": "Data Recovery",
+      "services": [
+        "Data Recovery",
+        "Computer Repair"
+      ],
+      "city": "Glendale",
+      "phone": "",
+      "email": "",
+      "website": "",
+      "serviceArea": "Los Angeles County",
+      "commissionPercent": 12,
+      "distanceMiles": 13,
+      "rating": 4.9,
+      "availability": "By appointment",
+      "contact": "data@example.com",
+      "notes": "Use for data recovery and advanced computer repair referrals.",
+      "status": "active"
+    }
+  ],
+  "leads": [],
+  "estimates": [],
+  "quoteRequests": [],
+  "commissions": [],
+  "projects": [],
+  "marketingIdeas": [],
+  "mediaReviews": [],
+  "sourceLeads": [],
+  "dispatches": [],
+  "followUps": [],
+  "updatedAt": "2026-06-14T00:00:00.000Z"
+}

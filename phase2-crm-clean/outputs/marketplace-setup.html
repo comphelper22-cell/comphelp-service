@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Business Manager Setup | CompHelp Service</title>
+  <style>
+    :root{--bg:#070b10;--text:#f5f8fb;--muted:#a9b8c6;--line:rgba(255,255,255,.14);--accent:#25e1b1;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#070b10,#0b121a);color:var(--text)}main{width:min(980px,calc(100% - 2rem));margin:auto;padding:3rem 0}h1{font-size:clamp(2rem,5vw,4rem);margin:0 0 1rem}.card{border:1px solid var(--line);border-radius:8px;padding:1rem;background:rgba(255,255,255,.055);margin:1rem 0}pre{white-space:pre-wrap;overflow:auto;background:#05090d;border:1px solid var(--line);border-radius:8px;padding:1rem;color:#d6e1e8}.muted,li,p{color:var(--muted);line-height:1.6}.pill{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:.2rem .55rem;color:var(--accent);font-weight:800}
+  </style>
+</head>
+<body>
+  <main>
+    <p class="pill">CompHelp Service</p>
+    <h1>Business Manager Setup Checklist</h1>
+    <p class="muted">Use this page to finish the Marketplace Manager, AI Manager, Gallery Upload, SMM Manager, Estimate Manager, Vendor Manager, and Project Manager deployment.</p>
+
+    <section class="card">
+      <h2>1. Add Vercel Environment Variables</h2>
+      <p>In Vercel, open Project Settings, then Environment Variables. Add these values for Production, Preview, and Development as needed.</p>
+      <pre>OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
+
+MARKETPLACE_ADMIN_SECRET=
+MARKETPLACE_MANAGER_SECRET=
+MARKETPLACE_VIEWER_SECRET=
+
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+ADMIN_UPLOAD_SECRET=
+
+PUBLIC_SITE_URL=https://comphelp-service.vercel.app</pre>
+      <h3>Optional</h3>
+      <pre>RESEND_API_KEY=
+LEAD_FROM_EMAIL=
+HUBSPOT_ACCESS_TOKEN=
+N8N_LEAD_WEBHOOK_URL=
+N8N_VENDOR_QUOTE_WEBHOOK_URL=
+VAPI_PROJECT_WEBHOOK_URL=</pre>
+    </section>
+
+    <section class="card">
+      <h2>2. Connect Supabase</h2>
+      <ol>
+        <li>Create a Supabase project.</li>
+        <li>Open the SQL editor.</li>
+        <li>Run <code>supabase.marketplace.sql</code>.</li>
+        <li>Add <code>SUPABASE_URL</code> and <code>SUPABASE_SERVICE_ROLE_KEY</code> to Vercel.</li>
+        <li>Redeploy the Vercel project.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>3. Connect Cloudinary</h2>
+      <ol>
+        <li>Create a Cloudinary account.</li>
+        <li>Copy Cloud Name, API Key, and API Secret.</li>
+        <li>Add them to Vercel.</li>
+        <li>Redeploy before testing uploads.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>4. Test Workflow</h2>
+      <ol>
+        <li>Set admin code.</li>
+        <li>Add vendor.</li>
+        <li>Add lead.</li>
+        <li>Generate estimate.</li>
+        <li>Upload project media with privacy confirmation.</li>
+        <li>Generate SMM draft.</li>
+        <li>Check gallery on the matching service page.</li>
+        <li>Check dashboard metrics.</li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>

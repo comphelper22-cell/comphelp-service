@@ -1,0 +1,91 @@
+{
+  "business": {
+    "name": "CompHelp Service",
+    "phone": "+1 (747) 295-1440",
+    "email": "comphelper22@gmail.com",
+    "instagram": "https://www.instagram.com/comphelp_service/",
+    "serviceAreas": [
+      "Los Angeles",
+      "Burbank",
+      "Glendale",
+      "North Hollywood",
+      "Studio City"
+    ]
+  },
+  "workflow": {
+    "approvalRequired": true,
+    "autoPublish": false,
+    "neverDeleteOriginals": true,
+    "privacyReviewRequired": true,
+    "maxSelectedMedia": 6
+  },
+  "folders": {
+    "uploads": "uploads/new",
+    "processed": "uploads/processed",
+    "needsReview": "uploads/needs-review",
+    "backups": "uploads/original-backups",
+    "logs": "logs"
+  },
+  "imageOptimization": {
+    "maxWidth": 1600,
+    "quality": 78,
+    "thumbnailWidth": 480,
+    "createWebP": true
+  },
+  "services": {
+    "security-camera-installation": {
+      "label": "Security Camera Installation",
+      "page": "security-camera-installation.html",
+      "galleryFolder": "assets/gallery/security-camera-installation",
+      "keywords": ["security", "camera", "cctv", "nvr", "doorbell", "surveillance"]
+    },
+    "smart-home-setup": {
+      "label": "Smart Home Setup",
+      "page": "smart-home-setup.html",
+      "galleryFolder": "assets/gallery/smart-home-setup",
+      "keywords": ["smart", "home", "device", "alexa", "google", "thermostat", "lock"]
+    },
+    "wifi-network-installation": {
+      "label": "WiFi & Network Installation",
+      "page": "wifi-network-installation.html",
+      "galleryFolder": "assets/gallery/wifi-network-installation",
+      "keywords": ["wifi", "wi-fi", "network", "router", "mesh", "ethernet", "access-point"]
+    },
+    "computer-repair": {
+      "label": "Computer Repair",
+      "page": "computer-repair.html",
+      "galleryFolder": "assets/gallery/computer-repair",
+      "keywords": ["computer", "laptop", "desktop", "pc", "mac", "repair", "windows"]
+    },
+    "data-recovery": {
+      "label": "Data Recovery",
+      "page": "data-recovery.html",
+      "galleryFolder": "assets/gallery/data-recovery",
+      "keywords": ["data", "recovery", "drive", "usb", "backup", "files", "transfer"]
+    }
+  },
+  "privacy": {
+    "sensitiveKeywords": [
+      "license plate",
+      "address",
+      "face",
+      "password",
+      "wifi password",
+      "serial number",
+      "document",
+      "invoice",
+      "receipt",
+      "mail",
+      "id card"
+    ],
+    "blurTargets": [
+      "license plates",
+      "street addresses",
+      "faces",
+      "passwords",
+      "serial numbers",
+      "documents",
+      "WiFi passwords"
+    ]
+  }
+}

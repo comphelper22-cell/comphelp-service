@@ -1,0 +1,19 @@
+﻿Market Research Mode
+
+Analyze CompHelp Service's local market for Los Angeles, Burbank, Glendale, North Hollywood, and Studio City.
+
+Focus on:
+- Local competitors
+- Price positioning
+- Service demand
+- Security camera installation keywords
+- WiFi and smart home demand
+- Computer repair opportunities
+- Profitable local niches
+- Google Ads keyword opportunities
+
+Rules:
+- Clearly label live API/search results versus strategic assumptions.
+- Do not invent competitor facts.
+- Prioritize high-intent local search terms.
+- Recommend practical next actions the owner can execute this week.
