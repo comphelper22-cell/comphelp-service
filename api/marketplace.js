@@ -3,6 +3,9 @@ const path = require("path");
 
 const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
 const GALLERY_FILE = path.join(process.cwd(), "data", "gallery.json");
+
+const AUTOMATION_LOG_FILE = path.join(process.cwd(), "logs", "automation.jsonl");
+
 const CRM_STAGES = ["New Lead", "Contacted", "Quote Sent", "Follow-up", "Won", "Lost"];
 const CRM_STAGE_KEYS = {
   "new lead": "New Lead",
@@ -45,7 +48,11 @@ const DEFAULT_MARKETPLACE = {
   mediaReviews: [],
   sourceLeads: [],
   dispatches: [],
-  followUps: []
+  followUps: [],
+  messageQueue: [],
+  optOuts: [],
+  activityLogs: [],
+  deploymentRuns: []
 };
 const DEFAULT_GALLERY = { version: 1, items: [] };
 const TABLES = {
@@ -59,7 +66,10 @@ const TABLES = {
   mediaReviews: "marketplace_media_reviews",
   sourceLeads: "marketplace_source_leads",
   dispatches: "marketplace_dispatches",
-  followUps: "marketplace_followups"
+  followUps: "marketplace_followups",
+  messageQueue: "marketplace_message_queue",
+  optOuts: "marketplace_opt_outs",
+  activityLogs: "marketplace_activity_logs"
 };
 
 function sendJson(res, statusCode, body) {
@@ -158,6 +168,18 @@ function readJson(file, fallback) {
   }
 }
 
+function readJsonLines(file, limit = 20) {
+  try {
+    return fs.readFileSync(file, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .slice(-limit)
+      .map((line) => JSON.parse(line));
+  } catch (_) {
+    return [];
+  }
+}
+
 function writeJson(file, data) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n", "utf8");
@@ -193,7 +215,11 @@ function readSeed() {
     mediaReviews: Array.isArray(seed.mediaReviews) ? seed.mediaReviews : [],
     sourceLeads: Array.isArray(seed.sourceLeads) ? seed.sourceLeads : [],
     dispatches: Array.isArray(seed.dispatches) ? seed.dispatches : [],
-    followUps: Array.isArray(seed.followUps) ? seed.followUps : []
+    followUps: Array.isArray(seed.followUps) ? seed.followUps : [],
+    messageQueue: Array.isArray(seed.messageQueue) ? seed.messageQueue : [],
+    optOuts: Array.isArray(seed.optOuts) ? seed.optOuts : [],
+    activityLogs: Array.isArray(seed.activityLogs) ? seed.activityLogs : [],
+    deploymentRuns: Array.isArray(seed.deploymentRuns) ? seed.deploymentRuns : []
   };
 }
 
@@ -288,6 +314,18 @@ function fromDbRecord(record) {
   return out;
 }
 
+function normalizeRecipient(value) {
+  return clean(value, 180).toLowerCase().replace(/\s+/g, "");
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function humanDelayMinutes(index = 0) {
+  return 12 + ((index * 17 + Math.floor(Math.random() * 29)) % 76);
+}
+
 async function list(tableKey) {
   const seed = readSeed();
   if (!supabaseConfigured()) return seed[tableKey] || [];
@@ -298,6 +336,80 @@ async function list(tableKey) {
     logError(`supabase:list:${tableKey}`, error);
     return seed[tableKey] || [];
   }
+}
+
+async function logActivity(type, message, metadata = {}) {
+  const record = {
+    type: clean(type, 80),
+    message: clean(message, 1000),
+    metadata,
+    actor: clean(metadata.actor || "system", 120),
+    status: clean(metadata.status || "logged", 80)
+  };
+  try {
+    return await insert("activityLogs", record);
+  } catch (error) {
+    logError(`activity:${type}`, error);
+    return { ...record, storage: "failed" };
+  }
+}
+
+async function queueSafety(input = {}) {
+  const recipient = normalizeRecipient(input.recipient || input.phone || input.email);
+  const body = clean(input.body || input.message, 2000);
+  const kind = clean(input.kind || "outreach", 50);
+  const channel = clean(input.channel || "draft", 40);
+  const approved = input.approved === true || input.approved === "true";
+  const dailyLimit = kind === "followup" ? Number(process.env.FOLLOWUP_DAILY_LIMIT || 20) : Number(process.env.OUTREACH_DAILY_LIMIT || 10);
+  const [queue, optOuts] = await Promise.all([list("messageQueue"), list("optOuts")]);
+  const errors = [];
+  const day = todayKey();
+  const sentToday = queue.filter((item) => {
+    return clean(item.kind, 50) === kind && clean(item.status, 50) === "sent" && clean(item.sentAt || item.sent_at || item.createdAt || item.created_at, 40).startsWith(day);
+  }).length;
+  const recentCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const contactedRecently = queue.some((item) => {
+    const itemRecipient = normalizeRecipient(item.recipient);
+    const time = Date.parse(item.sentAt || item.sent_at || item.createdAt || item.created_at || "");
+    return itemRecipient && itemRecipient === recipient && time && time >= recentCutoff && clean(item.status, 50) !== "replied";
+  });
+  const duplicate = queue.some((item) => {
+    return normalizeRecipient(item.recipient) === recipient && clean(item.body, 2000).toLowerCase() === body.toLowerCase() && !["failed", "cancelled"].includes(clean(item.status, 50));
+  });
+  const optedOut = optOuts.some((item) => normalizeRecipient(item.recipient) === recipient);
+  if (!recipient) errors.push("Recipient is required.");
+  if (!body) errors.push("Message body is required.");
+  if (optedOut) errors.push("Recipient is opted out.");
+  if (duplicate) errors.push("Duplicate message already exists.");
+  if (contactedRecently && !input.replied) errors.push("Recipient was contacted within 7 days.");
+  if (sentToday >= dailyLimit) errors.push(`Daily ${kind} limit reached.`);
+  if (input.cold !== false && !approved) errors.push("Cold outreach requires approval.");
+  if (/\bguaranteed\b|\blimited time only\b|\bact now\b/i.test(body)) errors.push("Message contains risky promotional wording.");
+  return { ok: errors.length === 0, errors, dailyLimit, sentToday, channel, kind, recipient, body, approved };
+}
+
+async function queueMessage(payload = {}) {
+  const safety = await queueSafety(payload);
+  const queue = await list("messageQueue");
+  const paused = process.env.OUTREACH_PAUSED !== "false" || payload.paused === true;
+  const status = safety.ok && !paused ? "queued" : "needs_approval";
+  const body = safety.channel === "sms" && !/stop to opt out/i.test(safety.body)
+    ? `${safety.body} Reply STOP to opt out.`
+    : safety.body;
+  const record = {
+    kind: safety.kind,
+    channel: safety.channel,
+    recipient: safety.recipient,
+    body,
+    status,
+    approved: safety.approved,
+    safety,
+    sendAfter: new Date(Date.now() + humanDelayMinutes(queue.length) * 60 * 1000).toISOString(),
+    source: clean(payload.source || "marketplace", 80)
+  };
+  const saved = await insert("messageQueue", record);
+  await logActivity("message_queue", `Message ${status} for ${safety.channel}.`, { status, recipient: safety.recipient, kind: safety.kind });
+  return saved;
 }
 
 async function insert(tableKey, record) {
@@ -553,6 +665,12 @@ function marketingIdeas(payload) {
   return {
     competitorAngles: [`Compare response time for ${service} in ${city}.`, "Highlight free estimates, local support, and clean installation.", "Build trust with recent project galleries and real job notes."],
     contentIdeas: [`${service} checklist for ${city} homeowners`, `How much does ${service.toLowerCase()} cost in ${city}?`, `Before and after: ${service.toLowerCase()} project walkthrough`],
+    facebookPost: `Need ${service.toLowerCase()} in ${city}? CompHelp Service helps local homes and small businesses with clear estimates and professional support.`,
+    instagramPost: `Recent ${service.toLowerCase()} work in ${city}. Clean setup, local support, and free estimate requests available.`,
+    reelsIdeas: ["Before/after walkthrough", "Common problem and fix", "Finished project reveal", "One-minute buying tip"],
+    reelScript: `Open with the finished ${service.toLowerCase()} result, show one problem detail, explain the customer benefit, and close with a free estimate CTA.`,
+    voiceover: `CompHelp Service helps ${city} customers with ${service.toLowerCase()} and reliable local support.`,
+    hashtags: ["#CompHelpService", `#${city.replace(/\s+/g, "")}`, `#${service.replace(/[^A-Za-z0-9]/g, "")}`, "#LosAngelesCounty"],
     socialDrafts: [`Need ${service.toLowerCase()} in ${city}? CompHelp Service offers local support and free estimates.`],
     seoPages: [`${service} ${city}`, `${service} near me`, `Best ${service.toLowerCase()} company in ${city}`]
   };
@@ -577,7 +695,15 @@ function smmFallback(payload) {
       { platform: "Instagram", format: type === "tiktok" ? "Reel" : type, bestTime: "6:00 PM local time", autoPost: process.env.AUTO_POST === "true" },
       { platform: "Facebook", format: "Project post", bestTime: "12:00 PM local time", autoPost: process.env.AUTO_POST === "true" },
       { platform: "TikTok", format: "Short vertical video", bestTime: "7:30 PM local time", autoPost: process.env.AUTO_POST === "true" }
-    ]
+    ],
+    weeklyContentCalendar: [
+      { day: "Monday", idea: `${service} tip for ${city} customers`, format: "short educational post" },
+      { day: "Tuesday", idea: "Recent project highlight", format: "before/after carousel" },
+      { day: "Wednesday", idea: "Common mistake to avoid", format: "reel" },
+      { day: "Thursday", idea: "Customer FAQ answer", format: "story or post" },
+      { day: "Friday", idea: "Weekend free estimate reminder", format: "Facebook and Instagram post" }
+    ],
+    schedulingRecommendations: ["Use drafts first.", "Post during local business hours or early evening.", "Do not auto-post unless AUTO_POST=true.", "Review captions for customer privacy before publishing."]
   };
 }
 
@@ -593,12 +719,40 @@ function seoPlan(payload) {
     cityPageIdeas: [`${service} in ${city}`, `${service} near ${city}`, `${city} ${service} free estimate`],
     servicePageIdeas: [`${service} pricing`, `${service} FAQ`, `${service} work gallery`],
     blogIdeas: [`How to choose ${service.toLowerCase()} in ${city}`, `${service} cost guide for ${city}`, `Common ${service.toLowerCase()} mistakes`],
+    keywordSuggestions: [`${service} ${city}`, `${service} near me`, `${city} ${service} cost`, `${service} free estimate`, `local ${service.toLowerCase()} company`],
     metaTitle: `${service} ${city} | CompHelp Service`,
     metaDescription: `CompHelp Service provides ${service.toLowerCase()} for homes and small businesses in ${city}. Request a free estimate.`,
     faqIdeas: [`How much does ${service.toLowerCase()} cost?`, `Do you serve ${city}?`, "How soon can service be scheduled?"],
     internalLinks: ["/", "/security-camera-installation", "/smart-home-setup", "/wifi-network-installation", "/computer-repair", "/data-recovery"],
+    schemaMarkup: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": `${service} in ${city}`,
+      "provider": { "@type": "LocalBusiness", "name": "CompHelp Service" },
+      "areaServed": city
+    },
+    blogDraft: {
+      title: `${service} in ${city}: What Local Customers Should Know`,
+      intro: `If you need ${service.toLowerCase()} in ${city}, CompHelp Service can help you understand the project, estimate the scope, and plan next steps.`,
+      sections: ["What affects price", "What to prepare before service", "When to request a free estimate", "Why local support matters"]
+    },
     proposedSlug: `/${slug}`,
     nextAction: "Review, create the page with the SEO page tool, then update sitemap.xml."
+  };
+}
+
+function deploymentStatus() {
+  const logs = readJsonLines(AUTOMATION_LOG_FILE, 25);
+  const latest = logs[logs.length - 1] || null;
+  return {
+    githubConfigured: Boolean(process.env.GITHUB_TOKEN && process.env.GITHUB_REPO),
+    vercelConfigured: Boolean(process.env.VERCEL_TOKEN && (process.env.VERCEL_PROJECT_ID || process.env.VERCEL_DEPLOY_HOOK_URL)),
+    autoDeploy: process.env.AUTO_DEPLOY !== "false",
+    branch: process.env.GITHUB_BRANCH || "main",
+    repo: process.env.GITHUB_REPO || "comphelper22-cell/comphelp-service",
+    latest,
+    recentLogs: logs.reverse(),
+    workflow: ["Validate project", "Commit changed files through GitHub API", "Push to main", "Trigger Vercel deployment", "Report deployment status"]
   };
 }
 
@@ -719,7 +873,7 @@ async function dashboard(req) {
       projects: []
     };
   }
-  const [leads, vendors, commissions, projects, mediaReviews, sourceLeads, dispatches, followUps] = await Promise.all([
+  const [leads, vendors, commissions, projects, mediaReviews, sourceLeads, dispatches, followUps, messageQueue, activityLogs] = await Promise.all([
     list("leads"),
     list("vendors"),
     list("commissions"),
@@ -727,7 +881,9 @@ async function dashboard(req) {
     list("mediaReviews"),
     list("sourceLeads"),
     list("dispatches"),
-    list("followUps")
+    list("followUps"),
+    list("messageQueue"),
+    list("activityLogs")
   ]);
   const revenue = commissions.reduce((sum, item) => sum + money(item.revenue || item.projectValue), 0);
   const expectedCommission = commissions.reduce((sum, item) => sum + money(item.expectedCommission || item.expected_commission), 0);
@@ -753,6 +909,9 @@ async function dashboard(req) {
       openProjects,
       dispatches: dispatches.length,
       followUps: followUps.length,
+      queuedMessages: messageQueue.filter((item) => ["queued", "needs_approval"].includes(clean(item.status, 50))).length,
+      messagesSentToday: messageQueue.filter((item) => clean(item.status, 50) === "sent" && clean(item.sentAt || item.sent_at || item.createdAt || item.created_at, 40).startsWith(todayKey())).length,
+      activityLogs: activityLogs.length,
       revenue: Math.round(revenue),
       expectedCommission: Math.round(expectedCommission),
       publishedGalleryItems: galleryCount(),
@@ -764,7 +923,10 @@ async function dashboard(req) {
     recentLeads: leads.slice(0, 8).map((lead) => ({ ...lead, status: normalizeLeadStatus(lead.status) })),
     topVendors: vendors.slice().sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0)).slice(0, 8),
     vendors,
-    projects: projects.slice(0, 12)
+    projects: projects.slice(0, 12),
+    activityLogs: activityLogs.slice(0, 20),
+    messageQueue: messageQueue.slice(0, 20),
+    deployment: deploymentStatus()
   };
 }
 
@@ -788,10 +950,37 @@ function vendorPayload(payload) {
 }
 
 async function handleAction(action, payload) {
+  if (action === "queueMessage") {
+    return { ok: true, message: await queueMessage(payload) };
+  }
+  if (action === "optOut") {
+    const record = await insert("optOuts", {
+      recipient: clean(payload.recipient || payload.phone || payload.email, 180),
+      reason: clean(payload.reason || "manual", 500),
+      source: clean(payload.source || "marketplace", 80),
+      status: "active"
+    });
+    await logActivity("opt_out", "Opt-out saved.", { recipient: record.recipient, status: "active" });
+    return { ok: true, optOut: record };
+  }
+  if (action === "approveMessage") {
+    const messageId = clean(payload.id || payload.messageId, 120);
+    const patch = { approved: true, status: "queued", approvedAt: new Date().toISOString() };
+    const message = await updateRecord("messageQueue", messageId, patch);
+    await logActivity("message_approved", "Message approved and queued.", { messageId, status: "queued" });
+    return { ok: true, message };
+  }
+  if (action === "activityLogs") {
+    return { ok: true, activityLogs: (await list("activityLogs")).slice(0, 100) };
+  }
+  if (action === "deploymentStatus") {
+    return { ok: true, deployment: deploymentStatus() };
+  }
   if (action === "leadSourceSearch") {
     const plans = leadSourceSearchPlan(payload);
     const saved = [];
     for (const plan of plans) saved.push(await insert("sourceLeads", plan));
+    await logActivity("lead_source_search", "Lead source search plans created.", { count: saved.length, city: payload.city, category: payload.category });
     return {
       ok: true,
       sourceLeads: saved,
@@ -801,19 +990,26 @@ async function handleAction(action, payload) {
   if (action === "lead") {
     const lead = leadPayload(payload);
     const saved = await insert("leads", lead);
+    await logActivity("lead_saved", `Lead saved: ${saved.name || "New lead"}`, { leadId: saved.id, service: saved.service, status: saved.status });
     return { ok: true, lead: saved, hubspot: await createHubSpotContact(lead), n8n: await callWebhook("N8N_LEAD_WEBHOOK_URL", { lead }) };
   }
   if (action === "estimate") {
     const estimate = await calculateEstimate(payload);
     const saved = await insert("estimates", estimate);
+    await logActivity("estimate_created", `Estimate created for ${saved.service}.`, { estimateId: saved.id, recommended: saved.recommended });
     return { ok: true, estimate: saved, quoteUrl: `/api/marketplace-quote?id=${encodeURIComponent(saved.id || estimate.id)}` };
   }
   if (action === "emailEstimate") return { ok: true, email: await emailEstimate(payload) };
   if (action === "vendorSearch") {
     const vendor = await insert("vendors", { ...vendorPayload(payload), source: "vendor_finder", status: "needs_approval" });
+    await logActivity("vendor_found", `Vendor profile saved: ${vendor.name || "Vendor"}`, { vendorId: vendor.id, category: vendor.category, status: vendor.status });
     return { ok: true, vendor, note: "Vendor profile saved for approval and ranking." };
   }
-  if (action === "vendor") return { ok: true, vendor: await insert("vendors", vendorPayload(payload)) };
+  if (action === "vendor") {
+    const vendor = await insert("vendors", vendorPayload(payload));
+    await logActivity("vendor_saved", `Vendor saved: ${vendor.name || "Vendor"}`, { vendorId: vendor.id, category: vendor.category });
+    return { ok: true, vendor };
+  }
   if (action === "vendorUpdate") return { ok: true, vendor: await updateRecord("vendors", clean(payload.id, 120), vendorPayload(payload)) };
   if (action === "vendorDelete") return { ok: true, vendor: await deleteRecord("vendors", clean(payload.id, 120)) };
   if (action === "vendorMatch") return { ok: true, match: await vendorProjectMatch(payload) };
@@ -821,6 +1017,7 @@ async function handleAction(action, payload) {
     const recommendation = await recommendVendors(payload);
     const request = { leadId: clean(payload.leadId, 120), projectId: clean(payload.projectId, 120), service: clean(payload.service, 120), category: clean(payload.category, 80), city: clean(payload.city, 80), scope: clean(payload.scope, 1600), status: "draft", vendorResponses: [], vendorOptions: recommendation.top3 || recommendation.top3Summary || [] };
     const saved = await insert("quoteRequests", request);
+    await logActivity("quote_request_created", "Vendor quote request draft created.", { quoteRequestId: saved.id, service: saved.service, status: saved.status });
     const n8n = payload.approved ? await callWebhook("N8N_VENDOR_QUOTE_WEBHOOK_URL", { request: saved }) : { skipped: true, reason: "Approval required before sending." };
     return { ok: true, quoteRequest: saved, comparison: recommendation, n8n };
   }
@@ -839,6 +1036,7 @@ async function handleAction(action, payload) {
       vendorResponses: [],
       vendorOptions: plan.topVendors
     });
+    await logActivity("dispatcher_plan", "Dispatcher plan created.", { dispatchId: saved.id, service: saved.service, status: saved.status });
     return { ok: true, dispatch: saved, quoteRequest, plan };
   }
   if (action === "recommendation") return { ok: true, recommendation: await recommendVendors(payload) };
@@ -846,7 +1044,9 @@ async function handleAction(action, payload) {
     const projectValue = money(payload.projectValue || payload.revenue);
     const rate = money(payload.commissionPercent || payload.commissionRate);
     const commission = { projectValue, vendorSelected: clean(payload.vendorSelected || payload.vendorName, 140), commissionPercent: rate, expectedCommission: Math.round(projectValue * (rate / 100)), paidCommission: money(payload.paidCommission), paymentStatus: clean(payload.paymentStatus || payload.status, 80), followUpDate: clean(payload.followUpDate, 60), jobName: clean(payload.jobName, 140), revenue: projectValue, status: clean(payload.paymentStatus || payload.status, 80) };
-    return { ok: true, commission: await insert("commissions", commission) };
+    const saved = await insert("commissions", commission);
+    await logActivity("commission_tracked", "Commission record saved.", { commissionId: saved.id, expectedCommission: saved.expectedCommission });
+    return { ok: true, commission: saved };
   }
   if (action === "marketing") return { ok: true, marketing: await insert("marketingIdeas", { ...payload, ideas: marketingIdeas(payload) }), ideas: marketingIdeas(payload) };
   if (action === "seo") {
@@ -861,20 +1061,28 @@ async function handleAction(action, payload) {
     const plan = followupPlan(payload);
     const saved = [];
     for (const item of plan) saved.push(await insert("followUps", { ...item, customerName: clean(payload.name || payload.customerName, 120), service: clean(payload.service, 120), recipient: clean(payload.phone || payload.email, 180) }));
+    await logActivity("followup_plan", "Customer follow-up drafts created.", { count: saved.length, service: payload.service });
     return { ok: true, followUps: saved, note: "Follow-up drafts saved. Sending still requires approval and business-hours checks." };
   }
   if (action === "project") {
     const project = { customerName: clean(payload.customerName, 120), service: clean(payload.service, 120), title: clean(payload.title, 160), city: clean(payload.city, 80), status: clean(payload.status, 80), completionDate: clean(payload.completionDate, 60), followUpDate: clean(payload.followUpDate, 60), beforeAfterNotes: clean(payload.beforeAfterNotes, 1000), customerReview: clean(payload.customerReview, 1200), notes: clean(payload.notes, 1500), reminders: [payload.followUpDate ? `Follow up on ${payload.followUpDate}.` : "Set follow-up date.", "Confirm customer has estimate and next step.", "Send review request only after completed work and approval."] };
     const saved = await insert("projects", project);
+    await logActivity("project_saved", `Project saved: ${saved.title || saved.service || "Project"}`, { projectId: saved.id, service: saved.service, status: saved.status });
     return { ok: true, project: saved, vapi: await callWebhook("VAPI_PROJECT_WEBHOOK_URL", { project: saved }) };
   }
   throw new Error("Unknown marketplace action.");
 }
 
 const PERMISSIONS = {
+<<<<<<< HEAD
   admin: ["leadSourceSearch", "lead", "estimate", "emailEstimate", "vendorSearch", "vendor", "vendorUpdate", "vendorDelete", "vendorMatch", "quoteRequest", "vendorResponse", "dispatcher", "recommendation", "commission", "marketing", "seo", "smm", "followupPlan", "project"],
   manager: ["leadSourceSearch", "lead", "estimate", "vendorSearch", "vendor", "vendorUpdate", "vendorMatch", "quoteRequest", "dispatcher", "recommendation", "marketing", "seo", "smm", "followupPlan", "project"],
   viewer: ["recommendation", "vendorMatch"]
+=======
+  admin: ["queueMessage", "optOut", "approveMessage", "activityLogs", "deploymentStatus", "leadSourceSearch", "lead", "estimate", "emailEstimate", "vendorSearch", "vendor", "vendorUpdate", "vendorDelete", "quoteRequest", "vendorResponse", "dispatcher", "recommendation", "commission", "marketing", "seo", "smm", "followupPlan", "project"],
+  manager: ["queueMessage", "optOut", "activityLogs", "deploymentStatus", "leadSourceSearch", "lead", "estimate", "vendorSearch", "vendor", "vendorUpdate", "quoteRequest", "dispatcher", "recommendation", "marketing", "seo", "smm", "followupPlan", "project"],
+  viewer: ["recommendation", "activityLogs", "deploymentStatus"]
+>>>>>>> 4e1a10a (update by phase 4)
 };
 
 module.exports = async function handler(req, res) {

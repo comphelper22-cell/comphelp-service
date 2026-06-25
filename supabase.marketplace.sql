@@ -194,3 +194,37 @@ create table if not exists marketplace_followups (
   status text,
   message text
 );
+
+create table if not exists marketplace_message_queue (
+  id text primary key,
+  created_at timestamptz default now(),
+  kind text,
+  channel text,
+  recipient text,
+  body text,
+  status text,
+  approved boolean default false,
+  safety jsonb,
+  send_after text,
+  sent_at text,
+  source text
+);
+
+create table if not exists marketplace_opt_outs (
+  id text primary key,
+  created_at timestamptz default now(),
+  recipient text,
+  reason text,
+  source text,
+  status text
+);
+
+create table if not exists marketplace_activity_logs (
+  id text primary key,
+  created_at timestamptz default now(),
+  type text,
+  message text,
+  metadata jsonb,
+  actor text,
+  status text
+);
