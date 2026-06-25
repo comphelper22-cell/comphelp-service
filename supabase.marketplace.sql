@@ -36,9 +36,12 @@ create table if not exists marketplace_vendors (
   distance_miles numeric,
   rating numeric,
   availability text,
+  notes text,
   contact text,
   status text
 );
+
+alter table marketplace_vendors add column if not exists notes text;
 
 create table if not exists marketplace_estimates (
   id text primary key,

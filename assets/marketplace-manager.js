@@ -194,9 +194,12 @@
   }
 
   function renderVendors(vendors) {
-    $("#vendorList").innerHTML = vendors.map(function (vendor) {
-      return '<div class="row"><strong>' + escapeHtml(vendor.name) + '</strong><span>' + escapeHtml(vendor.category) + '</span><span>' + escapeHtml(vendor.serviceArea || vendor.city || "") + '</span><span class="pill">' + escapeHtml(vendor.rating || "") + ' stars</span></div>';
-    }).join("");
+    vendors = (vendors || []).slice().sort(function (a, b) {
+      return Number(b.rating || 0) - Number(a.rating || 0) || Number(b.commissionPercent || 0) - Number(a.commissionPercent || 0);
+    });
+    $("#vendorList").innerHTML = vendors.length ? vendors.map(function (vendor, index) {
+      return '<div class="row"><strong>#' + (index + 1) + ' ' + escapeHtml(vendor.name) + '</strong><span>' + escapeHtml(vendor.category) + '<br><span class="muted">' + escapeHtml(vendor.city || "") + '</span></span><span>' + escapeHtml(vendor.serviceArea || "") + '<br><span class="muted">' + escapeHtml(vendor.availability || "") + '</span></span><span class="pill">' + escapeHtml(vendor.rating || "") + ' stars • ' + escapeHtml(vendor.commissionPercent || 0) + '%</span></div>';
+    }).join("") : '<p class="muted">No vendors yet.</p>';
   }
 
   function renderEstimate(estimate) {
@@ -428,6 +431,7 @@
             $("#estimateResult").textContent = JSON.stringify(result, null, 2);
           }
           if (action === "quoteRequest") $("#quoteResult").textContent = JSON.stringify(result, null, 2);
+          if (action === "vendorMatch") $("#vendorMatchResult").textContent = JSON.stringify(result, null, 2);
           if (action === "recommendation") $("#recommendationResult").textContent = JSON.stringify(result, null, 2);
           if (action === "commission") $("#commissionResult").textContent = JSON.stringify(result, null, 2);
           if (action === "marketing") $("#marketingResult").textContent = JSON.stringify(result, null, 2);

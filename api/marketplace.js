@@ -496,23 +496,55 @@ async function openaiJson(system, payload, fallback) {
 
 async function recommendVendors(payload) {
   const service = clean(payload.service || payload.category, 120);
+  const city = clean(payload.city, 80).toLowerCase();
   const vendors = (await list("vendors")).filter((vendor) => {
     const services = Array.isArray(vendor.services) ? vendor.services : String(vendor.services || "").split(",");
-    return services.some((item) => clean(item).toLowerCase().includes(service.toLowerCase())) || clean(vendor.category).toLowerCase().includes(service.toLowerCase());
+    const serviceMatch = services.some((item) => clean(item).toLowerCase().includes(service.toLowerCase())) || clean(vendor.category).toLowerCase().includes(service.toLowerCase());
+    const status = clean(vendor.status || "active", 80).toLowerCase();
+    const cityMatch = !city || clean(vendor.city, 80).toLowerCase().includes(city) || clean(vendor.serviceArea || vendor.service_area, 240).toLowerCase().includes(city);
+    return serviceMatch && cityMatch && !["inactive", "paused", "blocked"].includes(status);
   });
   const ranked = vendors.map((vendor) => {
     const rating = Number(vendor.rating || 4);
     const distance = Number(vendor.distanceMiles || 25);
     const commission = Number(vendor.commissionPercent || 0);
     const availabilityBoost = /same|next|today|tomorrow|3/i.test(vendor.availability || "") ? 12 : 4;
-    const score = Math.round(rating * 18 - distance * 0.7 + availabilityBoost + Math.min(commission, 20) * 0.4);
-    return { ...vendor, recommendationScore: score, reason: `Good service match; rating ${rating}, distance ${distance} miles, availability ${vendor.availability || "unknown"}, commission ${commission}%.` };
+    const cityBoost = city && clean(vendor.city, 80).toLowerCase().includes(city) ? 10 : 0;
+    const score = Math.round(rating * 18 - distance * 0.7 + availabilityBoost + cityBoost + Math.min(commission, 20) * 0.4);
+    return { ...vendor, recommendationScore: score, reason: `Service match; rating ${rating}, distance ${distance} miles, availability ${vendor.availability || "unknown"}, commission ${commission}%, city fit ${cityBoost ? "strong" : "service-area"}.` };
   }).sort((a, b) => b.recommendationScore - a.recommendationScore).slice(0, 3);
   const fallback = {
     top3: ranked,
     explanation: ranked.length ? `Recommended ${ranked[0].name} first based on service fit, rating, distance, availability, and commission.` : "No matching vendors found yet."
   };
   return openaiJson("Return JSON with top3Summary and explanation for vendor recommendations for CompHelp Service. Never use old branding.", { project: payload, vendors: ranked }, fallback);
+}
+
+async function vendorProjectMatch(payload) {
+  const recommendation = await recommendVendors(payload);
+  const topVendors = recommendation.top3 || recommendation.top3Summary || [];
+  const selected = topVendors[0] || null;
+  const projectValue = money(payload.projectValue || payload.budget || payload.customerPrice);
+  const commissionPercent = money(payload.commissionPercent || selected?.commissionPercent || 10);
+  const expectedCommission = Math.round(projectValue * (commissionPercent / 100));
+  return {
+    service: clean(payload.service, 120),
+    city: clean(payload.city || "Los Angeles", 80),
+    projectValue,
+    selectedVendor: selected,
+    topVendors,
+    quoteRequestDraft: selected ? `Hi ${selected.name}, can you quote this ${clean(payload.service, 120)} project in ${clean(payload.city || "Los Angeles", 80)}? Scope: ${clean(payload.scope || payload.notes, 1000)}` : "No matching vendor found. Add or approve vendors before sending a quote request.",
+    commissionDraft: {
+      vendorSelected: selected?.name || "",
+      projectValue,
+      commissionPercent,
+      expectedCommission,
+      paymentStatus: "expected",
+      status: "expected"
+    },
+    ownerApprovalRequired: true,
+    status: "draft"
+  };
 }
 
 function marketingIdeas(payload) {
@@ -745,7 +777,7 @@ function vendorPayload(payload) {
     email: clean(payload.email, 180),
     website: clean(payload.website, 240),
     serviceArea: clean(payload.serviceArea, 240),
-    city: clean(payload.serviceArea, 80),
+    city: clean(payload.city || payload.serviceArea, 80),
     rating: Math.min(5, Math.max(1, Number(payload.rating || 4))),
     availability: clean(payload.availability, 120),
     commissionPercent: money(payload.commissionPercent),
@@ -784,6 +816,7 @@ async function handleAction(action, payload) {
   if (action === "vendor") return { ok: true, vendor: await insert("vendors", vendorPayload(payload)) };
   if (action === "vendorUpdate") return { ok: true, vendor: await updateRecord("vendors", clean(payload.id, 120), vendorPayload(payload)) };
   if (action === "vendorDelete") return { ok: true, vendor: await deleteRecord("vendors", clean(payload.id, 120)) };
+  if (action === "vendorMatch") return { ok: true, match: await vendorProjectMatch(payload) };
   if (action === "quoteRequest") {
     const recommendation = await recommendVendors(payload);
     const request = { leadId: clean(payload.leadId, 120), projectId: clean(payload.projectId, 120), service: clean(payload.service, 120), category: clean(payload.category, 80), city: clean(payload.city, 80), scope: clean(payload.scope, 1600), status: "draft", vendorResponses: [], vendorOptions: recommendation.top3 || recommendation.top3Summary || [] };
@@ -839,9 +872,9 @@ async function handleAction(action, payload) {
 }
 
 const PERMISSIONS = {
-  admin: ["leadSourceSearch", "lead", "estimate", "emailEstimate", "vendorSearch", "vendor", "vendorUpdate", "vendorDelete", "quoteRequest", "vendorResponse", "dispatcher", "recommendation", "commission", "marketing", "seo", "smm", "followupPlan", "project"],
-  manager: ["leadSourceSearch", "lead", "estimate", "vendorSearch", "vendor", "vendorUpdate", "quoteRequest", "dispatcher", "recommendation", "marketing", "seo", "smm", "followupPlan", "project"],
-  viewer: ["recommendation"]
+  admin: ["leadSourceSearch", "lead", "estimate", "emailEstimate", "vendorSearch", "vendor", "vendorUpdate", "vendorDelete", "vendorMatch", "quoteRequest", "vendorResponse", "dispatcher", "recommendation", "commission", "marketing", "seo", "smm", "followupPlan", "project"],
+  manager: ["leadSourceSearch", "lead", "estimate", "vendorSearch", "vendor", "vendorUpdate", "vendorMatch", "quoteRequest", "dispatcher", "recommendation", "marketing", "seo", "smm", "followupPlan", "project"],
+  viewer: ["recommendation", "vendorMatch"]
 };
 
 module.exports = async function handler(req, res) {

@@ -279,6 +279,7 @@
             <input name="phone" placeholder="Phone">
             <input name="email" type="email" placeholder="Email">
             <input name="website" type="url" placeholder="Website">
+            <input name="city" placeholder="City" value="Los Angeles">
             <input name="serviceArea" placeholder="Service area">
             <input name="commissionPercent" type="number" min="0" max="100" step=".1" placeholder="Commission %">
             <input name="rating" type="number" min="1" max="5" step=".1" placeholder="Rating">
@@ -290,6 +291,22 @@
             <p class="status"></p>
           </form>
           <div class="panel"><h2>Vendor Directory</h2><div id="vendorList" class="list"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <form class="panel" data-action="vendorMatch" data-output="vendorMatchResult">
+            <h2>Match Vendor to Project</h2>
+            <select name="service" required></select>
+            <input name="city" placeholder="City" value="Los Angeles">
+            <input name="projectValue" type="number" min="0" step="1" placeholder="Project value">
+            <input name="commissionPercent" type="number" min="0" max="100" step=".1" placeholder="Commission %" value="10">
+            <textarea name="scope" placeholder="Project scope and notes"></textarea>
+            <button class="btn primary">Rank and Match Vendor</button>
+            <p class="status"></p>
+          </form>
+          <div class="panel">
+            <h2>Vendor Match Output</h2>
+            <pre id="vendorMatchResult"></pre>
+          </div>
         </div>
       </section>
 
