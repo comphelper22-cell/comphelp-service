@@ -3,6 +3,20 @@ const path = require("path");
 
 const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
 const GALLERY_FILE = path.join(process.cwd(), "data", "gallery.json");
+const CRM_STAGES = ["New Lead", "Contacted", "Quote Sent", "Follow-up", "Won", "Lost"];
+const CRM_STAGE_KEYS = {
+  "new lead": "New Lead",
+  new: "New Lead",
+  contacted: "Contacted",
+  "quote sent": "Quote Sent",
+  quote_sent: "Quote Sent",
+  estimate_sent: "Quote Sent",
+  "follow-up": "Follow-up",
+  follow_up: "Follow-up",
+  followup: "Follow-up",
+  won: "Won",
+  lost: "Lost"
+};
 const DEFAULT_MARKETPLACE = {
   version: 1,
   business: {
@@ -12,6 +26,7 @@ const DEFAULT_MARKETPLACE = {
     serviceAreas: ["Los Angeles", "Burbank", "Glendale", "North Hollywood", "Studio City"]
   },
   services: ["Security Camera Installation", "Smart Home Setup", "WiFi & Network Installation", "Computer Repair", "Data Recovery"],
+  crmStages: CRM_STAGES,
   vendorCategories: ["Cameras", "WiFi", "Computer Repair", "Data Recovery", "Smart Home", "Electrician", "HVAC", "Plumbing", "Roofing"],
   estimateRules: {
     "Security Camera Installation": { base: 299, unit: "camera", perUnit: 125, questions: ["Property type", "Number of cameras", "Wiring needed", "Preferred installation date"] },
@@ -56,6 +71,53 @@ function sendJson(res, statusCode, body) {
 
 function clean(value, max = 1000) {
   return String(value || "").trim().slice(0, max);
+}
+
+function normalizeLeadStatus(value) {
+  const raw = clean(value, 80);
+  const key = raw.toLowerCase().replace(/\s+/g, " ");
+  return CRM_STAGE_KEYS[key] || CRM_STAGE_KEYS[key.replace(/\s+/g, "_")] || "New Lead";
+}
+
+function crmSummary(leads = []) {
+  const counts = CRM_STAGES.reduce((acc, stage) => {
+    acc[stage] = 0;
+    return acc;
+  }, {});
+  leads.forEach((lead) => {
+    counts[normalizeLeadStatus(lead.status)] += 1;
+  });
+  return {
+    stages: CRM_STAGES,
+    totalLeads: leads.length,
+    newLeads: counts["New Lead"],
+    contacted: counts.Contacted,
+    quoteSent: counts["Quote Sent"],
+    followUp: counts["Follow-up"],
+    won: counts.Won,
+    lost: counts.Lost,
+    counts
+  };
+}
+
+function leadPayload(payload) {
+  const notes = clean(payload.notes || payload.message, 1500);
+  return {
+    name: clean(payload.name, 120),
+    phone: clean(payload.phone, 60),
+    email: clean(payload.email, 160),
+    instagram: clean(payload.instagram || payload.Instagram, 240),
+    tiktok: clean(payload.tiktok || payload.TikTok, 240),
+    address: clean(payload.address, 300),
+    source: clean(payload.source || "marketplace_manager", 120),
+    service: clean(payload.service, 120),
+    city: clean(payload.city, 80),
+    notes,
+    message: notes,
+    status: normalizeLeadStatus(payload.status),
+    preferredDate: clean(payload.preferredDate, 60),
+    qualification: qualification(payload.service, notes)
+  };
 }
 
 function money(value) {
@@ -115,6 +177,7 @@ function readSeed() {
     business: { ...DEFAULT_MARKETPLACE.business, ...(seed.business || {}) },
     estimateRules: { ...DEFAULT_MARKETPLACE.estimateRules, ...(seed.estimateRules || {}) },
     services: Array.isArray(seed.services) && seed.services.length ? seed.services : DEFAULT_MARKETPLACE.services,
+    crmStages: Array.isArray(seed.crmStages) && seed.crmStages.length ? seed.crmStages : DEFAULT_MARKETPLACE.crmStages,
     vendorCategories: Array.isArray(seed.vendorCategories) && seed.vendorCategories.length ? seed.vendorCategories : DEFAULT_MARKETPLACE.vendorCategories,
     vendors: Array.isArray(seed.vendors) ? seed.vendors : [],
     leads: Array.isArray(seed.leads) ? seed.leads : [],
@@ -592,8 +655,8 @@ async function dashboard(req) {
       requiresAdmin: true,
       role: "public",
       warnings: dbConnected ? [] : ["Database not connected"],
-      config: { services: seed.services, vendorCategories: seed.vendorCategories, estimateRules: seed.estimateRules },
-      summary: { leads: 0, vendors: seed.vendors?.length || 0, projects: 0, openProjects: 0, revenue: 0, expectedCommission: 0, publishedGalleryItems: galleryCount(), smmDrafts: 0, conversionRate: 0 },
+      config: { services: seed.services, vendorCategories: seed.vendorCategories, estimateRules: seed.estimateRules, crmStages: seed.crmStages || CRM_STAGES },
+      summary: { leads: 0, vendors: seed.vendors?.length || 0, projects: 0, openProjects: 0, revenue: 0, expectedCommission: 0, publishedGalleryItems: galleryCount(), smmDrafts: 0, conversionRate: 0, crm: crmSummary([]) },
       recentLeads: [],
       topVendors: (seed.vendors || []).slice(0, 3),
       vendors: seed.vendors || [],
@@ -613,13 +676,21 @@ async function dashboard(req) {
   const revenue = commissions.reduce((sum, item) => sum + money(item.revenue || item.projectValue), 0);
   const expectedCommission = commissions.reduce((sum, item) => sum + money(item.expectedCommission || item.expected_commission), 0);
   const openProjects = projects.filter((project) => !["completed", "cancelled", "closed"].includes(clean(project.status, 40))).length;
+  const crm = crmSummary(leads);
   return {
     ok: true,
     role,
     warnings: dbConnected ? [] : ["Database not connected"],
-    config: { services: seed.services, vendorCategories: seed.vendorCategories, estimateRules: seed.estimateRules },
+    config: { services: seed.services, vendorCategories: seed.vendorCategories, estimateRules: seed.estimateRules, crmStages: seed.crmStages || CRM_STAGES },
     summary: {
       leads: leads.length,
+      crm,
+      newLeads: crm.newLeads,
+      contactedLeads: crm.contacted,
+      quoteSentLeads: crm.quoteSent,
+      followUpLeads: crm.followUp,
+      wonLeads: crm.won,
+      lostLeads: crm.lost,
       sourceLeads: sourceLeads.length,
       vendors: vendors.length,
       projects: projects.length,
@@ -634,7 +705,7 @@ async function dashboard(req) {
       vendorPerformance: vendors.slice().sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0)).slice(0, 5),
       marketingPerformance: { smmDrafts: mediaReviews.length, seoPlans: (await list("marketingIdeas")).length }
     },
-    recentLeads: leads.slice(0, 8),
+    recentLeads: leads.slice(0, 8).map((lead) => ({ ...lead, status: normalizeLeadStatus(lead.status) })),
     topVendors: vendors.slice().sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0)).slice(0, 8),
     vendors,
     projects: projects.slice(0, 12)
@@ -672,7 +743,7 @@ async function handleAction(action, payload) {
     };
   }
   if (action === "lead") {
-    const lead = { name: clean(payload.name, 120), phone: clean(payload.phone, 60), email: clean(payload.email, 160), address: clean(payload.address, 300), service: clean(payload.service, 120), notes: clean(payload.notes || payload.message, 1500), message: clean(payload.notes || payload.message, 1500), status: clean(payload.status, 80) || "new", preferredDate: clean(payload.preferredDate, 60), qualification: qualification(payload.service, payload.notes || payload.message), source: "marketplace_manager" };
+    const lead = leadPayload(payload);
     const saved = await insert("leads", lead);
     return { ok: true, lead: saved, hubspot: await createHubSpotContact(lead), n8n: await callWebhook("N8N_LEAD_WEBHOOK_URL", { lead }) };
   }

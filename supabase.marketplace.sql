@@ -4,7 +4,10 @@ create table if not exists marketplace_leads (
   name text,
   phone text,
   email text,
+  instagram text,
+  tiktok text,
   service text,
+  city text,
   address text,
   notes text,
   preferred_date text,
@@ -13,6 +16,10 @@ create table if not exists marketplace_leads (
   qualification jsonb,
   source text
 );
+
+alter table marketplace_leads add column if not exists instagram text;
+alter table marketplace_leads add column if not exists tiktok text;
+alter table marketplace_leads add column if not exists city text;
 
 create table if not exists marketplace_vendors (
   id text primary key,

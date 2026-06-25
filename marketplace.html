@@ -59,6 +59,10 @@
       <section data-view="dashboard" class="is-active">
         <div class="panel" id="dashboardWarnings" style="display:none;margin-bottom:.85rem"></div>
         <div class="grid" id="metrics"></div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>CRM Pipeline</h2>
+          <div class="grid" id="crmMetrics"></div>
+        </div>
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>Recent Leads</h2><div class="list" id="recentLeads"></div></div>
           <div class="panel"><h2>Top Vendors</h2><div class="list" id="topVendors"></div></div>
@@ -72,10 +76,14 @@
             <input name="name" placeholder="Customer name" required>
             <input name="phone" placeholder="Phone" required>
             <input name="email" type="email" placeholder="Email">
+            <input name="instagram" placeholder="Instagram profile URL or handle">
+            <input name="tiktok" placeholder="TikTok profile URL or handle">
+            <input name="source" placeholder="Lead source" value="marketplace_manager">
             <input name="address" placeholder="Address">
+            <input name="city" placeholder="City" value="Los Angeles">
             <select name="service" required></select>
             <textarea name="notes" placeholder="Project notes"></textarea>
-            <select name="status"><option>new</option><option>qualified</option><option>estimate_sent</option><option>won</option><option>lost</option><option>follow_up</option></select>
+            <select name="status"><option>New Lead</option><option>Contacted</option><option>Quote Sent</option><option>Follow-up</option><option>Won</option><option>Lost</option></select>
             <input name="preferredDate" type="date">
             <button class="btn primary">Save Lead</button>
             <p class="status"></p>

@@ -19,6 +19,14 @@
     "Computer Repair",
     "Data Recovery"
   ],
+  "crmStages": [
+    "New Lead",
+    "Contacted",
+    "Quote Sent",
+    "Follow-up",
+    "Won",
+    "Lost"
+  ],
   "vendorCategories": [
     "Cameras",
     "WiFi",

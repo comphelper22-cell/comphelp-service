@@ -129,6 +129,10 @@
   function renderMetrics(summary) {
     $("#metrics").innerHTML = [
       ["Total Leads", summary.leads],
+      ["New Leads", summary.newLeads || 0],
+      ["Contacted", summary.contactedLeads || 0],
+      ["Quote Sent", summary.quoteSentLeads || 0],
+      ["Won / Lost", (summary.wonLeads || 0) + " / " + (summary.lostLeads || 0)],
       ["Total Vendors", summary.vendors],
       ["Source Leads", summary.sourceLeads || 0],
       ["Total Projects", summary.projects],
@@ -142,6 +146,25 @@
       ["SMM Drafts", summary.smmDrafts || 0]
     ].map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + metric[1] + '</div></article>';
+    }).join("");
+  }
+
+  function renderCrmPipeline(crm) {
+    var target = $("#crmMetrics");
+    if (!target) return;
+    crm = crm || { counts: {} };
+    var counts = crm.counts || {};
+    var metrics = [
+      ["Total Leads", crm.totalLeads || 0],
+      ["New Lead", counts["New Lead"] || 0],
+      ["Contacted", counts.Contacted || 0],
+      ["Quote Sent", counts["Quote Sent"] || 0],
+      ["Follow-up", counts["Follow-up"] || 0],
+      ["Won", counts.Won || 0],
+      ["Lost", counts.Lost || 0]
+    ];
+    target.innerHTML = metrics.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
   }
 
@@ -160,7 +183,7 @@
 
   function renderRecentLeads(leads) {
     $("#recentLeads").innerHTML = leads.length ? leads.map(function (lead) {
-      return '<div class="row"><strong>' + escapeHtml(lead.name) + '</strong><span>' + escapeHtml(lead.service) + '</span><span>' + escapeHtml(lead.phone) + '</span><span class="pill">' + escapeHtml(lead.status || "new") + '</span></div>';
+      return '<div class="row"><strong>' + escapeHtml(lead.name) + '</strong><span>' + escapeHtml(lead.service) + '</span><span>' + escapeHtml(lead.source || lead.phone) + '</span><span class="pill">' + escapeHtml(lead.status || "New Lead") + '</span></div>';
     }).join("") : '<p class="muted">No leads yet.</p>';
   }
 
@@ -306,6 +329,7 @@
     fillSelects(dashboard.config);
     renderWarnings(dashboard.warnings);
     renderMetrics(dashboard.summary);
+    renderCrmPipeline(dashboard.summary && dashboard.summary.crm);
     renderRecentLeads(dashboard.recentLeads);
     renderTopVendors(dashboard.topVendors);
     renderVendors(dashboard.vendors);
