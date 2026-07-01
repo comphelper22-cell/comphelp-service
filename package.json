@@ -15,6 +15,7 @@
     "lead-finder-agent": "node agents/lead-finder-agent.js",
     "social-lead-finder-agent": "node agents/social-lead-finder-agent.js",
     "social-outreach-agent": "node agents/social-outreach-agent.js",
+    "developer-agent": "node agents/developer-agent.js",
     "vendor-agent": "node agents/vendor-finder-agent.js",
     "dispatcher-agent": "node agents/dispatcher-agent.js",
     "followup-agent": "node agents/followup-agent.js",

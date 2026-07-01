@@ -79,6 +79,10 @@
       "destination": "/api/social-leads.js"
     },
     {
+      "source": "/api/developer",
+      "destination": "/api/developer.js"
+    },
+    {
       "source": "/admin-test",
       "destination": "/admin-test.html"
     },

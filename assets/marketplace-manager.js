@@ -312,6 +312,40 @@
     }
   }
 
+  function renderDeveloperCenter(payload, writeOutput) {
+    var target = $("#developerMetrics");
+    if (!target || !payload) return;
+    var report = payload.report || payload;
+    var developer = report.developer || report.report || report;
+    var deployment = report.deployment || payload.deployment || {};
+    var summary = developer.summary || {};
+    var git = developer.git || deployment.gitStatus || {};
+    var metrics = [
+      ["Repository Health", developer.ok === false ? "Needs Review" : "OK"],
+      ["Validation Status", payload.validation ? (payload.validation.ok ? "Passed" : "Failed") : "Ready"],
+      ["Git Status", git.clean ? "Clean" : "Pending"],
+      ["Pending Changes", git.changedFiles ? git.changedFiles.length : 0],
+      ["Deployment", deployment.deploymentStatus || "approval_required"],
+      ["Recent Commits", git.recentCommits ? git.recentCommits.length : 0],
+      ["Build Status", deployment.buildStatus || "validation_required"],
+      ["Syntax Issues", summary.syntaxIssues || 0],
+      ["Missing Imports", summary.missingImports || 0],
+      ["Duplicate Blocks", summary.duplicateBlocks || 0]
+    ];
+    target.innerHTML = metrics.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if (writeOutput !== false && $("#developerResult")) {
+      $("#developerResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
+  async function refreshDeveloperCenter(action, writeOutput) {
+    var result = await routeApi("/api/developer", action || "fullReport", {});
+    renderDeveloperCenter(result, writeOutput);
+    return result;
+  }
+
   async function refreshCompliance() {
     var response = await fetch("/api/outreach", {
       cache: "no-store",
@@ -357,6 +391,7 @@
     renderQuestions($("select[name='service']").value);
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
+    await refreshDeveloperCenter("deployment", false).catch(function () {});
   }
 
   function attachNavigation() {
@@ -438,6 +473,7 @@
           if (action === "smm") $("#smmResult").textContent = JSON.stringify(result, null, 2);
           if (action === "seo") $("#seoResult").textContent = JSON.stringify(result, null, 2);
           if (action === "project") $("#projectResult").textContent = JSON.stringify(result, null, 2);
+          if (action.indexOf("developer") === 0) renderDeveloperCenter(result);
           if (action === "socialFinder" || action === "socialDraft") await refreshSocialLeads();
           await refresh();
         } catch (error) {
@@ -506,6 +542,36 @@
           $("#socialLeadResult").textContent = JSON.stringify(result, null, 2);
         } catch (error) {
           $("#socialLeadResult").textContent = error.message;
+        }
+      });
+    }
+
+    if ($("#refreshDeveloperCenter")) {
+      $("#refreshDeveloperCenter").addEventListener("click", async function () {
+        var button = $("#refreshDeveloperCenter");
+        button.disabled = true;
+        try {
+          var result = await refreshDeveloperCenter("fullReport");
+          $("#developerResult").textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          $("#developerResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    if ($("#runDeveloperValidation")) {
+      $("#runDeveloperValidation").addEventListener("click", async function () {
+        var button = $("#runDeveloperValidation");
+        button.disabled = true;
+        try {
+          var result = await refreshDeveloperCenter("validate");
+          $("#developerResult").textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          $("#developerResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
         }
       });
     }

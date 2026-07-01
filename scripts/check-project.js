@@ -12,10 +12,11 @@ const REQUIRED_SCRIPTS = [
   "smm-agent",
   "seo-agent",
   "estimate-agent",
+  "developer-agent",
   "vendor-agent",
   "marketplace-agent"
 ];
-const IGNORE_DIRS = new Set([".git", "node_modules", ".vercel", "logs", "uploads", "outputs"]);
+const IGNORE_DIRS = new Set([".git", "node_modules", ".vercel", "logs", "uploads", "outputs", "phase2-crm-clean"]);
 
 function log(action, payload) {
   fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -69,7 +70,7 @@ function validateVercel(errors) {
   }
   const vercel = JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
   const routes = JSON.stringify(vercel.rewrites || []);
-  for (const route of ["/api/marketplace", "/api/admin-test", "/marketplace", "/admin-test"]) {
+  for (const route of ["/api/marketplace", "/api/admin-test", "/api/developer", "/marketplace", "/admin-test"]) {
     if (!routes.includes(route)) errors.push(`vercel.json missing route: ${route}`);
   }
 }

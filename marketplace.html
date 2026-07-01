@@ -44,6 +44,7 @@
         <button data-target="analytics">Analytics</button>
         <button data-target="activity">Activity Logs</button>
         <button data-target="deployment">Deployment</button>
+        <button data-target="developer">Developer Center</button>
         <button data-target="marketing">Marketing</button>
         <button data-target="seo">SEO Manager</button>
         <button data-target="smm">SMM Manager</button>
@@ -460,6 +461,43 @@
             <button class="btn primary">Refresh Deployment Status</button>
             <p class="status"></p>
             <pre id="deploymentResult"></pre>
+          </form>
+        </div>
+      </section>
+
+      <section data-view="developer">
+        <div class="two">
+          <div class="panel">
+            <h2>Developer Center</h2>
+            <p class="muted">Repository health, validation, git status, pending changes, deployment readiness, recent commits, and build status.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshDeveloperCenter" type="button">Refresh Report</button>
+              <button class="btn" id="runDeveloperValidation" type="button">Run Validation</button>
+            </div>
+            <div class="grid" id="developerMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <form class="panel" data-action="developerReport" data-endpoint="/api/developer" data-api-action="fullReport" data-output="developerResult">
+            <h2>Reports</h2>
+            <p class="muted">Creates JSON reports in logs. Push and deployment are intentionally approval-only.</p>
+            <button class="btn primary">Generate Developer Report</button>
+            <p class="status"></p>
+            <pre id="developerResult"></pre>
+          </form>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <form class="panel" data-action="developerGitStatus" data-endpoint="/api/developer" data-api-action="gitStatus" data-output="developerGitResult">
+            <h2>Git Manager</h2>
+            <p class="muted">Shows status, changed files, current branch, last commit, and recent commits. It does not push.</p>
+            <button class="btn primary">Check Git Status</button>
+            <p class="status"></p>
+            <pre id="developerGitResult"></pre>
+          </form>
+          <form class="panel" data-action="developerDeployment" data-endpoint="/api/developer" data-api-action="deployment" data-output="developerDeployResult">
+            <h2>Deployment Manager</h2>
+            <p class="muted">Creates deployment readiness reports. Deployment requires owner approval.</p>
+            <button class="btn primary">Create Deployment Report</button>
+            <p class="status"></p>
+            <pre id="developerDeployResult"></pre>
           </form>
         </div>
       </section>
