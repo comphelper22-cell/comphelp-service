@@ -505,3 +505,45 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 11 - Customer Success Center"
 ```
+
+## Current Sprint: Project Titan Sprint 12
+
+Goal: build the Marketing & Growth Center to help service businesses generate more leads, understand marketing performance, improve local visibility, and increase revenue.
+
+Scope:
+
+- Marketing Engine.
+- Marketing Dashboard.
+- Lead Sources.
+- Campaigns.
+- Local SEO.
+- Reviews Engine.
+- Social Performance.
+- Email Campaigns.
+- Marketing ROI.
+- Growth Recommendations.
+- Marketing Manager Agent.
+- System API module `marketing`.
+- Marketplace Marketing & Growth Center section.
+- Marketing & Growth Center test.
+
+Out of scope:
+
+- Real Google, Facebook, Instagram, TikTok, or advertising APIs.
+- Paid service integrations.
+- Automatic posting or messaging.
+- Deployment pipeline changes.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Marketing & Growth Center shows leads today, lead sources, campaign performance, marketing ROI, local SEO health, reviews and reputation, social media performance, email campaigns, growth opportunities, and AI marketing recommendations.
+- API supports `marketing.status`, `marketing.dashboard`, `marketing.leads`, `marketing.campaigns`, `marketing.localSeo`, `marketing.reviews`, `marketing.social`, `marketing.email`, `marketing.roi`, and `marketing.recommendations`.
+- Uses JSON/demo fallback data safely.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 12 - Marketing Growth Center"
+```

@@ -135,6 +135,10 @@
     return systemApi("customerSuccess", action || "customerSuccess.dashboard", payload || {});
   }
 
+  async function marketingGrowthApi(action, payload) {
+    return systemApi("marketing", action || "marketing.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -842,6 +846,57 @@
     }
   }
 
+  function renderMarketingGrowthDashboard(payload) {
+    var target = $("#marketingGrowthMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var leadSources = data.leadSources || data.bySource || {};
+    var topSource = data.topLeadSource || Object.keys(leadSources).sort(function (a, b) {
+      return Number(leadSources[b] || 0) - Number(leadSources[a] || 0);
+    })[0] || "none";
+    var campaignData = data.campaignPerformance || data;
+    var campaigns = campaignData.campaigns || data.campaigns || [];
+    var roi = data.marketingRoi || data;
+    var localSeo = data.localSeoHealth || data;
+    var reviews = data.reviewsReputation || data;
+    var social = data.socialMediaPerformance || data;
+    var email = data.emailCampaigns || data;
+    var recommendations = data.aiMarketingRecommendations || data.recommendations || [];
+    var opportunities = data.growthOpportunities || recommendations || [];
+    var cards = [
+      ["Leads Today", data.leadsToday || data.totalLeads || 0],
+      ["Top Source", topSource],
+      ["Campaign Leads", campaignData.totalLeads || 0],
+      ["Marketing ROI", (roi.roiPercent !== undefined ? roi.roiPercent + "%" : "ready")],
+      ["Cost / Lead", roi.costPerLead !== undefined ? money(roi.costPerLead) : money(0)],
+      ["Local SEO Health", localSeo.localSeoHealth || localSeo.status || "ready"],
+      ["Reviews", reviews.totalReviews || 0],
+      ["Social Reach", social.totalReach || 0],
+      ["Email Campaigns", email.draftCampaigns || (email.campaigns ? email.campaigns.length : 0)],
+      ["Growth Ideas", opportunities.length || 0],
+      ["AI Recommendations", recommendations.length || 0],
+      ["Mode", data.demoMode ? "demo" : "live"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#marketingLeadSources", Object.keys(leadSources).map(function (source) {
+      return { title: source, meta: leadSources[source] + " leads", detail: "Tracked lead source.", pill: "source" };
+    }), "No lead source data yet.");
+    renderList("#marketingCampaignList", campaigns.slice(0, 6).map(function (campaign) {
+      return { title: campaign.name || campaign.title, meta: campaign.channel || "campaign", detail: "Leads: " + (campaign.leads || 0) + " | Revenue: " + money(campaign.revenue || 0), pill: campaign.roi !== undefined ? campaign.roi + "%" : "ROI" };
+    }), "No campaigns yet.");
+    renderList("#marketingGrowthOpportunities", opportunities.slice(0, 6).map(function (item) {
+      return { title: item.title || item.name, meta: item.category || "Growth", detail: item.description || item.recommendedAction || item.reasoning, pill: item.priority || "review" };
+    }), "No growth opportunities yet.");
+    renderList("#marketingRecommendationList", recommendations.slice(0, 6).map(function (item) {
+      return { title: item.title || item.name, meta: item.category || "Marketing", detail: item.description || item.recommendedAction || item.reasoning, pill: item.priority || "AI" };
+    }), "No marketing recommendations yet.");
+    if ($("#marketingGrowthResult")) {
+      $("#marketingGrowthResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -1085,6 +1140,7 @@
     await operationsApi("operations.dashboard", {}).then(renderOperationsDashboard).catch(function () {});
     await financeApi("finance.dashboard", {}).then(renderFinanceDashboard).catch(function () {});
     await customerSuccessApi("customerSuccess.dashboard", {}).then(renderCustomerSuccessDashboard).catch(function () {});
+    await marketingGrowthApi("marketing.dashboard", {}).then(renderMarketingGrowthDashboard).catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -1455,6 +1511,34 @@
             renderCustomerSuccessDashboard(await customerSuccessApi(action, {}));
           } catch (error) {
             $("#customerSuccessResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshMarketingGrowthDashboard", "marketing.dashboard"],
+      ["#showMarketingLeads", "marketing.leads"],
+      ["#showMarketingCampaigns", "marketing.campaigns"],
+      ["#showMarketingLocalSeo", "marketing.localSeo"],
+      ["#showMarketingReviews", "marketing.reviews"],
+      ["#showMarketingSocial", "marketing.social"],
+      ["#showMarketingEmail", "marketing.email"],
+      ["#showMarketingRoi", "marketing.roi"],
+      ["#showMarketingRecommendations", "marketing.recommendations"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderMarketingGrowthDashboard(await marketingGrowthApi(action, {}));
+          } catch (error) {
+            $("#marketingGrowthResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

@@ -34,6 +34,7 @@
         <button data-target="operationsCenter">Operations Center</button>
         <button data-target="financeCenter">Finance Center</button>
         <button data-target="customerSuccessCenter">Customer Success</button>
+        <button data-target="marketingGrowthCenter">Marketing & Growth</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -289,6 +290,39 @@
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>Follow-up Needed</h2><div class="list" id="customerFollowupNeeded"></div></div>
           <div class="panel"><h2>Reviews Needed</h2><div class="list" id="customerReviewsNeeded"></div></div>
+        </div>
+      </section>
+
+      <section data-view="marketingGrowthCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Marketing & Growth Center</h2>
+            <p class="muted">Lead sources, campaign performance, local SEO, reviews, social media, email campaigns, ROI, and AI growth recommendations.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshMarketingGrowthDashboard" type="button">Growth Dashboard</button>
+              <button class="btn" id="showMarketingLeads" type="button">Lead Sources</button>
+              <button class="btn" id="showMarketingCampaigns" type="button">Campaigns</button>
+              <button class="btn" id="showMarketingLocalSeo" type="button">Local SEO</button>
+              <button class="btn" id="showMarketingReviews" type="button">Reviews</button>
+              <button class="btn" id="showMarketingSocial" type="button">Social</button>
+              <button class="btn" id="showMarketingEmail" type="button">Email</button>
+              <button class="btn" id="showMarketingRoi" type="button">ROI</button>
+              <button class="btn" id="showMarketingRecommendations" type="button">Recommendations</button>
+            </div>
+            <div class="grid" id="marketingGrowthMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Marketing Output</h2>
+            <pre id="marketingGrowthResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Lead Sources</h2><div class="list" id="marketingLeadSources"></div></div>
+          <div class="panel"><h2>Campaign Performance</h2><div class="list" id="marketingCampaignList"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Growth Opportunities</h2><div class="list" id="marketingGrowthOpportunities"></div></div>
+          <div class="panel"><h2>AI Marketing Recommendations</h2><div class="list" id="marketingRecommendationList"></div></div>
         </div>
       </section>
 

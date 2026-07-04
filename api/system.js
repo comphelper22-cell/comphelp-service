@@ -26,6 +26,8 @@ const financeEngine = require("../finance/finance-engine");
 const financeAgent = require("../agents/finance-agent");
 const customerSuccessEngine = require("../customer-success/customer-success-engine");
 const customerSuccessAgent = require("../agents/customer-success-manager-agent");
+const marketingGrowthEngine = require("../marketing/marketing-engine");
+const marketingManagerAgent = require("../agents/marketing-manager-agent");
 
 const modules = {
   developer,
@@ -172,6 +174,21 @@ function runCustomerSuccessAction(action, payload = {}) {
   return { ok: false, error: "unknown_customer_success_action" };
 }
 
+function runMarketingGrowthAction(action, payload = {}) {
+  if (action === "marketing.status") return { ok: true, data: marketingGrowthEngine.status() };
+  if (action === "marketing.dashboard") return marketingGrowthEngine.dashboard(payload);
+  if (action === "marketing.leads") return marketingGrowthEngine.leads(payload);
+  if (action === "marketing.campaigns") return marketingGrowthEngine.campaigns(payload);
+  if (action === "marketing.localSeo") return marketingGrowthEngine.localSeo(payload);
+  if (action === "marketing.reviews") return marketingGrowthEngine.reviews(payload);
+  if (action === "marketing.social") return marketingGrowthEngine.social(payload);
+  if (action === "marketing.email") return marketingGrowthEngine.email(payload);
+  if (action === "marketing.roi") return marketingGrowthEngine.roi(payload);
+  if (action === "marketing.recommendations") return marketingGrowthEngine.recommendations(payload);
+  if (action === "marketing.agent") return { ok: true, data: marketingManagerAgent.run(payload) };
+  return { ok: false, error: "unknown_marketing_growth_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -199,7 +216,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
@@ -207,7 +224,8 @@ module.exports = async function handler(req, res) {
           workflowActions: ["workflow.status", "workflow.trigger", "workflow.build", "workflow.history", "workflow.events", "workflow.registry", "workflow.validate"],
           operationsActions: ["operations.status", "operations.dashboard", "operations.jobs", "operations.technicians", "operations.dispatchSuggestions", "operations.scheduleHealth", "operations.priorities", "operations.customerTimeline", "operations.inventoryNeeds"],
           financeActions: ["finance.status", "finance.dashboard", "finance.revenue", "finance.invoices", "finance.cashflow", "finance.expenses", "finance.profit", "finance.forecast", "finance.health", "finance.kpis"],
-          customerSuccessActions: ["customerSuccess.status", "customerSuccess.dashboard", "customerSuccess.health", "customerSuccess.timeline", "customerSuccess.ltv", "customerSuccess.risks", "customerSuccess.vip", "customerSuccess.lost", "customerSuccess.recommendations"]
+          customerSuccessActions: ["customerSuccess.status", "customerSuccess.dashboard", "customerSuccess.health", "customerSuccess.timeline", "customerSuccess.ltv", "customerSuccess.risks", "customerSuccess.vip", "customerSuccess.lost", "customerSuccess.recommendations"],
+          marketingActions: ["marketing.status", "marketing.dashboard", "marketing.leads", "marketing.campaigns", "marketing.localSeo", "marketing.reviews", "marketing.social", "marketing.email", "marketing.roi", "marketing.recommendations"]
         }
       });
     }
@@ -260,6 +278,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "customerSuccess") {
       const result = runCustomerSuccessAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "marketing") {
+      const result = runMarketingGrowthAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

@@ -460,3 +460,27 @@ Customer Success safety:
 - Review requests require owner approval.
 - No fake reviews or customer outcomes are generated.
 - No external AI or messaging integration is connected.
+
+## Marketing & Growth Center
+
+Project Titan Sprint 12 adds the Marketing & Growth Center for lead source tracking, campaign performance, local SEO health, reputation, social performance, email campaign drafts, marketing ROI, and AI growth recommendations.
+
+Marketing modules:
+
+- `marketing-engine.js` exposes the Marketing & Growth API surface.
+- `marketing-dashboard.js` combines marketing widgets for the UI.
+- `lead-sources.js` summarizes website, social, referral, and local search lead sources.
+- `campaigns.js` tracks campaign spend, leads, revenue, and ROI.
+- `local-seo.js` evaluates local SEO coverage and keyword opportunities.
+- `reviews-engine.js` summarizes reputation and review needs.
+- `social-performance.js` tracks social draft and reach signals.
+- `email-campaigns.js` tracks email campaign drafts and lead outcomes.
+- `marketing-roi.js` calculates marketing return, cost per lead, and revenue attribution.
+- `growth-recommendations.js` combines marketing data with the Recommendation Engine.
+
+Marketing safety:
+
+- No Google, Facebook, Instagram, TikTok, or paid ad APIs are connected.
+- Campaign data uses JSON/demo fallback until approved integrations exist.
+- Social and email outputs are drafts only.
+- Growth recommendations are advisory and owner-reviewed.

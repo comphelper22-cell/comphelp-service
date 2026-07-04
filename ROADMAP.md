@@ -147,7 +147,9 @@ Sprint 10: Finance Center with revenue overview, invoices, cash flow, expenses, 
 
 Sprint 11: Customer Success Center with health score, VIP customers, at-risk customers, lost customers, LTV, timeline, repeat revenue opportunities, follow-up/review needs, and AI recommendations.
 
-Sprint 12: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, and customer success actions.
+Sprint 12: Marketing & Growth Center with lead sources, campaign performance, local SEO health, reviews, social performance, email campaign drafts, ROI, and AI growth recommendations.
+
+Sprint 13: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, and marketing actions.
 
 ## API Consolidation Hotfix
 
