@@ -91,6 +91,10 @@
       "destination": "/api/platform.js"
     },
     {
+      "source": "/api/titan",
+      "destination": "/api/titan.js"
+    },
+    {
       "source": "/admin-test",
       "destination": "/admin-test.html"
     },

@@ -83,6 +83,10 @@
     return routeApi("/api/business-os", action || "dashboard", payload || {});
   }
 
+  async function titanApi(action, payload) {
+    return routeApi("/api/titan", action || "titanStatus", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -382,6 +386,52 @@
     }
   }
 
+  function renderTitan(payload) {
+    var target = $("#titanMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var cards = [
+      ["AI Executive Board", data.boardMembers || (data.boardMembers === 0 ? 0 : "ready")],
+      ["CompHelp AI Score", data.score || "ready"],
+      ["Sprint Quality Gates", data.gates ? data.gates.length : "ready"],
+      ["Product Strategy", data.priorities ? data.priorities.length : "ready"],
+      ["Customer Feedback", data.channels ? data.channels.length : "ready"],
+      ["Performance", data.dimensions ? data.dimensions.performance : "ready"],
+      ["Reliability", data.dimensions ? data.dimensions.reliability : "ready"],
+      ["Security", data.dimensions ? data.dimensions.security : "ready"],
+      ["AI Quality", data.dimensions ? data.dimensions.qa : "ready"],
+      ["Competitor Matrix", data.categories ? data.categories.length : "ready"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#titanResult")) {
+      $("#titanResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
+  function renderProjectControl(payload) {
+    var target = $("#projectControlMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var cards = [
+      ["Current Sprint", data.currentSprint || "Project Control Center Sprint"],
+      ["Current Release", data.releaseStatus || data.currentRelease || "v0.7"],
+      ["Completed Milestones", data.completedMilestones ? data.completedMilestones.length : "ready"],
+      ["Next 3 Sprints", data.nextSprints ? data.nextSprints.length : "ready"],
+      ["Ideas Backlog", data.backlogCount || data.totalIdeas || (data.ideas ? data.ideas.length : "ready")],
+      ["Blocked Items", data.blockedItems ? data.blockedItems.length : "ready"],
+      ["Quality Gates", data.qualityGateStatus ? Object.keys(data.qualityGateStatus).length : "ready"],
+      ["Deploy Checklist", data.deployApproval || "approval required"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#projectControlResult")) {
+      $("#projectControlResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   async function refreshDeveloperCenter(action, writeOutput) {
     var result = await routeApi("/api/developer", action || "fullReport", {});
     renderDeveloperCenter(result, writeOutput);
@@ -662,6 +712,74 @@
         }
       });
     }
+
+    if ($("#refreshTitanStatus")) {
+      $("#refreshTitanStatus").addEventListener("click", async function () {
+        var button = $("#refreshTitanStatus");
+        button.disabled = true;
+        try {
+          renderTitan(await titanApi("titanStatus", {}));
+        } catch (error) {
+          $("#titanResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    if ($("#runExecutiveBoard")) {
+      $("#runExecutiveBoard").addEventListener("click", async function () {
+        var button = $("#runExecutiveBoard");
+        button.disabled = true;
+        try {
+          renderTitan(await titanApi("executiveBoard", {}));
+        } catch (error) {
+          $("#titanResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    if ($("#runTitanQualityGates")) {
+      $("#runTitanQualityGates").addEventListener("click", async function () {
+        var button = $("#runTitanQualityGates");
+        button.disabled = true;
+        try {
+          renderTitan(await titanApi("qualityGates", {}));
+        } catch (error) {
+          $("#titanResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    [
+      ["#refreshProjectControl", "projectControlStatus"],
+      ["#showRoadmapSummary", "roadmapSummary"],
+      ["#showBacklogSummary", "backlogSummary"],
+      ["#showSprintPlan", "sprintPlan"],
+      ["#showReleasePlan", "releasePlan"],
+      ["#showDecisionLog", "decisionLog"],
+      ["#showFocusRules", "focusRules"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderProjectControl(await titanApi(action, {}));
+          } catch (error) {
+            $("#projectControlResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
 
     if ($("#generateBusinessReports")) {
       $("#generateBusinessReports").addEventListener("click", async function () {

@@ -91,3 +91,9 @@ Minimum test expectations:
 - Do not remove existing service pages, SEO pages, chatbot, lead form, marketplace APIs, or automation scripts.
 - Prefer additive changes over rewrites.
 
+## Project Titan Standards
+
+- Titan agents must export `name`, `role`, `mission`, `responsibilities`, `inputs`, `outputs`, `KPIs`, `escalationRules`, and `run()`.
+- Titan API responses must use `{ "ok": true, "data": ... }` or `{ "ok": false, "error": "message" }`.
+- Titan Alpha must use safe internal/default reports only.
+- Titan dashboard actions must run only on owner click, not automatically on page load.

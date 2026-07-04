@@ -100,3 +100,17 @@ Scope:
 - Marketplace billing.
 - Industry-specific agent packs.
 - Approval workflows for autonomous actions.
+
+## Project Titan Roadmap
+
+Titan Alpha: engineering operating system, AI Constitution, AI Executive Board foundation, CompHelp AI Score, quality gates, and internal review dashboard.
+
+Titan Beta: AI Executive Board reports with deeper product, security, reliability, and customer success reviews.
+
+Titan Gamma: CompHelp Brain shared memory for approved company knowledge, decisions, lessons, and operating context.
+
+Titan Delta: AI company daily briefing covering product, engineering, sales, support, marketing, reliability, security, and recommended next actions.
+
+## Project Control Center
+
+The Project Control Center is the planning layer that prevents scope creep. It owns the current sprint, next sprints, release plan, ideas backlog, decision log, focus rules, blocked items, and deploy checklist.

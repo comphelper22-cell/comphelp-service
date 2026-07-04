@@ -84,3 +84,7 @@ The platform foundation writes audit records for organization creation, user cre
 - Do not invent reviews or false claims.
 - Do not deploy without approval.
 - Do not push without approval.
+
+## Project Titan Safety
+
+Project Titan reports are internal. Titan Alpha must not connect to external APIs, scrape competitors, send outreach, publish social posts, push GitHub changes, or trigger Vercel deployments. Titan outputs are advisory until the owner approves a future automation policy.

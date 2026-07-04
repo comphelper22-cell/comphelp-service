@@ -46,6 +46,8 @@
         <button data-target="activity">Activity Logs</button>
         <button data-target="deployment">Deployment</button>
         <button data-target="developer">Developer Center</button>
+        <button data-target="projectTitan">Project Titan</button>
+        <button data-target="projectControl">Project Control</button>
         <button data-target="marketing">Marketing</button>
         <button data-target="seo">SEO Manager</button>
         <button data-target="smm">SMM Manager</button>
@@ -520,6 +522,48 @@
             <p class="status"></p>
             <pre id="developerDeployResult"></pre>
           </form>
+        </div>
+      </section>
+
+      <section data-view="projectTitan">
+        <div class="two">
+          <div class="panel">
+            <h2>Project Titan</h2>
+            <p class="muted">Engineering operating system, AI Executive Board, CompHelp AI Score, sprint quality gates, and internal strategy review. Reports run only when requested.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshTitanStatus" type="button">Run Titan Status</button>
+              <button class="btn" id="runExecutiveBoard" type="button">Executive Board</button>
+              <button class="btn" id="runTitanQualityGates" type="button">Quality Gates</button>
+            </div>
+            <div class="grid" id="titanMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Titan Output</h2>
+            <pre id="titanResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="projectControl">
+        <div class="two">
+          <div class="panel">
+            <h2>Project Control Center</h2>
+            <p class="muted">Permanent planning center for mission, releases, sprints, backlog, decisions, blocked items, quality gates, and deploy readiness.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshProjectControl" type="button">Control Status</button>
+              <button class="btn" id="showRoadmapSummary" type="button">Roadmap</button>
+              <button class="btn" id="showBacklogSummary" type="button">Backlog</button>
+              <button class="btn" id="showSprintPlan" type="button">Sprint Plan</button>
+              <button class="btn" id="showReleasePlan" type="button">Release Plan</button>
+              <button class="btn" id="showDecisionLog" type="button">Decisions</button>
+              <button class="btn" id="showFocusRules" type="button">Focus Rules</button>
+            </div>
+            <div class="grid" id="projectControlMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Control Output</h2>
+            <pre id="projectControlResult"></pre>
+          </div>
         </div>
       </section>
 

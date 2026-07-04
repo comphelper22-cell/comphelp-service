@@ -95,3 +95,15 @@ Deployment:
 - Never remove working features while extending the system.
 - Prefer additive, backward-compatible changes.
 - Keep the app deployable after each phase.
+
+## Project Titan
+
+Project Titan is the internal engineering operating system for building CompHelp AI. Titan adds the AI Executive Board, CompHelp AI Score, sprint quality gates, product strategy review, customer feedback loop, and quality review categories for performance, reliability, security, and AI output quality.
+
+Titan is foundation-only until explicitly expanded. It does not scrape competitors, call external APIs, send messages, publish content, push code, or deploy infrastructure.
+
+## Project Control Center
+
+The Project Control Center sits beside Project Titan as the planning and focus layer. It stores the current mission, release, sprint, backlog, decisions, and next actions in Markdown documents and exposes safe internal summaries through `/api/titan`.
+
+The Control Center does not automate work. It organizes work so future agents and engineers can choose the right next task without losing the long-term vision.

@@ -162,3 +162,29 @@ Escalation rules: ask owner before publishing policies, guarantees, or legal-fac
 
 Metrics: docs updated, repeated questions reduced, SOP adoption.
 
+## Project Titan Agents
+
+Project Titan adds internal review agents:
+
+- AI Strategy Agent.
+- AI Product Agent.
+- AI Customer Success Agent.
+- AI Performance Agent.
+- AI Reliability Agent.
+- AI Security Agent.
+- AI QA Agent.
+- AI Innovation Agent.
+
+These agents expose metadata and `run()` reports. They are internal reviewers only in Titan Alpha and must not trigger external automation.
+
+## Project Control Agent
+
+Purpose: keep the full CompHelp AI vision, roadmap, sprint tasks, backlog, blocked items, and next actions organized.
+
+Responsibilities: report current sprint, release status, backlog count, blocked items, quality gates, and recommended next step.
+
+Inputs: roadmap, sprint plan, release plan, decision log, ideas backlog, focus rules.
+
+Outputs: project control status, roadmap summary, backlog summary, sprint plan, release plan, decision log, focus rules.
+
+Escalation rules: sprint scope changes, commits, pushes, and deployments require owner approval.
