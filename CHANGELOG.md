@@ -1,5 +1,13 @@
 # Changelog
 
+## Project Titan Sprint 19 - Beta Launch Package
+
+- Added beta launch modules for demo mode, demo data, scenarios, checklist, feedback, feature tour, release readiness, customer demo, and known limitations.
+- Added Beta Manager Agent.
+- Added Beta Center dashboard UI.
+- Added beta launch documentation, demo script, customer demo guide, known limitations, and first customer checklist.
+- Added `tests/beta-launch.test.js`.
+
 ## Project Titan Sprint 18 - Production Hardening
 
 - Added production hardening modules for health checks, error boundaries, security checklist, performance audit, deployment audit, and release readiness.

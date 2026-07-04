@@ -28,6 +28,7 @@
       <p class="sub">Marketplace Manager V1</p>
       <nav class="nav" aria-label="Dashboard modules">
         <button class="is-active" data-target="dashboard">Dashboard</button>
+        <button data-target="betaCenter">Beta Center</button>
         <button data-target="businessDashboard">Business Dashboard</button>
         <button data-target="executiveDashboard">Executive Dashboard</button>
         <button data-target="salesManager">Sales Manager</button>
@@ -133,6 +134,47 @@
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>Recent Leads</h2><div class="list" id="recentLeads"></div></div>
           <div class="panel"><h2>Top Vendors</h2><div class="list" id="topVendors"></div></div>
+        </div>
+      </section>
+
+      <section data-view="betaCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Beta Center</h2>
+            <p class="muted">Customer demo package for understanding CompHelp AI in less than 10 minutes with synthetic demo data, known limitations, feedback capture, and readiness checks.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshBetaCenter" type="button">Beta Dashboard</button>
+              <button class="btn" id="showBetaTour" type="button">Product Tour</button>
+              <button class="btn" id="showBetaScenarios" type="button">Demo Scenarios</button>
+              <button class="btn" id="showBetaChecklist" type="button">Checklist</button>
+              <button class="btn" id="showBetaLimitations" type="button">Limitations</button>
+            </div>
+            <div class="grid" id="betaMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Welcome Wizard</h2>
+            <div class="list" id="betaWelcomeWizard"></div>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Interactive Product Tour</h2><div class="list" id="betaFeatureTour"></div></div>
+          <div class="panel"><h2>Demo Company</h2><div class="list" id="betaDemoCompany"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Demo Customers</h2><div class="list" id="betaDemoCustomers"></div></div>
+          <div class="panel"><h2>Demo Jobs</h2><div class="list" id="betaDemoJobs"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Demo Estimates</h2><div class="list" id="betaDemoEstimates"></div></div>
+          <div class="panel"><h2>Demo Invoices</h2><div class="list" id="betaDemoInvoices"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Known Limitations</h2><div class="list" id="betaKnownLimitations"></div></div>
+          <div class="panel"><h2>Feedback Form</h2><div class="list" id="betaFeedbackForm"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Release Checklist</h2><div class="list" id="betaReleaseChecklist"></div></div>
+          <div class="panel"><h2>Beta Output</h2><pre id="betaResult"></pre></div>
         </div>
       </section>
 

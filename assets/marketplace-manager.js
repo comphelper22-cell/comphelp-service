@@ -159,6 +159,55 @@
     return systemApi("integrations", action || "integrations.dashboard", payload || {});
   }
 
+  function betaDemoData() {
+    return {
+      welcomeWizard: ["Choose demo company", "Review product tour", "Walk through demo scenarios", "Collect feedback", "Review next steps"],
+      demoCompany: { name: "CompHelp Service Demo Company", city: "Los Angeles", industry: "Local technology services", serviceArea: "Los Angeles, Burbank, Glendale, North Hollywood, Studio City" },
+      demoCustomers: [
+        { name: "LA Market Owner", city: "Los Angeles", status: "VIP", serviceNeed: "Security Camera Installation" },
+        { name: "Burbank Office Manager", city: "Burbank", status: "New Lead", serviceNeed: "WiFi & Network Installation" },
+        { name: "Glendale Homeowner", city: "Glendale", status: "Follow-up", serviceNeed: "Smart Home Setup" }
+      ],
+      demoJobs: [
+        { title: "4-camera storefront install", customerName: "LA Market Owner", status: "Scheduled", priority: "High", value: 899 },
+        { title: "Office WiFi cleanup", customerName: "Burbank Office Manager", status: "Estimate Sent", priority: "Medium", value: 650 },
+        { title: "Laptop repair and backup", customerName: "Glendale Homeowner", status: "Follow-up", priority: "Medium", value: 220 }
+      ],
+      demoEstimates: [
+        { service: "Security Camera Installation", customerName: "LA Market Owner", low: 799, high: 1199, recommended: 899, status: "Ready" },
+        { service: "WiFi & Network Installation", customerName: "Burbank Office Manager", low: 450, high: 850, recommended: 650, status: "Sent" }
+      ],
+      demoInvoices: [
+        { id: "inv_demo_1", customerName: "LA Market Owner", amount: 899, status: "Draft" },
+        { id: "inv_demo_2", customerName: "Glendale Homeowner", amount: 220, status: "Paid" }
+      ],
+      productTour: [
+        { title: "Founder Command Center", value: "Business health, AI actions, revenue, risks, and workflow status." },
+        { title: "Sales Manager", value: "Pipeline, estimate priority, follow-ups, and revenue opportunities." },
+        { title: "Operations Center", value: "Jobs, technicians, urgent work, and customer waiting issues." },
+        { title: "Dispatch AI", value: "Scheduling suggestions, technician matching, route ideas, and ETA windows." },
+        { title: "Finance Center", value: "Revenue, invoices, cash flow, profit, alerts, and recommendations." },
+        { title: "Marketing & Growth", value: "Lead sources, campaigns, reviews, SEO, social, and ROI." }
+      ],
+      scenarios: [
+        { title: "Owner opens dashboard", goal: "Understand business health in under 60 seconds." },
+        { title: "New camera lead arrives", goal: "Show lead qualification, estimate, and dispatch handoff." },
+        { title: "Daily operations review", goal: "Review jobs, technician availability, and urgent work." },
+        { title: "Owner reviews growth", goal: "Show marketing, finance, analytics, and recommendations." }
+      ],
+      limitations: [
+        "External services are not connected in beta demo mode.",
+        "Authentication is still internal admin-code based.",
+        "Billing is architecture-only and does not process payments.",
+        "Public integrations are placeholders and do not send data.",
+        "Demo data is synthetic and should not be presented as real customer results."
+      ],
+      feedbackFields: ["Customer name", "Company", "What was clear?", "What was confusing?", "Top requested feature", "Would use beta?", "Notes"],
+      checklist: ["Demo data loads", "Tour explains product", "Known limitations are visible", "Feedback can be captured", "No private data shown", "Owner approval before deploy"],
+      betaReadinessScore: 92
+    };
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -1158,6 +1207,58 @@
     }
   }
 
+  function renderBetaCenter(view) {
+    var target = $("#betaMetrics");
+    if (!target) return;
+    var data = betaDemoData();
+    var cards = [
+      ["Readiness Score", data.betaReadinessScore + "/100"],
+      ["Demo Time", "10 min"],
+      ["Demo Customers", data.demoCustomers.length],
+      ["Demo Jobs", data.demoJobs.length],
+      ["Demo Estimates", data.demoEstimates.length],
+      ["Demo Invoices", data.demoInvoices.length],
+      ["Known Limitations", data.limitations.length],
+      ["Feedback Fields", data.feedbackFields.length]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#betaWelcomeWizard", data.welcomeWizard.map(function (step, index) {
+      return { title: "Step " + (index + 1), meta: "Welcome Wizard", detail: step, pill: "demo" };
+    }), "No wizard steps.");
+    renderList("#betaFeatureTour", data.productTour.map(function (item) {
+      return { title: item.title, meta: "Product Tour", detail: item.value, pill: "tour" };
+    }), "No tour items.");
+    renderList("#betaDemoCompany", Object.keys(data.demoCompany).map(function (key) {
+      return { title: key, meta: "Demo Company", detail: data.demoCompany[key], pill: "demo" };
+    }), "No demo company.");
+    renderList("#betaDemoCustomers", data.demoCustomers.map(function (customer) {
+      return { title: customer.name, meta: customer.city, detail: customer.serviceNeed, pill: customer.status };
+    }), "No demo customers.");
+    renderList("#betaDemoJobs", data.demoJobs.map(function (job) {
+      return { title: job.title, meta: job.customerName, detail: job.status + " | " + money(job.value), pill: job.priority };
+    }), "No demo jobs.");
+    renderList("#betaDemoEstimates", data.demoEstimates.map(function (estimate) {
+      return { title: estimate.service, meta: estimate.customerName, detail: money(estimate.low) + " - " + money(estimate.high) + " | Recommended " + money(estimate.recommended), pill: estimate.status };
+    }), "No demo estimates.");
+    renderList("#betaDemoInvoices", data.demoInvoices.map(function (invoice) {
+      return { title: invoice.id, meta: invoice.customerName, detail: money(invoice.amount), pill: invoice.status };
+    }), "No demo invoices.");
+    renderList("#betaKnownLimitations", data.limitations.map(function (item) {
+      return { title: item, meta: "Known limitation", detail: "Explain before customer demo.", pill: "transparent" };
+    }), "No known limitations.");
+    renderList("#betaFeedbackForm", data.feedbackFields.map(function (field) {
+      return { title: field, meta: "Feedback Form", detail: "Capture manually during beta demo.", pill: "field" };
+    }), "No feedback fields.");
+    renderList("#betaReleaseChecklist", data.checklist.map(function (item) {
+      return { title: item, meta: "Release Checklist", detail: "Required before first beta customer.", pill: "ready" };
+    }), "No checklist items.");
+    if ($("#betaResult")) {
+      $("#betaResult").textContent = JSON.stringify({ view: view || "dashboard", data: data }, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -1397,6 +1498,7 @@
     renderActivityLogs(dashboard.activityLogs);
     renderDeployment(dashboard.deployment);
     renderQuestions($("select[name='service']").value);
+    renderBetaCenter("dashboard");
     await refreshFounderDashboard().catch(function () {});
     await operationsApi("operations.dashboard", {}).then(renderOperationsDashboard).catch(function () {});
     await financeApi("finance.dashboard", {}).then(renderFinanceDashboard).catch(function () {});
@@ -1934,6 +2036,22 @@
           } finally {
             button.disabled = false;
           }
+        });
+      }
+    });
+
+    [
+      ["#refreshBetaCenter", "dashboard"],
+      ["#showBetaTour", "tour"],
+      ["#showBetaScenarios", "scenarios"],
+      ["#showBetaChecklist", "checklist"],
+      ["#showBetaLimitations", "limitations"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var view = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", function () {
+          renderBetaCenter(view);
         });
       }
     });
