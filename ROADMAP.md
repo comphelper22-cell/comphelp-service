@@ -24,6 +24,7 @@ Goal: turn leads, customers, vendors, projects, estimates, invoices, tasks, note
 
 Scope:
 
+- Core platform foundation: organizations, users, roles, permissions, sessions, audit logs, notifications, and preferences.
 - CRM pipeline stages.
 - Search and filtering.
 - Customer timeline.
@@ -99,4 +100,3 @@ Scope:
 - Marketplace billing.
 - Industry-specific agent packs.
 - Approval workflows for autonomous actions.
-

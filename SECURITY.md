@@ -19,6 +19,12 @@ Roles:
 
 Every API route should verify role permissions before writes.
 
+The v0.7 platform foundation stores roles and permissions in the database layer. Default roles are admin, manager, dispatcher, technician, customer, and viewer. Future SaaS authorization must evaluate tenant, role, resource, action, and explicit permission effect before allowing writes.
+
+## Session Management
+
+Sessions must store hashed token values, not raw tokens. Sessions should include user, organization, role, status, expiration time, creation time, and optional revocation time. Expired or revoked sessions must not authorize requests.
+
 ## Secrets Management
 
 - Never commit `.env` or `.env.local`.
@@ -68,6 +74,8 @@ Audit logs should track sensitive actions:
 - Deployment actions.
 - Data export.
 
+The platform foundation writes audit records for organization creation, user creation, session creation, session revocation, notification creation, preference updates, RBAC default creation, and manual audit events.
+
 ## Security Rules
 
 - Do not mass-send messages.
@@ -76,4 +84,3 @@ Audit logs should track sensitive actions:
 - Do not invent reviews or false claims.
 - Do not deploy without approval.
 - Do not push without approval.
-

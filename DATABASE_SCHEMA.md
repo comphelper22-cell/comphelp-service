@@ -72,7 +72,7 @@ Relationships: activity can reference any entity by `related_type` and `related_
 
 Stores SaaS users.
 
-Fields: `id`, `tenant_id`, `name`, `email`, `phone`, `status`, `created_at`, `updated_at`, `deleted_at`.
+Fields: `id`, `tenant_id`, `organization_id`, `name`, `email`, `phone`, `role`, `status`, `auth_provider`, `supabase_user_id`, `created_at`, `updated_at`, `deleted_at`.
 
 Relationships: users have roles and create audit log entries.
 
@@ -88,7 +88,23 @@ Recommended roles: `admin`, `manager`, `dispatcher`, `technician`, `customer`, `
 
 Stores role capabilities.
 
-Fields: `id`, `tenant_id`, `role_id`, `resource`, `action`, `allowed`, `created_at`, `updated_at`.
+Fields: `id`, `tenant_id`, `organization_id`, `role_id`, `role`, `resource`, `action`, `effect`, `status`, `created_at`, `updated_at`, `deleted_at`.
+
+### organizations
+
+Stores tenant and business account records.
+
+Fields: `id`, `tenant_id`, `name`, `slug`, `industry`, `city`, `owner_email`, `status`, `created_at`, `updated_at`, `deleted_at`.
+
+Relationships: organizations own users, roles, permissions, sessions, notifications, preferences, customers, leads, projects, estimates, invoices, and audit logs.
+
+### sessions
+
+Stores user session records.
+
+Fields: `id`, `tenant_id`, `organization_id`, `user_id`, `role`, `token_hash`, `status`, `expires_at`, `revoked_at`, `created_at`, `updated_at`, `deleted_at`.
+
+Raw session tokens must never be stored.
 
 ### audit_logs
 
@@ -114,6 +130,18 @@ Stores parts, equipment, and materials.
 
 Fields: `id`, `tenant_id`, `sku`, `name`, `category`, `quantity`, `unit_cost`, `reorder_level`, `vendor_id`, `status`, `created_at`, `updated_at`, `deleted_at`.
 
+### notifications
+
+Stores in-app and future email/SMS notification records.
+
+Fields: `id`, `tenant_id`, `organization_id`, `user_id`, `type`, `title`, `message`, `status`, `created_at`, `updated_at`, `deleted_at`.
+
+### preferences
+
+Stores user and organization settings.
+
+Fields: `id`, `tenant_id`, `organization_id`, `user_id`, `key`, `value`, `scope`, `status`, `created_at`, `updated_at`, `deleted_at`.
+
 ## Relationships
 
 - `tenants` own all SaaS records.
@@ -135,4 +163,3 @@ Audit logs are append-only. They should record authentication changes, role chan
 ## Multi-Tenant SaaS Strategy
 
 Every production table should include `tenant_id`. Row-level security should scope reads and writes by tenant and role. Shared service templates can live in global tables, but customer, lead, project, invoice, message, and audit data must remain tenant isolated.
-

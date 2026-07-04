@@ -347,6 +347,7 @@
     var developer = report.developer || report.report || report;
     var deployment = report.deployment || payload.deployment || {};
     var database = report.database || payload.database || deployment.database || {};
+    var platform = report.platform || payload.platform || {};
     var summary = developer.summary || {};
     var git = developer.git || deployment.gitStatus || {};
     var metrics = [
@@ -362,6 +363,11 @@
       ["JSON Fallback", database.jsonFallbackAvailable === false ? "missing" : (deployment.jsonStatus || "ready")],
       ["Last Database Check", database.timestamp || database.generatedAt || "not checked"],
       ["Database Errors", database.errors ? database.errors.length : 0],
+      ["Auth Status", platform.authStatus || "not checked"],
+      ["RBAC Status", platform.rbacStatus || "not checked"],
+      ["Organization Status", platform.organizationStatus || "not checked"],
+      ["Session Status", platform.sessionStatus || "not checked"],
+      ["Audit Log Status", platform.auditLogStatus || "not checked"],
       ["Backup", deployment.backupStatus || "checking"],
       ["API", deployment.apiStatus ? deployment.apiStatus.filter(function (item) { return item.exists; }).length + "/" + deployment.apiStatus.length : "checking"],
       ["Syntax Issues", summary.syntaxIssues || 0],
@@ -619,6 +625,21 @@
         button.disabled = true;
         try {
           var result = await refreshDeveloperCenter("databaseStatus");
+          $("#developerResult").textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          $("#developerResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    if ($("#checkPlatformStatus")) {
+      $("#checkPlatformStatus").addEventListener("click", async function () {
+        var button = $("#checkPlatformStatus");
+        button.disabled = true;
+        try {
+          var result = await refreshDeveloperCenter("platformStatus");
           $("#developerResult").textContent = JSON.stringify(result, null, 2);
         } catch (error) {
           $("#developerResult").textContent = error.message;

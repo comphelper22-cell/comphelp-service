@@ -38,6 +38,7 @@ API layer:
 - `/api/marketplace` handles current marketplace dashboard resources.
 - `/api/business-os` handles business dashboard, CRM, estimates, dispatcher, analytics, and reports.
 - `/api/developer` handles Developer Center reports, validation, deployment readiness, and database status.
+- `/api/platform` handles the v0.7 core platform foundation for organizations, users, roles, permissions, sessions, audit logs, notifications, and preferences.
 - Supporting APIs handle quotes, uploads, outreach, estimates, follow-ups, social leads, and vendor dispatch.
 
 Database layer:
@@ -46,6 +47,16 @@ Database layer:
 - Supabase is used when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured.
 - JSON fallback uses `data/marketplace.json` and must never be broken.
 - Modules expose `create`, `list`, `getById`, `update`, `remove`, and `search`.
+- v0.7 platform modules add users, organizations, roles, permissions, sessions, audit logs, notifications, and preferences while preserving JSON fallback compatibility.
+
+Core platform foundation:
+
+- Organizations are the future tenant boundary.
+- Users belong to organizations and receive roles.
+- Roles map to permissions.
+- Sessions are stored by hashed token values.
+- Audit logs record account, permission, session, and workflow events.
+- Notifications and preferences provide the base for multi-user dashboard experiences.
 
 AI agent layer:
 
@@ -84,4 +95,3 @@ Deployment:
 - Never remove working features while extending the system.
 - Prefer additive, backward-compatible changes.
 - Keep the app deployable after each phase.
-

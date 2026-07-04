@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 const { database, databaseStatus: writeDatabaseStatus, supabaseConfigured } = require("../database");
+const { platformStatus: writePlatformStatus } = require("./platform-agent");
 
 const ROOT = path.resolve(__dirname, "..");
 const LOG_DIR = path.join(ROOT, "logs");
@@ -197,7 +198,7 @@ function deploymentReport() {
   const git = gitStatus();
   const databaseHealth = fs.existsSync(path.join(ROOT, "data", "marketplace.json")) ? "json_ready" : "json_missing";
   const backupReport = path.join(LOG_DIR, "backup-report.json");
-  const apiFiles = ["api/marketplace.js", "api/developer.js", "api/business-os.js"].map((file) => ({ file, exists: fs.existsSync(path.join(ROOT, file)) }));
+  const apiFiles = ["api/marketplace.js", "api/developer.js", "api/business-os.js", "api/platform.js"].map((file) => ({ file, exists: fs.existsSync(path.join(ROOT, file)) }));
   return writeReport("deployment-report.json", {
     ok: git.ok,
     readiness: git.clean ? "ready_for_review" : "pending_changes",
@@ -223,6 +224,10 @@ async function databaseStatus() {
   return writeDatabaseStatus();
 }
 
+async function platformStatus() {
+  return writePlatformStatus();
+}
+
 function fullReport() {
   const developer = analyzeProject();
   const deployment = deploymentReport();
@@ -237,6 +242,8 @@ async function main() {
       ? deploymentReport()
       : action === "databaseStatus"
         ? await databaseStatus()
+        : action === "platformStatus"
+          ? await platformStatus()
         : fullReport();
   console.log(JSON.stringify(output, null, 2));
 }
@@ -249,6 +256,7 @@ module.exports = {
   validateProject,
   deploymentReport,
   databaseStatus,
+  platformStatus,
   fullReport,
   gitStatus
 };

@@ -1,5 +1,240 @@
 {
   "version": 1,
+  "leads": [],
+  "vendors": [
+    {
+      "id": "vendor-camera-001",
+      "name": "Preferred Camera Installer",
+      "category": "Cameras",
+      "services": [
+        "Security Camera Installation"
+      ],
+      "city": "Los Angeles",
+      "phone": "",
+      "email": "",
+      "website": "",
+      "serviceArea": "Los Angeles County",
+      "commissionPercent": 10,
+      "distanceMiles": 8,
+      "rating": 4.8,
+      "availability": "Same week",
+      "contact": "vendor@example.com",
+      "notes": "Preferred camera installation partner. Confirm availability before assigning jobs.",
+      "status": "active"
+    },
+    {
+      "id": "vendor-network-001",
+      "name": "Preferred Network Technician",
+      "category": "WiFi",
+      "services": [
+        "WiFi & Network Installation",
+        "Smart Home Setup"
+      ],
+      "city": "Burbank",
+      "phone": "",
+      "email": "",
+      "website": "",
+      "serviceArea": "Burbank, Glendale, Los Angeles",
+      "commissionPercent": 10,
+      "distanceMiles": 11,
+      "rating": 4.7,
+      "availability": "Next 3 days",
+      "contact": "network@example.com",
+      "notes": "Good fit for WiFi, networking, and smart home setup projects.",
+      "status": "active"
+    },
+    {
+      "id": "vendor-data-001",
+      "name": "Preferred Data Recovery Partner",
+      "category": "Data Recovery",
+      "services": [
+        "Data Recovery",
+        "Computer Repair"
+      ],
+      "city": "Glendale",
+      "phone": "",
+      "email": "",
+      "website": "",
+      "serviceArea": "Los Angeles County",
+      "commissionPercent": 12,
+      "distanceMiles": 13,
+      "rating": 4.9,
+      "availability": "By appointment",
+      "contact": "data@example.com",
+      "notes": "Use for data recovery and advanced computer repair referrals.",
+      "status": "active"
+    }
+  ],
+  "projects": [],
+  "estimates": [],
+  "customers": [],
+  "tasks": [],
+  "activity": [],
+  "activityLogs": [],
+  "settings": [],
+  "users": [],
+  "organizations": [],
+  "roles": [
+    {
+      "name": "viewer",
+      "scope": "tenant",
+      "description": "viewer access role",
+      "status": "active",
+      "id": "roles_1783142287759_5e1b79",
+      "createdAt": "2026-07-04T05:18:07.760Z",
+      "updatedAt": "2026-07-04T05:18:07.760Z"
+    },
+    {
+      "name": "customer",
+      "scope": "tenant",
+      "description": "customer access role",
+      "status": "active",
+      "id": "roles_1783142287757_dbf81d",
+      "createdAt": "2026-07-04T05:18:07.759Z",
+      "updatedAt": "2026-07-04T05:18:07.759Z"
+    },
+    {
+      "name": "technician",
+      "scope": "tenant",
+      "description": "technician access role",
+      "status": "active",
+      "id": "roles_1783142287756_4c2f2b",
+      "createdAt": "2026-07-04T05:18:07.757Z",
+      "updatedAt": "2026-07-04T05:18:07.757Z"
+    },
+    {
+      "name": "dispatcher",
+      "scope": "tenant",
+      "description": "dispatcher access role",
+      "status": "active",
+      "id": "roles_1783142287754_7a77ad",
+      "createdAt": "2026-07-04T05:18:07.755Z",
+      "updatedAt": "2026-07-04T05:18:07.755Z"
+    },
+    {
+      "name": "manager",
+      "scope": "tenant",
+      "description": "manager access role",
+      "status": "active",
+      "id": "roles_1783142287751_88f9a6",
+      "createdAt": "2026-07-04T05:18:07.753Z",
+      "updatedAt": "2026-07-04T05:18:07.753Z"
+    },
+    {
+      "name": "admin",
+      "scope": "tenant",
+      "description": "admin access role",
+      "status": "active",
+      "id": "roles_1783142287748_77585a",
+      "createdAt": "2026-07-04T05:18:07.749Z",
+      "updatedAt": "2026-07-04T05:18:07.750Z"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "viewer",
+      "resource": "*",
+      "action": "read",
+      "effect": "allow",
+      "status": "active",
+      "id": "permissions_1783142287778_2dd04b",
+      "createdAt": "2026-07-04T05:18:07.780Z",
+      "updatedAt": "2026-07-04T05:18:07.780Z"
+    },
+    {
+      "role": "customer",
+      "resource": "portal",
+      "action": "read",
+      "effect": "allow",
+      "status": "active",
+      "id": "permissions_1783142287776_414121",
+      "createdAt": "2026-07-04T05:18:07.777Z",
+      "updatedAt": "2026-07-04T05:18:07.777Z"
+    },
+    {
+      "role": "technician",
+      "resource": "projects",
+      "action": "update",
+      "effect": "allow",
+      "status": "active",
+      "id": "permissions_1783142287774_8055f2",
+      "createdAt": "2026-07-04T05:18:07.775Z",
+      "updatedAt": "2026-07-04T05:18:07.775Z"
+    },
+    {
+      "role": "dispatcher",
+      "resource": "dispatch",
+      "action": "write",
+      "effect": "allow",
+      "status": "active",
+      "id": "permissions_1783142287771_425fe3",
+      "createdAt": "2026-07-04T05:18:07.772Z",
+      "updatedAt": "2026-07-04T05:18:07.772Z"
+    },
+    {
+      "role": "manager",
+      "resource": "vendors",
+      "action": "write",
+      "effect": "allow",
+      "status": "active",
+      "id": "permissions_1783142287768_861fbb",
+      "createdAt": "2026-07-04T05:18:07.770Z",
+      "updatedAt": "2026-07-04T05:18:07.770Z"
+    },
+    {
+      "role": "manager",
+      "resource": "estimates",
+      "action": "write",
+      "effect": "allow",
+      "status": "active",
+      "id": "permissions_1783142287766_026435",
+      "createdAt": "2026-07-04T05:18:07.767Z",
+      "updatedAt": "2026-07-04T05:18:07.767Z"
+    },
+    {
+      "role": "manager",
+      "resource": "leads",
+      "action": "write",
+      "effect": "allow",
+      "status": "active",
+      "id": "permissions_1783142287764_6d8af9",
+      "createdAt": "2026-07-04T05:18:07.765Z",
+      "updatedAt": "2026-07-04T05:18:07.765Z"
+    },
+    {
+      "role": "admin",
+      "resource": "*",
+      "action": "*",
+      "effect": "allow",
+      "status": "active",
+      "id": "permissions_1783142287761_af3426",
+      "createdAt": "2026-07-04T05:18:07.763Z",
+      "updatedAt": "2026-07-04T05:18:07.763Z"
+    }
+  ],
+  "sessions": [],
+  "auditLogs": [
+    {
+      "actorId": "system",
+      "organizationId": "",
+      "action": "rbac_defaults_created",
+      "resource": "platform",
+      "resourceId": "",
+      "status": "created",
+      "metadata": {
+        "roles": 6,
+        "permissions": 8
+      },
+      "createdAt": "2026-07-04T05:18:07.781Z",
+      "id": "auditLogs_1783142287781_f2b81b",
+      "updatedAt": "2026-07-04T05:18:07.782Z"
+    }
+  ],
+  "notifications": [],
+  "preferences": [],
+  "invoices": [],
+  "quoteRequests": [],
+  "commissions": [],
   "business": {
     "name": "CompHelp Service",
     "phone": "+1 (747) 295-1440",
@@ -95,75 +330,6 @@
       ]
     }
   },
-  "vendors": [
-    {
-      "id": "vendor-camera-001",
-      "name": "Preferred Camera Installer",
-      "category": "Cameras",
-      "services": [
-        "Security Camera Installation"
-      ],
-      "city": "Los Angeles",
-      "phone": "",
-      "email": "",
-      "website": "",
-      "serviceArea": "Los Angeles County",
-      "commissionPercent": 10,
-      "distanceMiles": 8,
-      "rating": 4.8,
-      "availability": "Same week",
-      "contact": "vendor@example.com",
-      "notes": "Preferred camera installation partner. Confirm availability before assigning jobs.",
-      "status": "active"
-    },
-    {
-      "id": "vendor-network-001",
-      "name": "Preferred Network Technician",
-      "category": "WiFi",
-      "services": [
-        "WiFi & Network Installation",
-        "Smart Home Setup"
-      ],
-      "city": "Burbank",
-      "phone": "",
-      "email": "",
-      "website": "",
-      "serviceArea": "Burbank, Glendale, Los Angeles",
-      "commissionPercent": 10,
-      "distanceMiles": 11,
-      "rating": 4.7,
-      "availability": "Next 3 days",
-      "contact": "network@example.com",
-      "notes": "Good fit for WiFi, networking, and smart home setup projects.",
-      "status": "active"
-    },
-    {
-      "id": "vendor-data-001",
-      "name": "Preferred Data Recovery Partner",
-      "category": "Data Recovery",
-      "services": [
-        "Data Recovery",
-        "Computer Repair"
-      ],
-      "city": "Glendale",
-      "phone": "",
-      "email": "",
-      "website": "",
-      "serviceArea": "Los Angeles County",
-      "commissionPercent": 12,
-      "distanceMiles": 13,
-      "rating": 4.9,
-      "availability": "By appointment",
-      "contact": "data@example.com",
-      "notes": "Use for data recovery and advanced computer repair referrals.",
-      "status": "active"
-    }
-  ],
-  "leads": [],
-  "estimates": [],
-  "quoteRequests": [],
-  "commissions": [],
-  "projects": [],
   "marketingIdeas": [],
   "mediaReviews": [],
   "sourceLeads": [],
@@ -171,7 +337,6 @@
   "followUps": [],
   "messageQueue": [],
   "optOuts": [],
-  "activityLogs": [],
   "deploymentRuns": [],
-  "updatedAt": "2026-06-14T00:00:00.000Z"
+  "updatedAt": "2026-07-04T05:18:07.782Z"
 }

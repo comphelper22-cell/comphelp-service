@@ -5,7 +5,24 @@ const { DATA_FILE, DEFAULT_DATA, JsonStore, ensureDir, id, now, writeJson } = re
 
 const ROOT = path.resolve(__dirname, "..");
 const LOG_DIR = path.join(ROOT, "logs");
-const TABLE_CHECKS = ["leads", "vendors", "projects", "estimates", "customers", "tasks", "activityLogs", "settings"];
+const TABLE_CHECKS = [
+  "leads",
+  "vendors",
+  "projects",
+  "estimates",
+  "customers",
+  "tasks",
+  "activityLogs",
+  "settings",
+  "users",
+  "organizations",
+  "roles",
+  "permissions",
+  "sessions",
+  "auditLogs",
+  "notifications",
+  "preferences"
+];
 
 function clean(value, max = 1000) {
   return String(value || "").trim().slice(0, max);

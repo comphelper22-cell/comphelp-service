@@ -87,6 +87,10 @@
       "destination": "/api/business-os.js"
     },
     {
+      "source": "/api/platform",
+      "destination": "/api/platform.js"
+    },
+    {
       "source": "/admin-test",
       "destination": "/admin-test.html"
     },
