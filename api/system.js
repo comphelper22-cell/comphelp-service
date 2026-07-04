@@ -34,6 +34,8 @@ const dispatchAiEngine = require("../dispatch-ai/dispatch-ai-engine");
 const aiDispatcherAgent = require("../agents/ai-dispatcher-agent");
 const saasEngine = require("../saas/tenant-engine");
 const saasAgent = require("../agents/saas-agent");
+const billingEngine = require("../billing/billing-engine");
+const billingAgent = require("../agents/billing-agent");
 
 const modules = {
   developer,
@@ -233,6 +235,18 @@ function runSaasAction(action, payload = {}) {
   return { ok: false, error: "unknown_saas_action" };
 }
 
+function runBillingAction(action, payload = {}) {
+  if (action === "billing.status") return { ok: true, data: billingEngine.status() };
+  if (action === "billing.plans") return billingEngine.plans(payload);
+  if (action === "billing.subscriptions") return billingEngine.subscriptions(payload);
+  if (action === "billing.invoices") return billingEngine.invoices(payload);
+  if (action === "billing.usage") return billingEngine.usage(payload);
+  if (action === "billing.dashboard") return billingEngine.dashboard(payload);
+  if (action === "billing.paymentStatus") return billingEngine.paymentStatus(payload);
+  if (action === "billing.agent") return { ok: true, data: billingAgent.run(payload) };
+  return { ok: false, error: "unknown_billing_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -260,7 +274,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
@@ -272,7 +286,8 @@ module.exports = async function handler(req, res) {
           marketingActions: ["marketing.status", "marketing.dashboard", "marketing.leads", "marketing.campaigns", "marketing.localSeo", "marketing.reviews", "marketing.social", "marketing.email", "marketing.roi", "marketing.recommendations"],
           analyticsActions: ["analytics.status", "analytics.dashboard", "analytics.kpis", "analytics.trends", "analytics.reports", "analytics.scorecard", "analytics.export", "analytics.insights"],
           dispatchAIActions: ["dispatchAI.status", "dispatchAI.dashboard", "dispatchAI.schedule", "dispatchAI.optimize", "dispatchAI.technicians", "dispatchAI.routes", "dispatchAI.eta", "dispatchAI.capacity", "dispatchAI.emergency"],
-          saasActions: ["saas.status", "saas.organizations", "saas.teams", "saas.permissions", "saas.settings", "saas.dashboard"]
+          saasActions: ["saas.status", "saas.organizations", "saas.teams", "saas.permissions", "saas.settings", "saas.dashboard"],
+          billingActions: ["billing.status", "billing.plans", "billing.subscriptions", "billing.invoices", "billing.usage", "billing.dashboard"]
         }
       });
     }
@@ -341,6 +356,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "saas") {
       const result = runSaasAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "billing") {
+      const result = runBillingAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

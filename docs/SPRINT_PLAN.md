@@ -667,3 +667,43 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 15 - SaaS Multi-Tenant Foundation"
 ```
+
+## Current Sprint: Project Titan Sprint 16
+
+Goal: create billing architecture and subscription plan management for future SaaS monetization.
+
+Scope:
+
+- Billing Engine.
+- Plans.
+- Subscriptions.
+- Invoices.
+- Usage Tracking.
+- Billing Dashboard.
+- Payment Status.
+- Billing Agent.
+- System API module `billing`.
+- Marketplace Billing Center section.
+- Billing & Subscriptions test.
+
+Out of scope:
+
+- Stripe connection.
+- Real payment processing.
+- Card data storage.
+- Tax/legal payment compliance.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Billing Center shows plans, subscription status, usage, invoices, payment status, and upgrade recommendations.
+- API supports `billing.status`, `billing.plans`, `billing.subscriptions`, `billing.invoices`, `billing.usage`, and `billing.dashboard`.
+- No Stripe connection exists.
+- No card data is stored.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 16 - Billing Subscriptions"
+```

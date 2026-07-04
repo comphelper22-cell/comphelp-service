@@ -155,7 +155,9 @@ Sprint 14: Scheduling & Dispatch AI with schedule optimization, technician match
 
 Sprint 15: SaaS Multi-Tenant Foundation with organizations, teams, roles, permissions, tenant settings, tenant context, and SaaS Admin Center using JSON fallback only.
 
-Sprint 16: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, and SaaS actions.
+Sprint 16: Billing & Subscriptions with draft plans, subscription status, usage tracking, invoice summaries, payment safety status, and Billing Center UI.
+
+Sprint 17: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, SaaS, and billing actions.
 
 ## API Consolidation Hotfix
 

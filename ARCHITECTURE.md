@@ -549,3 +549,24 @@ SaaS safety:
 - Supabase/PostgreSQL is prepared for later but not connected.
 - Secrets are never read, logged, or exposed.
 - Tenant health is advisory and should be verified before production SaaS onboarding.
+
+## Billing & Subscriptions
+
+Project Titan Sprint 16 adds billing architecture and subscription plan management for future SaaS monetization.
+
+Billing modules:
+
+- `billing-engine.js` exposes the Billing API surface.
+- `plans.js` defines draft SaaS plans and billing data normalization.
+- `subscriptions.js` summarizes tenant subscription status.
+- `invoices.js` summarizes billing invoices without processing payments.
+- `usage-tracking.js` prepares usage metering for future plan limits.
+- `billing-dashboard.js` combines plans, subscriptions, usage, invoices, payment status, and upgrade recommendations.
+- `payment-status.js` confirms payment-provider safety state.
+
+Billing safety:
+
+- Stripe is not connected.
+- No real payment processing exists.
+- Card data is never stored.
+- Billing outputs are architecture and planning data until a future approved payment sprint.

@@ -151,6 +151,10 @@
     return systemApi("saas", action || "saas.dashboard", payload || {});
   }
 
+  async function billingApi(action, payload) {
+    return systemApi("billing", action || "billing.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -1056,6 +1060,56 @@
     }
   }
 
+  function renderBillingDashboard(payload) {
+    var target = $("#billingMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var plans = data.plans || [];
+    var subscriptions = data.subscriptionStatus || data.subscriptions || [];
+    var usage = data.usage || data;
+    var usageTotals = usage.totals || {};
+    var invoices = data.invoices || [];
+    var payment = data.paymentStatus || data;
+    var recommendations = data.upgradeRecommendations || [];
+    var cards = [
+      ["Plans", plans.length || 0],
+      ["Subscriptions", subscriptions.length || data.activeSubscriptions || 0],
+      ["Usage Metrics", Object.keys(usageTotals).length || 0],
+      ["Invoices", invoices.length || data.openInvoices || 0],
+      ["Payment Status", payment.status || "ready"],
+      ["Stripe", payment.stripeConnected || data.stripeConnected ? "connected" : "not connected"],
+      ["Card Data", payment.cardDataStored ? "stored" : "not stored"],
+      ["Recommendations", recommendations.length || 0]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#billingPlans", plans.slice(0, 6).map(function (plan) {
+      return { title: plan.name, meta: money(plan.monthlyPrice || 0) + " / month", detail: "Leads: " + (plan.leadLimit || "custom") + " | Users: " + (plan.userLimit || "custom"), pill: plan.status || "draft" };
+    }), "No billing plans yet.");
+    renderList("#billingSubscriptions", subscriptions.slice(0, 6).map(function (subscription) {
+      return { title: subscription.planName || subscription.planId, meta: subscription.status || "draft", detail: "Seats: " + (subscription.seats || 1) + " | Provider: " + (subscription.paymentProvider || "none"), pill: subscription.billingCycle || "monthly" };
+    }), "No subscriptions yet.");
+    renderList("#billingUsage", Object.keys(usageTotals).map(function (metric) {
+      return { title: metric, meta: usageTotals[metric], detail: "Tracked usage metric for future plan limits.", pill: "usage" };
+    }), "No usage data yet.");
+    renderList("#billingInvoices", invoices.slice(0, 6).map(function (invoice) {
+      return { title: invoice.id, meta: money(invoice.amount || 0), detail: invoice.dueDate || invoice.source || "Billing invoice", pill: invoice.status || "draft" };
+    }), "No invoices yet.");
+    renderList("#billingPaymentStatus", [
+      { title: "Payment provider", meta: payment.paymentProvider || "none", detail: "Stripe is intentionally not connected.", pill: "safe" },
+      { title: "Payment processing", meta: payment.paymentProcessingEnabled ? "enabled" : "disabled", detail: "No real payment processing in Sprint 16.", pill: "disabled" },
+      { title: "Card data", meta: payment.cardDataStored ? "stored" : "not stored", detail: "Card data must never be stored locally.", pill: "safe" },
+      { title: "Recommended action", meta: payment.status || "ready", detail: payment.recommendedAction || "Finalize pricing first.", pill: "review" }
+    ], "No payment status yet.");
+    renderList("#billingUpgradeRecommendations", recommendations.slice(0, 6).map(function (item) {
+      return { title: item.title, meta: item.priority || "Review", detail: item.recommendedAction || item.reason, pill: "upgrade" };
+    }), "No upgrade recommendations yet.");
+    if ($("#billingResult")) {
+      $("#billingResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -1303,6 +1357,7 @@
     await analyticsReportsApi("analytics.dashboard", {}).then(renderAnalyticsReportsDashboard).catch(function () {});
     await dispatchAIApi("dispatchAI.dashboard", {}).then(renderDispatchAIDashboard).catch(function () {});
     await saasApi("saas.dashboard", {}).then(renderSaasDashboard).catch(function () {});
+    await billingApi("billing.dashboard", {}).then(renderBillingDashboard).catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -1778,6 +1833,31 @@
             renderSaasDashboard(await saasApi(action, {}));
           } catch (error) {
             $("#saasResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshBillingDashboard", "billing.dashboard"],
+      ["#showBillingPlans", "billing.plans"],
+      ["#showBillingSubscriptions", "billing.subscriptions"],
+      ["#showBillingInvoices", "billing.invoices"],
+      ["#showBillingUsage", "billing.usage"],
+      ["#showBillingStatus", "billing.paymentStatus"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderBillingDashboard(await billingApi(action, {}));
+          } catch (error) {
+            $("#billingResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

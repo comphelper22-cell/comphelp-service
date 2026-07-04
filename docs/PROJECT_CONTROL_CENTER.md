@@ -44,6 +44,7 @@ Project Control Center Sprint.
 - Analytics & Reporting Center for Project Titan Sprint 13.
 - Scheduling & Dispatch AI for Project Titan Sprint 14.
 - SaaS Multi-Tenant Foundation for Project Titan Sprint 15.
+- Billing & Subscriptions for Project Titan Sprint 16.
 - API consolidation hotfix for Vercel Hobby compatibility.
 
 ## Next 3 Sprints
@@ -92,6 +93,7 @@ git diff --stat
 - Analytics & Reporting Center shows business scorecard, trends, KPIs, weekly/monthly reports, and AI insights across departments.
 - Dispatch AI Center shows schedule optimization, technician availability, route suggestions, ETA, emergency jobs, conflicts, capacity, and AI dispatch suggestions.
 - SaaS Admin Center shows organizations, teams, roles, permissions, settings, tenant health, and JSON fallback mode.
+- Billing Center shows plans, subscription status, usage, invoices, payment status, and upgrade recommendations without payment processing.
 - Documentation updated.
 
 ## Deploy Checklist

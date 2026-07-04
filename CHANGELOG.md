@@ -1,5 +1,14 @@
 # Changelog
 
+## Project Titan Sprint 16 - Billing & Subscriptions
+
+- Added billing architecture modules for plans, subscriptions, invoices, usage tracking, payment status, and billing dashboard.
+- Added Billing Agent.
+- Added `billing.*` actions to `/api/system`.
+- Added Billing Center dashboard UI.
+- Added `tests/billing-subscriptions.test.js`.
+- Documented billing architecture, roadmap, sprint plan, and project control updates.
+
 ## Project Titan Sprint 15 - SaaS Multi-Tenant Foundation
 
 - Added SaaS foundation modules for organizations, teams, tenant context, permissions, settings, and tenant dashboard.

@@ -38,6 +38,7 @@
         <button data-target="analyticsReports">Analytics & Reports</button>
         <button data-target="dispatchAICenter">Dispatch AI</button>
         <button data-target="saasAdminCenter">SaaS Admin</button>
+        <button data-target="billingCenter">Billing</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -430,6 +431,40 @@
         <div class="panel" style="margin-top:.85rem">
           <h2>Tenant Health</h2>
           <div class="list" id="saasTenantHealth"></div>
+        </div>
+      </section>
+
+      <section data-view="billingCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Billing Center</h2>
+            <p class="muted">Billing architecture for future SaaS monetization. Stripe and real payment processing are intentionally not connected, and no card data is stored.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshBillingDashboard" type="button">Billing Dashboard</button>
+              <button class="btn" id="showBillingPlans" type="button">Plans</button>
+              <button class="btn" id="showBillingSubscriptions" type="button">Subscriptions</button>
+              <button class="btn" id="showBillingInvoices" type="button">Invoices</button>
+              <button class="btn" id="showBillingUsage" type="button">Usage</button>
+              <button class="btn" id="showBillingStatus" type="button">Payment Status</button>
+            </div>
+            <div class="grid" id="billingMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Billing Output</h2>
+            <pre id="billingResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Plans</h2><div class="list" id="billingPlans"></div></div>
+          <div class="panel"><h2>Subscription Status</h2><div class="list" id="billingSubscriptions"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Usage</h2><div class="list" id="billingUsage"></div></div>
+          <div class="panel"><h2>Invoices</h2><div class="list" id="billingInvoices"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Payment Status</h2><div class="list" id="billingPaymentStatus"></div></div>
+          <div class="panel"><h2>Upgrade Recommendations</h2><div class="list" id="billingUpgradeRecommendations"></div></div>
         </div>
       </section>
 
