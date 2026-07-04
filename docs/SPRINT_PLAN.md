@@ -378,3 +378,45 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Epic D Sprint 7.5 - Workflow Automation Engine"
 ```
+
+## Current Sprint: Project Titan Sprint 9
+
+Goal: build the daily operations dashboard for service businesses.
+
+Scope:
+
+- Operations Engine.
+- Jobs Board.
+- Technician Board.
+- Dispatch Suggestions.
+- Schedule Health.
+- Job Priority.
+- Customer Timeline.
+- Inventory Needs.
+- Operations Dashboard.
+- Operations Agent.
+- System API module `operations`.
+- Marketplace Operations Center section.
+- Operations Center test.
+
+Out of scope:
+
+- New core Brain engines.
+- External AI providers.
+- Deployment pipeline changes.
+- Automatic technician assignment.
+- Automatic customer contact.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Operations dashboard includes today's jobs, technician board, urgent jobs, late/at-risk jobs, AI dispatch suggestions, schedule health, customer waiting, inventory needed, job priority queue, and operations KPI cards.
+- API supports `operations.status`, `operations.dashboard`, `operations.jobs`, `operations.technicians`, `operations.dispatchSuggestions`, `operations.scheduleHealth`, `operations.priorities`, `operations.customerTimeline`, and `operations.inventoryNeeds`.
+- Uses JSON/demo fallback safely when real data is missing.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 9 - Operations Center"
+```

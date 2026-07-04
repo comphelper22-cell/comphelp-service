@@ -36,12 +36,14 @@ Project Control Center Sprint.
 - Executive Intelligence for Project Titan Epic C Sprint 6.
 - AI Sales Manager for Project Titan Epic D Sprint 7.
 - Workflow & Automation Engine for Project Titan Epic D Sprint 7.5.
+- Founder Dashboard UI polish for Project Titan Sprint 8.
+- Operations Center for Project Titan Sprint 9.
 - API consolidation hotfix for Vercel Hobby compatibility.
 
 ## Next 3 Sprints
 
 1. v0.7 Sprint 2 - Supabase readiness and platform health checks.
-2. Project Titan Sprint 8 - decision governance and approval queue.
+2. Project Titan Sprint 10 - decision governance and approval queue.
 3. v0.9 Sprint 1 - CRM Core pipeline and activity timeline.
 
 ## Blocked Items
@@ -77,6 +79,7 @@ git diff --stat
 - Executive Intelligence returns daily briefings, KPI health, forecasts, risks, and opportunities.
 - AI Sales Manager returns pipeline priorities, best next customer, revenue prediction, and follow-up queue.
 - Workflow Engine provides event-based execution, approvals, task queues, history, and audit trail.
+- Operations Center shows today's jobs, technicians, dispatch suggestions, schedule health, waiting customers, and inventory needs.
 - Documentation updated.
 
 ## Deploy Checklist

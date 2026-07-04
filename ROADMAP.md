@@ -139,7 +139,11 @@ Epic D Sprint 7: AI Sales Manager with sales pipeline intelligence, estimate pri
 
 Epic D Sprint 7.5: Workflow & Automation Engine with event triggers, approval workflows, task queues, retry policies, notifications, execution history, and audit trail.
 
-Sprint 8: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, and workflow actions.
+Sprint 8: Founder Dashboard UI polish with owner-facing command center, business health, AI actions, revenue opportunities, sales status, workflow activity, and AI workforce status.
+
+Sprint 9: Operations Center with today's jobs, technician board, urgent jobs, at-risk work, dispatch suggestions, schedule health, customer waiting, inventory needs, and operations KPIs.
+
+Sprint 10: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, and operations actions.
 
 ## API Consolidation Hotfix
 

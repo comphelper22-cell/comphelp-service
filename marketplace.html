@@ -31,6 +31,7 @@
         <button data-target="businessDashboard">Business Dashboard</button>
         <button data-target="executiveDashboard">Executive Dashboard</button>
         <button data-target="salesManager">Sales Manager</button>
+        <button data-target="operationsCenter">Operations Center</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -186,6 +187,38 @@
             <h2>Sales Output</h2>
             <pre id="salesResult"></pre>
           </div>
+        </div>
+      </section>
+
+      <section data-view="operationsCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Operations Center</h2>
+            <p class="muted">Daily dispatch view for today's jobs, technician status, urgent work, customer waiting issues, inventory needs, and AI dispatch suggestions.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshOperationsDashboard" type="button">Operations Dashboard</button>
+              <button class="btn" id="showOperationsJobs" type="button">Today's Jobs</button>
+              <button class="btn" id="showOperationsTechnicians" type="button">Technician Board</button>
+              <button class="btn" id="showOperationsDispatch" type="button">AI Dispatch Suggestions</button>
+              <button class="btn" id="showOperationsSchedule" type="button">Schedule Health</button>
+              <button class="btn" id="showOperationsPriorities" type="button">Job Priority Queue</button>
+              <button class="btn" id="showOperationsCustomers" type="button">Customer Waiting</button>
+              <button class="btn" id="showOperationsInventory" type="button">Inventory Needed</button>
+            </div>
+            <div class="grid" id="operationsMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Operations Output</h2>
+            <pre id="operationsResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Urgent Jobs</h2><div class="list" id="operationsUrgentJobs"></div></div>
+          <div class="panel"><h2>Late / At Risk Jobs</h2><div class="list" id="operationsAtRiskJobs"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>AI Dispatch Suggestions</h2><div class="list" id="operationsDispatchList"></div></div>
+          <div class="panel"><h2>Customer Waiting</h2><div class="list" id="operationsCustomerWaiting"></div></div>
         </div>
       </section>
 

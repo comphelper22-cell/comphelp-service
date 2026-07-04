@@ -123,6 +123,10 @@
     return systemApi("workflow", action || "workflow.status", payload || {});
   }
 
+  async function operationsApi(action, payload) {
+    return systemApi("operations", action || "operations.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -699,6 +703,47 @@
     }
   }
 
+  function renderOperationsDashboard(payload) {
+    var target = $("#operationsMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var kpis = data.operationsKpis || data;
+    var schedule = data.scheduleHealth || {};
+    var inventory = data.inventoryNeeded || {};
+    var technicians = data.technicianBoard || data.technicians || [];
+    var jobs = data.todaysJobs || (data.jobs ? data.jobs.todaysJobs : []) || [];
+    var cards = [
+      ["Today's Jobs", jobs.length || kpis.openJobs || 0],
+      ["Open Jobs", kpis.openJobs || 0],
+      ["Completed", kpis.completedJobs || 0],
+      ["Urgent Jobs", (data.urgentJobs || []).length || kpis.urgentJobs || 0],
+      ["At Risk", (data.atRiskJobs || []).length || kpis.atRiskJobs || 0],
+      ["Available Techs", kpis.availableTechnicians || technicians.filter(function (item) { return item.workload === "available"; }).length || 0],
+      ["Schedule Health", schedule.score !== undefined ? schedule.score : kpis.scheduleScore || "ready"],
+      ["Customer Waiting", (data.customerWaiting || []).length || kpis.customerWaiting || 0],
+      ["Inventory", inventory.status || "ready"],
+      ["AI Suggestions", (data.dispatchSuggestions || []).length || 0]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#operationsUrgentJobs", (data.urgentJobs || []).slice(0, 5).map(function (job) {
+      return { title: job.title || job.service, meta: job.customerName, detail: job.city || job.status, pill: job.priority || "urgent" };
+    }), "No urgent jobs.");
+    renderList("#operationsAtRiskJobs", (data.atRiskJobs || []).slice(0, 5).map(function (job) {
+      return { title: job.title || job.service, meta: job.customerName, detail: job.notes || "Review risk.", pill: "at risk" };
+    }), "No at-risk jobs.");
+    renderList("#operationsDispatchList", (data.dispatchSuggestions || []).slice(0, 5).map(function (item) {
+      return { title: item.jobTitle || item.service, meta: item.suggestedTechnician, detail: item.reason, pill: item.confidence !== undefined ? Math.round(Number(item.confidence) * 100) + "%" : "AI" };
+    }), "No dispatch suggestions yet.");
+    renderList("#operationsCustomerWaiting", (data.customerWaiting || []).slice(0, 5).map(function (item) {
+      return { title: item.customerName, meta: item.service, detail: item.note, pill: item.priority || "waiting" };
+    }), "No customer waiting issues.");
+    if ($("#operationsResult")) {
+      $("#operationsResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -939,6 +984,7 @@
     renderDeployment(dashboard.deployment);
     renderQuestions($("select[name='service']").value);
     await refreshFounderDashboard().catch(function () {});
+    await operationsApi("operations.dashboard", {}).then(renderOperationsDashboard).catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -1228,6 +1274,33 @@
             renderSalesDashboard(await salesApi(action, {}));
           } catch (error) {
             $("#salesResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshOperationsDashboard", "operations.dashboard"],
+      ["#showOperationsJobs", "operations.jobs"],
+      ["#showOperationsTechnicians", "operations.technicians"],
+      ["#showOperationsDispatch", "operations.dispatchSuggestions"],
+      ["#showOperationsSchedule", "operations.scheduleHealth"],
+      ["#showOperationsPriorities", "operations.priorities"],
+      ["#showOperationsCustomers", "operations.customerTimeline"],
+      ["#showOperationsInventory", "operations.inventoryNeeds"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderOperationsDashboard(await operationsApi(action, {}));
+          } catch (error) {
+            $("#operationsResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

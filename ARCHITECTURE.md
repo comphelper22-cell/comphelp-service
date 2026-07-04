@@ -389,3 +389,26 @@ Architecture rules:
 - Customer-facing actions default to `needs_approval`.
 - The workflow layer reuses Context, Decision, Recommendation, and Executive Intelligence.
 - No external AI provider, messaging provider, deployment pipeline, or autonomous execution is connected in Sprint 7.5.
+
+## Operations Center
+
+Project Titan Sprint 9 adds the daily operations dashboard for owners, dispatchers, and technicians. It reuses Executive Intelligence, Recommendation Engine, Workflow Engine, Sales Manager, and JSON-compatible marketplace data.
+
+Operations modules:
+
+- `operations-engine.js` exposes the Operations Center interface.
+- `jobs-board.js` builds today's jobs, urgent jobs, open jobs, and at-risk jobs.
+- `technician-board.js` summarizes technician/vendor availability and workload.
+- `dispatch-suggestions.js` recommends technician matches without auto-assigning.
+- `schedule-health.js` scores schedule load, unassigned jobs, and at-risk work.
+- `job-priority.js` ranks the job queue.
+- `customer-timeline.js` identifies customer waiting issues.
+- `inventory-needs.js` flags low or inferred materials.
+- `operations-dashboard.js` combines operations data for UI and API consumers.
+
+Operations safety:
+
+- Dispatch suggestions are advisory only.
+- Technicians are never assigned automatically.
+- Customers are never contacted automatically.
+- Inventory needs are prompts for owner/dispatcher review.

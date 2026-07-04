@@ -20,6 +20,8 @@ const salesEngine = require("../sales/sales-engine");
 const salesManagerAgent = require("../agents/sales-manager-agent");
 const workflowEngine = require("../workflow/workflow-engine");
 const workflowAgent = require("../agents/workflow-agent");
+const operationsEngine = require("../operations/operations-engine");
+const operationsAgent = require("../agents/operations-agent");
 
 const modules = {
   developer,
@@ -123,6 +125,20 @@ function runWorkflowAction(action, payload = {}) {
   return { ok: false, error: "unknown_workflow_action" };
 }
 
+function runOperationsAction(action, payload = {}) {
+  if (action === "operations.status") return { ok: true, data: operationsEngine.status() };
+  if (action === "operations.dashboard") return operationsEngine.dashboard(payload);
+  if (action === "operations.jobs") return operationsEngine.jobs(payload);
+  if (action === "operations.technicians") return operationsEngine.technicians(payload);
+  if (action === "operations.dispatchSuggestions") return operationsEngine.dispatchSuggestions(payload);
+  if (action === "operations.scheduleHealth") return operationsEngine.scheduleHealth(payload);
+  if (action === "operations.priorities") return operationsEngine.priorities(payload);
+  if (action === "operations.customerTimeline") return operationsEngine.customerTimeline(payload);
+  if (action === "operations.inventoryNeeds") return operationsEngine.inventoryNeeds(payload);
+  if (action === "operations.agent") return { ok: true, data: operationsAgent.run(payload) };
+  return { ok: false, error: "unknown_operations_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -150,12 +166,13 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
           salesActions: ["sales.status", "sales.pipeline", "sales.estimates", "sales.followups", "sales.conversion", "sales.opportunities", "sales.dashboard"],
-          workflowActions: ["workflow.status", "workflow.trigger", "workflow.build", "workflow.history", "workflow.events", "workflow.registry", "workflow.validate"]
+          workflowActions: ["workflow.status", "workflow.trigger", "workflow.build", "workflow.history", "workflow.events", "workflow.registry", "workflow.validate"],
+          operationsActions: ["operations.status", "operations.dashboard", "operations.jobs", "operations.technicians", "operations.dispatchSuggestions", "operations.scheduleHealth", "operations.priorities", "operations.customerTimeline", "operations.inventoryNeeds"]
         }
       });
     }
@@ -196,6 +213,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "workflow") {
       const result = runWorkflowAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "operations") {
+      const result = runOperationsAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });
