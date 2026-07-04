@@ -200,3 +200,15 @@ Inputs: current user, organization, customer, project, task, agent, and session.
 Outputs: brain status, health, recommendations, executive summary, memory status, and knowledge status.
 
 Escalation rules: memory writes, external AI provider connections, customer privacy concerns, and external API integrations require owner approval.
+
+## Memory Agent
+
+Purpose: diagnose and validate the Shared Memory Engine.
+
+Responsibilities: memory diagnostics, memory statistics, memory validation, and registry review.
+
+Inputs: memory provider, query, record, and memory registry.
+
+Outputs: memory status, memory stats, and validation report.
+
+Escalation rules: customer privacy concerns, external memory providers, and bulk clear/delete requests require owner approval.

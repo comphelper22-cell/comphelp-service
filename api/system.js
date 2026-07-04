@@ -3,6 +3,9 @@ const businessOs = require("../server/api-modules/business-os");
 const platform = require("../server/api-modules/platform");
 const titan = require("../server/api-modules/titan");
 const brain = require("../server/api-modules/brain");
+const memory = require("../brain/memory");
+const memoryRegistry = require("../brain/memory-registry");
+const memoryAgent = require("../agents/memory-agent");
 
 const modules = {
   developer,
@@ -12,6 +15,20 @@ const modules = {
   titan,
   brain
 };
+
+function runMemoryAction(action, payload = {}) {
+  const scope = clean(payload.scope || "shortMemory", 80);
+  if (action === "status") return { ok: true, data: memoryAgent.status() };
+  if (action === "search") return memory.search(scope, payload.query || "");
+  if (action === "save") return memory.save(scope, payload.record || payload);
+  if (action === "update") return memory.update(scope, payload.id, payload.patch || payload.record || {});
+  if (action === "delete") return memory.delete(scope, payload.id);
+  if (action === "clear") return memory.clear(scope);
+  if (action === "stats") return memory.stats(payload.scope);
+  if (action === "registry") return { ok: true, data: memoryRegistry.status() };
+  if (action === "validate") return { ok: true, data: memoryAgent.validate() };
+  return { ok: false, error: "unknown_memory_action" };
+}
 
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
@@ -40,7 +57,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain"]
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory"]
         }
       });
     }
@@ -50,8 +67,12 @@ module.exports = async function handler(req, res) {
     const moduleName = clean(body.module, 80);
     const action = clean(body.action, 120);
     const target = modules[moduleName];
-    if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });
     if (!action) return sendJson(res, 400, { ok: false, error: "missing_system_action" });
+    if (moduleName === "memory") {
+      const result = runMemoryAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });
 
     req.body = {
       ...(body.payload || {}),

@@ -128,3 +128,9 @@ Brain modules:
 - Executive Summary Engine.
 
 The Brain exposes safe internal architecture through `/api/system` module `brain` and a dashboard section. Memory writes and AI learning are intentionally disabled until a future approved storage and privacy policy exists.
+
+## Shared Memory Engine
+
+Project Titan Beta Sprint 2 adds a local JSON-backed Shared Memory Engine used by future AI modules. It includes short, long, business, customer, session, and knowledge memory providers. Providers expose the same interface: `save`, `load`, `update`, `delete`, `search`, and `clear`.
+
+Memory is local architecture only. It does not connect to external AI, OpenAI, Supabase memory, vector databases, or external APIs.

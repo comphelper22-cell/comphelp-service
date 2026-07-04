@@ -1,8 +1,12 @@
+const memory = require("./memory");
+const memoryRegistry = require("./memory-registry");
+
 const MEMORY_TYPES = {
   shortMemory: "Temporary working context for the current task or session.",
   longMemory: "Durable approved facts and decisions.",
   businessMemory: "Business operations, goals, services, processes, and metrics.",
   customerMemory: "Customer-specific context governed by privacy rules.",
+  sessionMemory: "Current authenticated session context and temporary dashboard state.",
   knowledgeMemory: "Documentation, SOPs, service knowledge, and technical references.",
   learningMemory: "Future improvement patterns after approval; no autonomous learning yet."
 };
@@ -10,33 +14,35 @@ const MEMORY_TYPES = {
 function memoryStatus() {
   return {
     ok: true,
-    status: "architecture_ready",
+    status: "json_memory_ready",
     learningEnabled: false,
     externalAiConnected: false,
+    registry: memoryRegistry.status(),
+    stats: memory.stats().data,
     types: Object.entries(MEMORY_TYPES).map(([key, description]) => ({
       key,
       description,
-      status: "interface_defined"
+      status: key === "learningMemory" ? "interface_only" : "json_ready"
     }))
   };
 }
 
-function readMemory(type) {
-  return {
-    ok: true,
-    type,
-    data: [],
-    note: "Memory persistence interface is defined. No AI learning or external memory provider is connected yet."
-  };
+function readMemory(type, query) {
+  return memory.load(type, query);
 }
 
 function writeMemory(type, record) {
-  return {
-    ok: false,
-    type,
-    record,
-    error: "memory_write_requires_future_storage_policy"
-  };
+  return memory.save(type, record);
 }
 
-module.exports = { MEMORY_TYPES, memoryStatus, readMemory, writeMemory };
+module.exports = {
+  MEMORY_TYPES,
+  clearMemory: memory.clear,
+  deleteMemory: memory.delete,
+  memoryStatus,
+  readMemory,
+  searchMemory: memory.search,
+  stats: memory.stats,
+  updateMemory: memory.update,
+  writeMemory
+};

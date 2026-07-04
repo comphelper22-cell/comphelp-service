@@ -47,6 +47,7 @@
         <button data-target="deployment">Deployment</button>
         <button data-target="developer">Developer Center</button>
         <button data-target="comphelpBrain">CompHelp Brain</button>
+        <button data-target="memoryCenter">Memory</button>
         <button data-target="projectTitan">Project Titan</button>
         <button data-target="projectControl">Project Control</button>
         <button data-target="marketing">Marketing</button>
@@ -544,6 +545,26 @@
           <div class="panel">
             <h2>Brain Output</h2>
             <pre id="brainResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="memoryCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Shared Memory</h2>
+            <p class="muted">Local JSON-backed memory layer for future AI modules. No external AI provider, Supabase memory, or autonomous learning is connected.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshMemoryStatus" type="button">Memory Health</button>
+              <button class="btn" id="showMemoryStats" type="button">Memory Statistics</button>
+              <button class="btn" id="showMemoryRegistry" type="button">Memory Registry</button>
+              <button class="btn" id="validateMemory" type="button">Validation</button>
+            </div>
+            <div class="grid" id="memoryMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Memory Output</h2>
+            <pre id="memoryResult"></pre>
           </div>
         </div>
       </section>

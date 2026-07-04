@@ -3,6 +3,7 @@ const memoryManager = require("./memory-manager");
 const recommendationEngine = require("./recommendation-engine");
 const decisionEngine = require("./decision-engine");
 const knowledgeRegistry = require("./knowledge-registry");
+const memoryRegistry = require("./memory-registry");
 const executiveSummaryEngine = require("./executive-summary");
 
 function brainStatus(input = {}) {
@@ -17,6 +18,7 @@ function brainStatus(input = {}) {
     modules: {
       contextEngine: contextEngine.contextStatus(input).status,
       memoryManager: memoryManager.memoryStatus().status,
+      memoryRegistry: memoryRegistry.status().status,
       recommendationEngine: "ready",
       decisionEngine: decisionEngine.decisionStatus().status,
       knowledgeRegistry: knowledgeRegistry.knowledgeStatus().status,
@@ -34,6 +36,7 @@ function brainHealth(input = {}) {
     status: "healthy",
     brain: brainStatus(input),
     memory,
+    memoryRegistry: memoryRegistry.status(),
     knowledge,
     risks: [
       "No AI provider is connected yet.",
@@ -51,5 +54,6 @@ module.exports = {
   executiveSummary: executiveSummaryEngine.executiveSummary,
   knowledgeRegistry,
   memoryManager,
+  memoryRegistry,
   recommendation: recommendationEngine.recommendation
 };

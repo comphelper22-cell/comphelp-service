@@ -28,12 +28,13 @@ Project Control Center Sprint.
 - Titan API planning actions.
 - Project control agent foundation.
 - CompHelp Brain Kernel architecture for Project Titan Beta Sprint 1.
+- Shared Memory Engine for Project Titan Beta Sprint 2.
 - API consolidation hotfix for Vercel Hobby compatibility.
 
 ## Next 3 Sprints
 
 1. v0.7 Sprint 2 - Supabase readiness and platform health checks.
-2. Project Titan Beta Sprint 2 - Brain memory write policy and persistence design.
+2. Project Titan Beta Sprint 3 - memory governance, privacy rules, and audit logging.
 3. v0.9 Sprint 1 - CRM Core pipeline and activity timeline.
 
 ## Blocked Items

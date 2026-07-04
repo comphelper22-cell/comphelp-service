@@ -119,9 +119,9 @@ The Project Control Center is the planning layer that prevents scope creep. It o
 
 Sprint 1: CompHelp Brain Kernel architecture with context, memory interfaces, recommendations, decisions, knowledge registry, and executive summary.
 
-Sprint 2: approved Brain memory write policy, persistence strategy, and privacy controls.
+Sprint 2: Shared Memory Engine with local JSON providers, memory registry, Memory Agent diagnostics, and System API module `memory`.
 
-Sprint 3: CompHelp Brain shared memory reports for agents and the Project Control Center.
+Sprint 3: approved memory governance, privacy rules, retention policy, and audit logging for memory operations.
 
 ## API Consolidation Hotfix
 

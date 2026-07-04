@@ -95,6 +95,10 @@
     return systemApi("brain", action || "brainStatus", payload || {});
   }
 
+  async function memoryApi(action, payload) {
+    return systemApi("memory", action || "status", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -466,6 +470,30 @@
     }
   }
 
+  function renderMemory(payload) {
+    var target = $("#memoryMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var memory = data.memory || data;
+    var registry = data.registry || memory.registry || {};
+    var stats = data.stats || memory.stats || data;
+    var statItems = Array.isArray(stats) ? stats : (Array.isArray(stats.data) ? stats.data : []);
+    var cards = [
+      ["Memory", memory.status || "ready"],
+      ["Memory Health", data.ok === false ? "needs review" : "healthy"],
+      ["Memory Statistics", statItems.length || (data.providerCount || "ready")],
+      ["Memory Registry", registry.providerCount || (registry.data && registry.data.providerCount) || "ready"],
+      ["Validation", data.validation ? (data.validation.ok ? "passed" : "review") : "ready"],
+      ["Storage", memory.storage || "json"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#memoryResult")) {
+      $("#memoryResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   async function refreshDeveloperCenter(action, writeOutput) {
     var result = await systemApi("developer", action || "fullReport", {});
     renderDeveloperCenter(result, writeOutput);
@@ -767,6 +795,29 @@
             renderBrain(await brainApi(action, {}));
           } catch (error) {
             $("#brainResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshMemoryStatus", "status"],
+      ["#showMemoryStats", "stats"],
+      ["#showMemoryRegistry", "registry"],
+      ["#validateMemory", "validate"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderMemory(await memoryApi(action, {}));
+          } catch (error) {
+            $("#memoryResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

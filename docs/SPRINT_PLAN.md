@@ -62,3 +62,37 @@ Deployment requires owner approval:
 ```powershell
 npm run vercel-deploy
 ```
+
+## Upcoming Sprint: Project Titan Beta Sprint 2
+
+Goal: teach CompHelp AI to remember through local JSON-backed memory providers used by future AI modules.
+
+Scope:
+
+- Shared Memory providers.
+- Memory Registry.
+- Memory Agent.
+- System API module `memory`.
+- Dashboard Memory section.
+- Documentation updates.
+
+Out of scope:
+
+- External AI providers.
+- OpenAI API.
+- Supabase Memory.
+- External APIs.
+- Autonomous AI learning.
+
+Acceptance criteria:
+
+- Memory providers expose `save`, `load`, `update`, `delete`, `search`, and `clear`.
+- API actions return safe JSON.
+- Dashboard tab renders memory cards.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Beta Sprint 2 - Shared Memory Engine"
+```
