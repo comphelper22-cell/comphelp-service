@@ -14,6 +14,12 @@ const brainOrchestrator = require("../brain/orchestrator/brain-orchestrator");
 const integrationAgent = require("../agents/integration-agent");
 const recommendationEngine = require("../brain/recommendation/recommendation-engine");
 const recommendationAgent = require("../agents/recommendation-agent");
+const executiveEngine = require("../brain/executive/executive-engine");
+const executiveAgent = require("../agents/executive-agent");
+const salesEngine = require("../sales/sales-engine");
+const salesManagerAgent = require("../agents/sales-manager-agent");
+const workflowEngine = require("../workflow/workflow-engine");
+const workflowAgent = require("../agents/workflow-agent");
 
 const modules = {
   developer,
@@ -79,6 +85,44 @@ function runRecommendationAction(action, payload = {}) {
   return { ok: false, error: "unknown_recommendation_action" };
 }
 
+function runExecutiveAction(action, payload = {}) {
+  if (action === "executive.status") return { ok: true, data: executiveEngine.status() };
+  if (action === "executive.dashboard") return executiveEngine.dashboard(payload);
+  if (action === "executive.briefing") return executiveEngine.briefing(payload);
+  if (action === "executive.kpi") return executiveEngine.kpi(payload);
+  if (action === "executive.forecast") return executiveEngine.forecast(payload);
+  if (action === "executive.health") return executiveEngine.health(payload);
+  if (action === "executive.risks") return executiveEngine.risks(payload);
+  if (action === "executive.opportunities") return executiveEngine.opportunities(payload);
+  if (action === "executive.summary") return executiveEngine.summary(payload);
+  if (action === "executive.agent") return { ok: true, data: executiveAgent.run(payload) };
+  return { ok: false, error: "unknown_executive_action" };
+}
+
+function runSalesAction(action, payload = {}) {
+  if (action === "sales.status") return { ok: true, data: salesEngine.status() };
+  if (action === "sales.pipeline") return salesEngine.pipeline(payload);
+  if (action === "sales.estimates") return salesEngine.estimates(payload);
+  if (action === "sales.followups") return salesEngine.followups(payload);
+  if (action === "sales.conversion") return salesEngine.conversion(payload);
+  if (action === "sales.opportunities") return salesEngine.opportunities(payload);
+  if (action === "sales.dashboard") return salesEngine.dashboard(payload);
+  if (action === "sales.agent") return { ok: true, data: salesManagerAgent.run(payload) };
+  return { ok: false, error: "unknown_sales_action" };
+}
+
+function runWorkflowAction(action, payload = {}) {
+  if (action === "workflow.status") return { ok: true, data: workflowEngine.status() };
+  if (action === "workflow.trigger") return workflowEngine.trigger(payload);
+  if (action === "workflow.build") return workflowEngine.build(payload);
+  if (action === "workflow.history") return workflowEngine.history(payload.limit || 20);
+  if (action === "workflow.events") return { ok: true, data: workflowEngine.events(payload.limit || 20) };
+  if (action === "workflow.registry") return { ok: true, data: workflowEngine.registry() };
+  if (action === "workflow.validate") return { ok: true, data: workflowEngine.validate(payload) };
+  if (action === "workflow.agent") return { ok: true, data: workflowAgent.run(payload) };
+  return { ok: false, error: "unknown_workflow_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -106,9 +150,12 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
-          recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"]
+          recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
+          executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
+          salesActions: ["sales.status", "sales.pipeline", "sales.estimates", "sales.followups", "sales.conversion", "sales.opportunities", "sales.dashboard"],
+          workflowActions: ["workflow.status", "workflow.trigger", "workflow.build", "workflow.history", "workflow.events", "workflow.registry", "workflow.validate"]
         }
       });
     }
@@ -137,6 +184,18 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "recommendation") {
       const result = runRecommendationAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "executive") {
+      const result = runExecutiveAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "sales") {
+      const result = runSalesAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "workflow") {
+      const result = runWorkflowAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

@@ -111,6 +111,14 @@
     return systemApi("recommendation", action || "recommendation.status", payload || {});
   }
 
+  async function executiveApi(action, payload) {
+    return systemApi("executive", action || "executive.dashboard", payload || {});
+  }
+
+  async function salesApi(action, payload) {
+    return systemApi("sales", action || "sales.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -497,6 +505,73 @@
     }
   }
 
+  function renderExecutiveDashboard(payload) {
+    var target = $("#executiveMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var health = data.businessHealth || data.businessHealthScore || {};
+    var kpis = data.kpis || data;
+    var forecasts = data.forecasts || {};
+    var risks = data.businessRisks || data.risks || [];
+    var opportunities = data.growthOpportunities || data.opportunities || [];
+    var aiQueue = data.aiPriorityQueue || data.aiRecommendations || [];
+    var cards = [
+      ["Business Health", health.overallScore !== undefined ? health.overallScore : "ready"],
+      ["Revenue Today", "$" + escapeHtml(data.revenueToday || kpis.revenueToday || 0)],
+      ["Revenue Yesterday", "$" + escapeHtml(data.revenueYesterday || kpis.revenueYesterday || 0)],
+      ["Revenue This Week", "$" + escapeHtml(data.revenueThisWeek || kpis.revenueThisWeek || 0)],
+      ["Revenue This Month", "$" + escapeHtml(data.revenueThisMonth || kpis.revenueThisMonth || 0)],
+      ["Open Jobs", data.openJobs !== undefined ? data.openJobs : kpis.openJobs || 0],
+      ["Open Estimates", data.openEstimates !== undefined ? data.openEstimates : kpis.openEstimates || 0],
+      ["Conversion", (data.estimateConversionRate !== undefined ? data.estimateConversionRate : kpis.estimateConversionRate || 0) + "%"],
+      ["Average Job", "$" + escapeHtml(data.averageJobValue || kpis.averageJobValue || 0)],
+      ["Risks", risks.length || 0],
+      ["Opportunities", opportunities.length || 0],
+      ["AI Queue", aiQueue.length || 0]
+    ];
+    if (forecasts.revenueForecast) cards.push(["30-Day Forecast", "$" + escapeHtml(forecasts.revenueForecast.next30Days || 0)]);
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#executiveResult")) {
+      $("#executiveResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
+  function renderSalesDashboard(payload) {
+    var target = $("#salesMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var overview = data.salesOverview || {};
+    var kpis = data.kpis || data;
+    var highPriorityDeals = data.highPriorityDeals || data.prioritizedDeals || [];
+    var calls = data.todaysCalls || [];
+    var followups = data.todaysFollowups || [];
+    var opportunities = data.revenueOpportunities || data;
+    var cards = [
+      ["Best Customer", overview.bestNextCustomer || "ready"],
+      ["Expected Revenue", "$" + escapeHtml(overview.expectedRevenue || kpis.revenuePipeline || 0)],
+      ["Probability", overview.probability !== undefined ? overview.probability : "ready"],
+      ["Priority", overview.priority || "ready"],
+      ["Open Estimates", kpis.openEstimates || 0],
+      ["Won Estimates", kpis.wonEstimates || 0],
+      ["Lost Estimates", kpis.lostEstimates || 0],
+      ["Conversion", (kpis.conversionRate || 0) + "%"],
+      ["Avg Deal", "$" + escapeHtml(kpis.averageDealSize || 0)],
+      ["Pipeline", "$" + escapeHtml(data.revenuePipeline || kpis.revenuePipeline || 0)],
+      ["Today's Calls", calls.length || 0],
+      ["Follow-ups", followups.length || 0],
+      ["High Priority", highPriorityDeals.length || 0],
+      ["Opportunities", Array.isArray(opportunities) ? opportunities.length : 0]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#salesResult")) {
+      $("#salesResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -878,6 +953,56 @@
         }
       });
     }
+
+    [
+      ["#refreshExecutiveDashboard", "executive.dashboard"],
+      ["#showExecutiveBriefing", "executive.briefing"],
+      ["#showExecutiveKpis", "executive.kpi"],
+      ["#showExecutiveForecast", "executive.forecast"],
+      ["#showExecutiveRisks", "executive.risks"],
+      ["#showExecutiveOpportunities", "executive.opportunities"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderExecutiveDashboard(await executiveApi(action, {}));
+          } catch (error) {
+            $("#executiveResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshSalesDashboard", "sales.dashboard"],
+      ["#showSalesPipeline", "sales.pipeline"],
+      ["#showSalesEstimates", "sales.estimates"],
+      ["#showSalesFollowups", "sales.followups"],
+      ["#showSalesConversion", "sales.conversion"],
+      ["#showSalesOpportunitiesEngine", "sales.opportunities"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderSalesDashboard(await salesApi(action, {}));
+          } catch (error) {
+            $("#salesResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
 
     [
       ["#refreshBrainStatus", "brain.status"],

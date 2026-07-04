@@ -133,7 +133,13 @@ Sprint 4.5: Integration and Stabilization with Brain Orchestrator, Memory -> Con
 
 Sprint 5: Recommendation Intelligence with explainable business recommendations, revenue opportunities, operational improvements, sales opportunities, customer attention, priority scoring, and recommendation history.
 
-Sprint 6: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation workflows.
+Epic C Sprint 6: Executive Intelligence with daily executive briefings, KPI monitoring, business health scoring, forecasting, risk detection, growth opportunities, and Executive Dashboard UI.
+
+Epic D Sprint 7: AI Sales Manager with sales pipeline intelligence, estimate priority, deal probability, revenue prediction, follow-up queue, upsell/cross-sell detection, and Sales Dashboard UI.
+
+Epic D Sprint 7.5: Workflow & Automation Engine with event triggers, approval workflows, task queues, retry policies, notifications, execution history, and audit trail.
+
+Sprint 8: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, and workflow actions.
 
 ## API Consolidation Hotfix
 

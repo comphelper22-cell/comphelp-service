@@ -265,3 +265,127 @@ flowchart LR
   Queue --> Explain["Explain"]
   Queue --> History["History"]
 ```
+
+## Executive Intelligence
+
+Project Titan Epic C Sprint 6 adds Executive Intelligence as the owner-facing business operating layer. It reuses Marketplace JSON data, the Recommendation Engine, and the existing Brain architecture to produce executive dashboards, daily briefings, KPI monitoring, forecasts, risk detection, and growth opportunities.
+
+Executive modules:
+
+- `executive-engine.js` exposes the public Executive Intelligence interface.
+- `executive-dashboard.js` builds the owner dashboard payload.
+- `executive-briefing.js` creates the daily executive briefing.
+- `executive-kpi.js` reads JSON-compatible operating data and calculates KPIs.
+- `executive-health.js` creates the 0-100 business health model.
+- `executive-risk.js` detects late estimates, late invoices, idle technicians, missed follow-ups, low conversion, churn risk, inventory shortage, and scheduling conflicts.
+- `executive-forecast.js` creates revenue, workload, customer growth, marketing, cash flow, and technician capacity forecasts.
+- `executive-opportunities.js` surfaces revenue, sales, customer, and marketing opportunities.
+- `executive-insights.js` summarizes owner-level insights.
+- `executive-summary.js` returns the required executive output format.
+
+Business Health Model:
+
+- Overall Score.
+- Revenue.
+- Operations.
+- Sales.
+- Customers.
+- Marketing.
+- Technicians.
+- Finance.
+- Inventory.
+
+Forecast Model:
+
+- Revenue forecast.
+- Workload forecast.
+- Customer growth.
+- Marketing performance.
+- Cash flow trend.
+- Technician capacity.
+
+Risk Model:
+
+- Detects operational, sales, customer, finance, inventory, and scheduling risks using local data and safe defaults.
+- Does not automate outreach, dispatch, collections, or publishing.
+
+KPI Engine:
+
+- Calculates revenue today, yesterday, week, and month.
+- Tracks open jobs, completed jobs, open estimates, conversion rate, average job value, outstanding invoices, collections, technician utilization, customer satisfaction, marketing performance, and inventory status.
+
+## AI Sales Manager
+
+Project Titan Epic D Sprint 7 adds the first AI Employee focused on revenue growth and sales pipeline discipline. The Sales Manager reuses Marketplace JSON data, Executive KPI utilities, Recommendation Intelligence, and owner-approval safety rules.
+
+Sales pipeline:
+
+```mermaid
+flowchart LR
+  Lead["Lead"] --> Qualification["Qualification"]
+  Qualification --> Estimate["Estimate"]
+  Estimate --> FollowUp["Follow-up"]
+  FollowUp --> Negotiation["Negotiation"]
+  Negotiation --> Won["Won"]
+  Negotiation --> Lost["Lost"]
+```
+
+Sales modules:
+
+- `sales-engine.js` exposes the Sales Intelligence interface.
+- `pipeline-manager.js` maps leads and estimates into pipeline stages.
+- `estimate-scoring.js` scores open estimates by value, age, service, status, and probability.
+- `deal-priority.js` ranks deals and recommends the next owner action.
+- `followup-engine.js` builds today's calls and follow-up queue.
+- `sales-dashboard.js` returns the dashboard payload.
+- `conversion-engine.js` calculates sales KPIs.
+- `customer-intelligence.js` detects VIP customers, churn risks, and the best customer to call.
+- `revenue-opportunities.js` detects estimate conversion, upsell, cross-sell, and VIP opportunities.
+
+Sales KPIs:
+
+- Open estimates.
+- Won estimates.
+- Lost estimates.
+- Conversion rate.
+- Average deal size.
+- Revenue pipeline.
+- Follow-up completion.
+- Average close time.
+
+All sales outputs are recommendations only. The Sales Manager never contacts customers, sends messages, changes prices, or pushes discounts without owner approval.
+
+## Workflow & Automation Engine
+
+Project Titan Epic D Sprint 7.5 adds the shared workflow layer used by every AI Employee. The workflow engine provides one orchestration system for event-based execution, approvals, task queues, automation rules, retry policies, notifications, execution history, and audit trails.
+
+Supported events:
+
+- New Lead.
+- New Estimate.
+- Estimate Accepted.
+- Invoice Overdue.
+- Job Completed.
+- Customer Created.
+- Technician Assigned.
+- Inventory Low.
+
+Workflow lifecycle:
+
+```mermaid
+flowchart LR
+  Event["Business Event"] --> Trigger["Workflow Trigger"]
+  Trigger --> Registry["Workflow Registry"]
+  Registry --> Builder["Workflow Builder"]
+  Builder --> Approval["Approval Check"]
+  Approval --> Runner["Workflow Runner"]
+  Runner --> History["Execution History"]
+  Runner --> Audit["Audit Trail"]
+```
+
+Architecture rules:
+
+- Workflow actions are internal records unless a future approved integration is connected.
+- Customer-facing actions default to `needs_approval`.
+- The workflow layer reuses Context, Decision, Recommendation, and Executive Intelligence.
+- No external AI provider, messaging provider, deployment pipeline, or autonomous execution is connected in Sprint 7.5.

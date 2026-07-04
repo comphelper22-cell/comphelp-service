@@ -29,6 +29,8 @@
       <nav class="nav" aria-label="Dashboard modules">
         <button class="is-active" data-target="dashboard">Dashboard</button>
         <button data-target="businessDashboard">Business Dashboard</button>
+        <button data-target="executiveDashboard">Executive Dashboard</button>
+        <button data-target="salesManager">Sales Manager</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -91,6 +93,50 @@
           <div class="panel">
             <h2>Business Output</h2>
             <pre id="businessResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="executiveDashboard">
+        <div class="two">
+          <div class="panel">
+            <h2>Executive Dashboard</h2>
+            <p class="muted">Real-time executive intelligence for business health, revenue visibility, forecasts, risks, opportunities, and the AI priority queue.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshExecutiveDashboard" type="button">Executive Dashboard</button>
+              <button class="btn" id="showExecutiveBriefing" type="button">Daily Executive Briefing</button>
+              <button class="btn" id="showExecutiveKpis" type="button">KPIs</button>
+              <button class="btn" id="showExecutiveForecast" type="button">Forecasts</button>
+              <button class="btn" id="showExecutiveRisks" type="button">Risks</button>
+              <button class="btn" id="showExecutiveOpportunities" type="button">Opportunities</button>
+            </div>
+            <div class="grid" id="executiveMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Executive Output</h2>
+            <pre id="executiveResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="salesManager">
+        <div class="two">
+          <div class="panel">
+            <h2>AI Sales Manager</h2>
+            <p class="muted">Sales pipeline intelligence for estimate priority, deal probability, revenue prediction, follow-ups, upsells, cross-sells, and best next customer actions.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshSalesDashboard" type="button">Sales Overview</button>
+              <button class="btn" id="showSalesPipeline" type="button">Revenue Pipeline</button>
+              <button class="btn" id="showSalesEstimates" type="button">High Priority Deals</button>
+              <button class="btn" id="showSalesFollowups" type="button">Today's Follow-ups</button>
+              <button class="btn" id="showSalesConversion" type="button">Conversion</button>
+              <button class="btn" id="showSalesOpportunitiesEngine" type="button">Revenue Opportunities</button>
+            </div>
+            <div class="grid" id="salesMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Sales Output</h2>
+            <pre id="salesResult"></pre>
           </div>
         </div>
       </section>

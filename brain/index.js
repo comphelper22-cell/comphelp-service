@@ -8,7 +8,10 @@ const businessDecisionEngine = require("./decision/decision-engine");
 const knowledgeRegistry = require("./knowledge-registry");
 const memoryRegistry = require("./memory-registry");
 const executiveSummaryEngine = require("./executive-summary");
+const executiveIntelligence = require("./executive/executive-engine");
 const brainOrchestrator = require("./orchestrator/brain-orchestrator");
+const salesIntelligence = require("../sales/sales-engine");
+const workflowEngine = require("../workflow/workflow-engine");
 
 function brainStatus(input = {}) {
   return {
@@ -30,7 +33,10 @@ function brainStatus(input = {}) {
       businessDecisionEngine: businessDecisionEngine.status().status,
       brainOrchestrator: brainOrchestrator.status().status,
       knowledgeRegistry: knowledgeRegistry.knowledgeStatus().status,
-      executiveSummaryEngine: "ready"
+      executiveSummaryEngine: "ready",
+      executiveIntelligence: executiveIntelligence.status().status,
+      salesIntelligence: salesIntelligence.status().status,
+      workflowEngine: workflowEngine.status().status
     },
     timestamp: new Date().toISOString()
   };
@@ -62,10 +68,13 @@ module.exports = {
   decisionEngine,
   businessDecisionEngine,
   brainOrchestrator,
+  executiveIntelligence,
   executiveSummary: executiveSummaryEngine.executiveSummary,
   knowledgeRegistry,
   memoryManager,
   memoryRegistry,
   recommendation: recommendationEngine.recommendation,
-  recommendationIntelligence
+  recommendationIntelligence,
+  salesIntelligence,
+  workflowEngine
 };

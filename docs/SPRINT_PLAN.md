@@ -250,3 +250,131 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 5 - Recommendation Intelligence"
 ```
+
+## Current Sprint: Project Titan Epic C Sprint 6
+
+Goal: transform CompHelp AI into an Executive Business Operating System with real-time intelligence, daily executive briefings, KPI monitoring, forecasts, and proactive insights.
+
+Scope:
+
+- Executive Engine.
+- Executive Dashboard.
+- Executive Briefing.
+- Executive KPI Engine.
+- Executive Health.
+- Executive Risk Detection.
+- Executive Forecasts.
+- Executive Opportunities.
+- Executive Insights.
+- Executive Summary.
+- Executive Agent.
+- System API module `executive`.
+- Marketplace Executive Dashboard section.
+- Executive Intelligence integration test.
+
+Out of scope:
+
+- OpenAI, Anthropic, Gemini, or external AI providers.
+- Deployment architecture changes.
+- Supabase-only storage.
+- Automated dispatch, collections, outreach, or publishing.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Executive output includes executive summary, business health score, KPIs, forecasts, risks, opportunities, AI recommendations, and generated timestamp.
+- Business health model scores revenue, operations, sales, customers, marketing, technicians, finance, and inventory from 0 to 100.
+- Forecast model includes revenue, workload, customer growth, marketing performance, cash flow trend, and technician capacity.
+- Risk model detects late estimates, late invoices, idle technicians, missed follow-ups, low conversion, customer churn risk, inventory shortage, and scheduling conflicts.
+- Dashboard shows business health, revenue, forecasts, risks, opportunities, and daily executive briefing.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Epic C Sprint 6 - Executive Intelligence"
+```
+
+## Current Sprint: Project Titan Epic D Sprint 7
+
+Goal: build the first AI Employee capable of helping service companies increase revenue by managing the full sales pipeline.
+
+Scope:
+
+- AI Sales Manager Agent.
+- Sales Engine.
+- Pipeline Manager.
+- Estimate Scoring.
+- Deal Priority.
+- Follow-up Engine.
+- Sales Dashboard.
+- Conversion Engine.
+- Customer Intelligence.
+- Revenue Opportunities.
+- System API module `sales`.
+- Marketplace Sales Manager section.
+- Sales Manager integration test.
+
+Out of scope:
+
+- External AI providers.
+- Deployment pipeline changes.
+- Customer outreach automation.
+- Discounting or price changes without owner approval.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Sales pipeline follows Lead -> Qualification -> Estimate -> Follow-up -> Negotiation -> Won/Lost.
+- Sales dashboard returns best next customer, expected revenue, probability, reasoning, priority, and recommended action.
+- Sales KPIs include open estimates, won estimates, lost estimates, conversion rate, average deal size, revenue pipeline, follow-up completion, and average close time.
+- Features include estimate priority, deal probability, revenue prediction, best customer to call, best follow-up time, lost deal recovery, VIP detection, upsell detection, and cross-sell detection.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Epic D Sprint 7 - AI Sales Manager"
+```
+
+## Current Sprint: Project Titan Epic D Sprint 7.5
+
+Goal: create the unified automation layer used by every AI Employee.
+
+Scope:
+
+- Workflow Engine.
+- Workflow Builder.
+- Workflow Runner.
+- Workflow Registry.
+- Workflow Validator.
+- Workflow History.
+- Workflow Events.
+- Workflow Actions.
+- Workflow Triggers.
+- Workflow Approval.
+- Workflow Agent.
+- System API module `workflow`.
+- Workflow Engine test.
+
+Out of scope:
+
+- External AI providers.
+- Messaging providers.
+- Deployment pipeline changes.
+- Autonomous execution without approval.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Supported events include New Lead, New Estimate, Estimate Accepted, Invoice Overdue, Job Completed, Customer Created, Technician Assigned, and Inventory Low.
+- Workflows include approval checks, retry policies, internal task/notification actions, execution history, warnings, errors, and audit trail.
+- Customer-facing workflow actions default to `needs_approval`.
+- Workflow layer reuses Context, Decision, Recommendation, and Executive Intelligence.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Epic D Sprint 7.5 - Workflow Automation Engine"
+```

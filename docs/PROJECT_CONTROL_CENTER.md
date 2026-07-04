@@ -33,12 +33,15 @@ Project Control Center Sprint.
 - Business Decision Engine for Project Titan Gamma Sprint 4.
 - Brain Orchestrator and integration stabilization for Project Titan Sprint 4.5.
 - Recommendation Intelligence Engine for Project Titan Sprint 5.
+- Executive Intelligence for Project Titan Epic C Sprint 6.
+- AI Sales Manager for Project Titan Epic D Sprint 7.
+- Workflow & Automation Engine for Project Titan Epic D Sprint 7.5.
 - API consolidation hotfix for Vercel Hobby compatibility.
 
 ## Next 3 Sprints
 
 1. v0.7 Sprint 2 - Supabase readiness and platform health checks.
-2. Project Titan Sprint 6 - decision governance and approval queue.
+2. Project Titan Sprint 8 - decision governance and approval queue.
 3. v0.9 Sprint 1 - CRM Core pipeline and activity timeline.
 
 ## Blocked Items
@@ -71,6 +74,9 @@ git diff --stat
 - Internal dashboard modules route through `/api/system`.
 - Brain pipeline validates Memory -> Context -> Decision.
 - Recommendation Intelligence returns explainable owner-approved next actions.
+- Executive Intelligence returns daily briefings, KPI health, forecasts, risks, and opportunities.
+- AI Sales Manager returns pipeline priorities, best next customer, revenue prediction, and follow-up queue.
+- Workflow Engine provides event-based execution, approvals, task queues, history, and audit trail.
 - Documentation updated.
 
 ## Deploy Checklist
