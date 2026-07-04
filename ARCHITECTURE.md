@@ -528,3 +528,24 @@ Dispatch AI safety:
 - ETA and route suggestions are advisory only.
 - Technicians are not assigned automatically.
 - Emergency jobs require manual customer confirmation.
+
+## SaaS Multi-Tenant Foundation
+
+Project Titan Sprint 15 adds the SaaS Multi-Tenant Foundation for organizations, teams, tenant context, tenant-scoped roles, permissions, settings, and tenant health.
+
+SaaS modules:
+
+- `tenant-engine.js` exposes the SaaS foundation API surface.
+- `organization-manager.js` summarizes tenant organization records.
+- `team-manager.js` summarizes users and role distribution.
+- `tenant-context.js` builds the current JSON-backed tenant context.
+- `tenant-permissions.js` validates roles, permissions, default role coverage, and tenant scope.
+- `tenant-settings.js` summarizes tenant settings and recommended future settings.
+- `tenant-dashboard.js` combines organizations, teams, roles, permissions, settings, and tenant health.
+
+SaaS safety:
+
+- Sprint 15 uses JSON fallback only.
+- Supabase/PostgreSQL is prepared for later but not connected.
+- Secrets are never read, logged, or exposed.
+- Tenant health is advisory and should be verified before production SaaS onboarding.

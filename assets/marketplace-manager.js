@@ -147,6 +147,10 @@
     return systemApi("dispatchAI", action || "dispatchAI.dashboard", payload || {});
   }
 
+  async function saasApi(action, payload) {
+    return systemApi("saas", action || "saas.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -1005,6 +1009,53 @@
     }
   }
 
+  function renderSaasDashboard(payload) {
+    var target = $("#saasMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var orgs = data.organizations || [];
+    var teams = data.teams || data.users || [];
+    var roles = data.roles || [];
+    var permissions = data.permissions || [];
+    var settings = data.settings || [];
+    var health = data.tenantHealth || data;
+    var context = data.tenantContext || data;
+    var cards = [
+      ["Organizations", orgs.length || data.organizationsCount || 0],
+      ["Teams", teams.length || data.activeUsers || 0],
+      ["Roles", roles.length || data.roleCount || 0],
+      ["Permissions", permissions.length || data.permissionCount || 0],
+      ["Settings", settings.length || 0],
+      ["Tenant Health", health.score !== undefined ? health.score + "/100" : "ready"],
+      ["Mode", context.mode || (data.jsonFallbackOnly ? "json_fallback" : "ready")],
+      ["Supabase", context.supabaseConnected || data.supabaseConnected ? "connected" : "not connected"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#saasOrganizations", orgs.slice(0, 8).map(function (org) {
+      return { title: org.name, meta: org.city || org.slug || "Organization", detail: org.industry || org.ownerEmail || "Tenant organization", pill: org.status || "active" };
+    }), "No organizations yet.");
+    renderList("#saasTeams", teams.slice(0, 8).map(function (user) {
+      return { title: user.name || user.email, meta: user.role || "viewer", detail: user.email || user.organizationId || "Team member", pill: user.status || "active" };
+    }), "No team members yet.");
+    renderList("#saasPermissions", permissions.slice(0, 10).map(function (permission) {
+      return { title: permission.role, meta: permission.resource + " / " + permission.action, detail: permission.effect || "allow", pill: permission.status || "active" };
+    }), "No permissions yet.");
+    renderList("#saasSettings", settings.slice(0, 8).map(function (setting) {
+      return { title: setting.key, meta: setting.scope || "tenant", detail: String(setting.value || "configured"), pill: setting.status || "active" };
+    }), "No tenant settings yet.");
+    renderList("#saasTenantHealth", [
+      { title: "Tenant isolation", meta: data.jsonFallbackOnly ? "JSON fallback" : "ready", detail: "Future production data should include tenant_id and role-scoped access.", pill: "foundation" },
+      { title: "Default roles", meta: roles.length + " roles", detail: "Admin, manager, dispatcher, technician, customer, and viewer are expected.", pill: roles.length >= 6 ? "ready" : "review" },
+      { title: "Permission coverage", meta: permissions.length + " permissions", detail: "Permissions prepare server-side role checks for SaaS.", pill: permissions.length ? "ready" : "review" },
+      { title: "Supabase/PostgreSQL", meta: "not connected", detail: "Prepared for a future sprint; this sprint uses JSON only.", pill: "future" }
+    ], "No tenant health data yet.");
+    if ($("#saasResult")) {
+      $("#saasResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -1251,6 +1302,7 @@
     await marketingGrowthApi("marketing.dashboard", {}).then(renderMarketingGrowthDashboard).catch(function () {});
     await analyticsReportsApi("analytics.dashboard", {}).then(renderAnalyticsReportsDashboard).catch(function () {});
     await dispatchAIApi("dispatchAI.dashboard", {}).then(renderDispatchAIDashboard).catch(function () {});
+    await saasApi("saas.dashboard", {}).then(renderSaasDashboard).catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -1702,6 +1754,30 @@
             renderDispatchAIDashboard(await dispatchAIApi(action, {}));
           } catch (error) {
             $("#dispatchAIResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshSaasDashboard", "saas.dashboard"],
+      ["#showSaasOrganizations", "saas.organizations"],
+      ["#showSaasTeams", "saas.teams"],
+      ["#showSaasPermissions", "saas.permissions"],
+      ["#showSaasSettings", "saas.settings"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderSaasDashboard(await saasApi(action, {}));
+          } catch (error) {
+            $("#saasResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

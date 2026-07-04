@@ -1,5 +1,14 @@
 # Changelog
 
+## Project Titan Sprint 15 - SaaS Multi-Tenant Foundation
+
+- Added SaaS foundation modules for organizations, teams, tenant context, permissions, settings, and tenant dashboard.
+- Added SaaS Agent.
+- Added `saas.*` actions to `/api/system`.
+- Added SaaS Admin Center dashboard UI.
+- Added `tests/saas-multitenant.test.js`.
+- Documented SaaS foundation architecture, roadmap, sprint plan, and project control updates.
+
 ## Project Titan Sprint 14 - Scheduling & Dispatch AI
 
 - Added Dispatch AI modules for schedule optimization, technician matching, route suggestions, ETA, capacity planning, emergency dispatch, and dispatch dashboard.

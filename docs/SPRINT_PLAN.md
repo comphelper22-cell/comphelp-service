@@ -627,3 +627,43 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 14 - Scheduling Dispatch AI"
 ```
+
+## Current Sprint: Project Titan Sprint 15
+
+Goal: prepare CompHelp AI for multiple companies, organizations, teams, roles, and tenant-isolated data.
+
+Scope:
+
+- Tenant Engine.
+- Organization Manager.
+- Team Manager.
+- Tenant Context.
+- Tenant Permissions.
+- Tenant Settings.
+- Tenant Dashboard.
+- SaaS Agent.
+- System API module `saas`.
+- Marketplace SaaS Admin Center section.
+- SaaS Multi-Tenant Foundation test.
+
+Out of scope:
+
+- Supabase connection.
+- PostgreSQL migration.
+- Billing.
+- Production tenant onboarding.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- SaaS Admin Center shows organizations, teams, roles, permissions, settings, and tenant health.
+- API supports `saas.status`, `saas.organizations`, `saas.teams`, `saas.permissions`, `saas.settings`, and `saas.dashboard`.
+- Uses JSON fallback only.
+- Does not expose secrets.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 15 - SaaS Multi-Tenant Foundation"
+```

@@ -37,6 +37,7 @@
         <button data-target="marketingGrowthCenter">Marketing & Growth</button>
         <button data-target="analyticsReports">Analytics & Reports</button>
         <button data-target="dispatchAICenter">Dispatch AI</button>
+        <button data-target="saasAdminCenter">SaaS Admin</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -396,6 +397,39 @@
         <div class="panel" style="margin-top:.85rem">
           <h2>AI Dispatch Suggestions</h2>
           <div class="list" id="dispatchAISuggestions"></div>
+        </div>
+      </section>
+
+      <section data-view="saasAdminCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>SaaS Admin Center</h2>
+            <p class="muted">JSON-backed tenant foundation for organizations, teams, roles, permissions, settings, and tenant health. Supabase/PostgreSQL is prepared for later but not connected.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshSaasDashboard" type="button">Tenant Dashboard</button>
+              <button class="btn" id="showSaasOrganizations" type="button">Organizations</button>
+              <button class="btn" id="showSaasTeams" type="button">Teams</button>
+              <button class="btn" id="showSaasPermissions" type="button">Permissions</button>
+              <button class="btn" id="showSaasSettings" type="button">Settings</button>
+            </div>
+            <div class="grid" id="saasMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>SaaS Output</h2>
+            <pre id="saasResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Organizations</h2><div class="list" id="saasOrganizations"></div></div>
+          <div class="panel"><h2>Teams</h2><div class="list" id="saasTeams"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Roles & Permissions</h2><div class="list" id="saasPermissions"></div></div>
+          <div class="panel"><h2>Settings</h2><div class="list" id="saasSettings"></div></div>
+        </div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>Tenant Health</h2>
+          <div class="list" id="saasTenantHealth"></div>
         </div>
       </section>
 

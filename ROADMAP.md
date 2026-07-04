@@ -153,7 +153,9 @@ Sprint 13: Analytics & Reporting Center with business scorecard, revenue trends,
 
 Sprint 14: Scheduling & Dispatch AI with schedule optimization, technician matching, route suggestions, ETA, capacity planning, emergency dispatch, and Dispatch AI dashboard.
 
-Sprint 15: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, and dispatch actions.
+Sprint 15: SaaS Multi-Tenant Foundation with organizations, teams, roles, permissions, tenant settings, tenant context, and SaaS Admin Center using JSON fallback only.
+
+Sprint 16: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, and SaaS actions.
 
 ## API Consolidation Hotfix
 
