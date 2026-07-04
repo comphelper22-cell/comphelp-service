@@ -1,0 +1,87 @@
+# CompHelp AI Architecture Bible v1.0
+
+CompHelp AI is an AI Business Operating System for service businesses. The first business vertical is local technology services: computer repair, security camera installation, networking, smart home setup, and data recovery.
+
+## Vision
+
+Mission: help service businesses operate with the speed, memory, and consistency of an AI-powered back office while keeping humans in control of customer trust, payments, dispatch, and publishing.
+
+Product philosophy:
+
+- Start with real daily workflows: leads, estimates, vendors, projects, follow-ups, gallery updates, and reporting.
+- Keep every automation approval-aware by default.
+- Prefer small composable agents over one giant assistant.
+- Support JSON fallback locally and Supabase in production.
+- Preserve customer privacy and business reputation before growth automation.
+
+Long-term goal: become a multi-tenant SaaS platform where service businesses can run sales, operations, marketing, dispatch, finance, content, and customer support from one agent-assisted dashboard.
+
+SaaS strategy: begin as an internal operating system for CompHelp AI, prove workflows in Los Angeles service operations, then generalize the database, roles, agent mesh, and industry templates for other service companies.
+
+## System Architecture
+
+Frontend:
+
+- Static HTML service pages and local SEO pages.
+- `marketplace.html` as the admin operating dashboard.
+- `assets/marketplace-manager.js` as the browser controller for dashboard modules.
+- Service pages remain fast, dark themed, SEO optimized, and independent of heavy client frameworks.
+
+Backend:
+
+- Vercel serverless API routes in `api/`.
+- Node.js scripts and agents in `agents/` and `scripts/`.
+- APIs return safe JSON and avoid exposing secrets.
+
+API layer:
+
+- `/api/marketplace` handles current marketplace dashboard resources.
+- `/api/business-os` handles business dashboard, CRM, estimates, dispatcher, analytics, and reports.
+- `/api/developer` handles Developer Center reports, validation, deployment readiness, and database status.
+- Supporting APIs handle quotes, uploads, outreach, estimates, follow-ups, social leads, and vendor dispatch.
+
+Database layer:
+
+- `database/` contains the Phase 6.1 abstraction.
+- Supabase is used when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured.
+- JSON fallback uses `data/marketplace.json` and must never be broken.
+- Modules expose `create`, `list`, `getById`, `update`, `remove`, and `search`.
+
+AI agent layer:
+
+- Agents live in `agents/`.
+- Agents produce drafts, recommendations, reports, and approval queues.
+- Agents must not push code, deploy, send customer messages, or publish social posts without approval unless a future explicit policy allows it.
+
+Storage:
+
+- JSON fallback in `data/`.
+- Cloudinary is the intended media storage provider for uploaded project media.
+- Supabase is the intended system database.
+- Local backup ZIPs are created by `scripts/backup-project.js`.
+
+Integrations:
+
+- OpenAI for reasoning, drafting, analysis, and chatbot behavior.
+- Supabase for production data.
+- Cloudinary for media.
+- GitHub for source control automation.
+- Vercel for hosting and deployment.
+- Twilio, Resend, Vapi, HubSpot, and n8n are optional integration layers.
+
+Deployment:
+
+- Local development runs from the repository.
+- GitHub main is the production source branch unless changed later.
+- Vercel deploys static pages and serverless APIs.
+- Push and deploy require explicit owner approval.
+
+## Core Principles
+
+- Never expose secrets.
+- Never commit `.env` or `.env.local`.
+- Never delete customer data automatically.
+- Never remove working features while extending the system.
+- Prefer additive, backward-compatible changes.
+- Keep the app deployable after each phase.
+
