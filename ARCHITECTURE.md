@@ -194,3 +194,35 @@ Policy system:
 - After Hours.
 
 Explainable decision model: every decision includes `decisionId`, `type`, `recommendedAction`, `confidence`, `priority`, `risk`, `reasoning`, `usedMemory`, `usedContext`, `alternatives`, and `timestamp`.
+
+## Brain Orchestrator
+
+Project Titan Sprint 4.5 adds the Brain Orchestrator as the unifying layer for the existing Memory, Context, and Decision engines. The orchestrator does not replace any engine. It verifies communication, runs the internal pipeline, records lightweight internal events, and returns a single Business Brain result.
+
+Brain pipeline:
+
+1. Memory stats and provider availability.
+2. Unified Context package.
+3. Explainable Business Decision.
+4. Unified Brain result with confidence, recommended action, warnings, and performance metrics.
+
+Module dependencies:
+
+- `brain/orchestrator/brain-pipeline.js` coordinates Memory, Context, and Decision.
+- `brain/orchestrator/brain-health.js` reports Brain health, module status, missing dependencies, errors, and warnings.
+- `brain/orchestrator/brain-metrics.js` measures memory access time, context build time, decision time, pipeline time, and average response time.
+- `brain/orchestrator/brain-events.js` keeps an in-memory internal event log for diagnostics.
+- `agents/integration-agent.js` produces integration diagnostics for dashboard and owner review.
+
+Integration flow:
+
+```mermaid
+flowchart LR
+  Memory["Shared Memory"] --> Context["Context Intelligence"]
+  Context --> Decision["Business Decision Engine"]
+  Decision --> Result["Unified Brain Result"]
+  Result --> Health["Health Monitoring"]
+  Result --> Metrics["Performance Metrics"]
+```
+
+Health monitoring returns Brain Health, Module Status, Pipeline Status, Missing Dependencies, Average Response Time, Errors, and Warnings. No external AI provider, external API, or deployment architecture change is introduced in Sprint 4.5.

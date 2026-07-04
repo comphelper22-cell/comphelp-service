@@ -437,9 +437,12 @@
     var modules = data.modules || (data.brain && data.brain.modules) || {};
     var memory = data.memory || data.memoryStatus || {};
     var knowledge = data.knowledge || data.knowledgeStatus || {};
+    var performance = data.performance || (data.pipelineValidation && data.pipelineValidation.performance) || {};
     var cards = [
       ["Brain Status", data.status || "ready"],
       ["Memory", memory.status || (data.types ? data.types.length : "ready")],
+      ["Pipeline", data.pipelineStatus || data.integrationStatus || (data.unifiedBrainResult ? data.unifiedBrainResult.status : "ready")],
+      ["Average MS", data.averageResponseTimeMs || performance.averageResponseTimeMs || "ready"],
       ["Recommendations", data.recommendations ? data.recommendations.length : "ready"],
       ["Executive Summary", data.businessHealth || "ready"],
       ["Knowledge", knowledge.status || (data.registry ? data.registry.length : "ready")],
@@ -839,12 +842,15 @@
     }
 
     [
-      ["#refreshBrainStatus", "brainStatus"],
-      ["#showBrainHealth", "brainHealth"],
+      ["#refreshBrainStatus", "brain.status"],
+      ["#showBrainHealth", "brain.health"],
       ["#showBrainRecommendation", "recommendation"],
       ["#showExecutiveSummary", "executiveSummary"],
       ["#showMemoryStatus", "memoryStatus"],
-      ["#showKnowledgeStatus", "knowledgeStatus"]
+      ["#showKnowledgeStatus", "knowledgeStatus"],
+      ["#runBrainPipeline", "brain.pipeline"],
+      ["#showBrainMetrics", "brain.metrics"],
+      ["#showBrainDiagnostics", "brain.diagnostics"]
     ].forEach(function (item) {
       var selector = item[0];
       var action = item[1];

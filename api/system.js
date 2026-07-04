@@ -10,6 +10,8 @@ const contextEngine = require("../brain/context/context-engine");
 const contextAgent = require("../agents/context-agent");
 const decisionEngine = require("../brain/decision/decision-engine");
 const decisionAgent = require("../agents/decision-agent");
+const brainOrchestrator = require("../brain/orchestrator/brain-orchestrator");
+const integrationAgent = require("../agents/integration-agent");
 
 const modules = {
   developer,
@@ -55,6 +57,15 @@ function runDecisionAction(action, payload = {}) {
   return { ok: false, error: "unknown_decision_action" };
 }
 
+function runBrainOrchestratorAction(action, payload = {}) {
+  if (action === "brain.status") return { ok: true, data: brainOrchestrator.status(payload) };
+  if (action === "brain.health") return brainOrchestrator.health(payload);
+  if (action === "brain.pipeline") return brainOrchestrator.pipeline(payload);
+  if (action === "brain.metrics") return brainOrchestrator.metrics(payload);
+  if (action === "brain.diagnostics") return { ok: true, data: integrationAgent.run(payload) };
+  return { ok: false, error: "unknown_brain_orchestrator_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -82,7 +93,8 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision"]
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision"],
+          brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"]
         }
       });
     }
@@ -103,6 +115,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "decision") {
       const result = runDecisionAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "brain" && action.indexOf("brain.") === 0) {
+      const result = runBrainOrchestratorAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });
