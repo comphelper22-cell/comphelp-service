@@ -27,15 +27,42 @@ Failure:
 ```mermaid
 flowchart TD
   Browser["Dashboard / Website"] --> Marketplace["/api/marketplace"]
-  Browser --> BusinessOS["/api/business-os"]
-  Browser --> Developer["/api/developer"]
+  Browser --> System["/api/system"]
   Browser --> Upload["/api/marketplace-project-upload"]
   Browser --> Social["/api/social-leads"]
   Browser --> Outreach["/api/outreach"]
   Marketplace --> Database["database/"]
-  BusinessOS --> Database
-  Developer --> Reports["logs/*.json"]
+  System --> Database
+  System --> Reports["logs/*.json"]
 ```
+
+## System API Router
+
+Internal dashboard modules use one Vercel function for Hobby compatibility:
+
+```http
+POST /api/system
+```
+
+Request body:
+
+```json
+{
+  "module": "brain",
+  "action": "brainStatus",
+  "payload": {}
+}
+```
+
+Supported modules:
+
+- `developer`
+- `business-os`
+- `platform`
+- `titan`
+- `brain`
+
+The original module handlers are preserved in `server/api-modules/` so code is not lost while Vercel function count stays below the Hobby limit.
 
 ## Core Routes
 
@@ -47,7 +74,7 @@ Expected actions: login, dashboard resources, leads, vendors, estimates, quotes,
 
 Safety: must fall back to JSON storage when Supabase is unavailable.
 
-### `/api/business-os`
+### System module `business-os`
 
 Purpose: Phase 6 business operating system API.
 
@@ -61,7 +88,7 @@ Actions:
 - `reports`
 - `databaseHealth`
 
-### `/api/developer`
+### System module `developer`
 
 Purpose: Developer Center API.
 
@@ -74,9 +101,17 @@ Actions:
 - `databaseStatus`
 - `fullReport`
 
-### `/api/platform`
+### System module `platform`
 
 Purpose: v0.7 core platform foundation API for organizations, users, roles, permissions, sessions, audit logs, notifications, and preferences.
+
+### System module `brain`
+
+Purpose: CompHelp Brain Kernel status, health, recommendation, executive summary, memory status, and knowledge status.
+
+### System module `titan`
+
+Purpose: Project Titan and Project Control Center reports.
 
 Actions:
 

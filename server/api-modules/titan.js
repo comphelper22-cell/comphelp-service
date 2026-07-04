@@ -1,12 +1,12 @@
-const strategyAgent = require("../agents/strategy-agent");
-const productAgent = require("../agents/product-agent");
-const customerSuccessAgent = require("../agents/customer-success-agent");
-const performanceAgent = require("../agents/performance-agent");
-const reliabilityAgent = require("../agents/reliability-agent");
-const securityAgent = require("../agents/security-agent");
-const qaAgent = require("../agents/qa-agent");
-const innovationAgent = require("../agents/innovation-agent");
-const projectControlAgent = require("../agents/project-control-agent");
+const strategyAgent = require("../../agents/strategy-agent");
+const productAgent = require("../../agents/product-agent");
+const customerSuccessAgent = require("../../agents/customer-success-agent");
+const performanceAgent = require("../../agents/performance-agent");
+const reliabilityAgent = require("../../agents/reliability-agent");
+const securityAgent = require("../../agents/security-agent");
+const qaAgent = require("../../agents/qa-agent");
+const innovationAgent = require("../../agents/innovation-agent");
+const projectControlAgent = require("../../agents/project-control-agent");
 
 const agents = [
   strategyAgent,

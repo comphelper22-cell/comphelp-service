@@ -2,47 +2,43 @@
 
 ## Current Sprint
 
-Project Control Center Sprint.
+API Consolidation Hotfix - Vercel Hobby Compatibility.
 
 ## Sprint Goal
 
-Create a permanent project planning and focus system for CompHelp AI.
+Reduce Vercel Serverless Function count while preserving developer, business-os, platform, titan, and brain functionality behind one System API Router.
 
 ## Scope
 
-- Project Control Center docs.
-- Ideas backlog.
-- Sprint plan.
-- Release plan.
-- Decision log.
-- Focus rules.
-- Project Control Center dashboard tab.
-- Titan API planning actions.
-- Project Control agent.
+- `/api/system`.
+- Move internal API handlers to `server/api-modules/`.
+- Update dashboard calls to use `{ module, action, payload }`.
+- Remove consolidated module rewrites from `vercel.json`.
+- Add API function count validation.
 
 ## Out of Scope
 
 - Runtime automation.
+- Feature changes unrelated to consolidation.
 - External APIs.
-- Competitor scraping.
 - Messaging.
 - Deployment.
 - Push/commit.
 
 ## Tasks
 
-- Create planning documents.
-- Add project-control agent.
-- Extend `/api/titan`.
-- Add dashboard cards.
-- Update architecture docs.
+- Create System API Router.
+- Move module API files.
+- Update dashboard endpoint calls.
+- Update `vercel.json`.
+- Update validation and docs.
 - Run validation.
 
 ## Acceptance Criteria
 
-- All requested docs exist.
+- `/api` has 10 or fewer JS function entrypoints.
 - API actions return safe JSON.
-- Dashboard tab renders planning cards.
+- Dashboard calls internal modules through `/api/system`.
 - `npm run check-project` passes.
 
 ## Validation Commands
@@ -56,7 +52,7 @@ git diff --stat
 ## Commit Message
 
 ```powershell
-git commit -m "Project Control Center - planning foundation"
+git commit -m "Hotfix - consolidate internal API routes"
 ```
 
 ## Deployment Commands
@@ -66,4 +62,3 @@ Deployment requires owner approval:
 ```powershell
 npm run vercel-deploy
 ```
-

@@ -188,3 +188,15 @@ Inputs: roadmap, sprint plan, release plan, decision log, ideas backlog, focus r
 Outputs: project control status, roadmap summary, backlog summary, sprint plan, release plan, decision log, focus rules.
 
 Escalation rules: sprint scope changes, commits, pushes, and deployments require owner approval.
+
+## CompHelp Brain Agent
+
+Purpose: coordinate every future AI agent through one internal intelligence kernel.
+
+Responsibilities: normalize context, report memory readiness, generate structured recommendations, create decision objects, expose knowledge registry status, and produce executive summaries.
+
+Inputs: current user, organization, customer, project, task, agent, and session.
+
+Outputs: brain status, health, recommendations, executive summary, memory status, and knowledge status.
+
+Escalation rules: memory writes, external AI provider connections, customer privacy concerns, and external API integrations require owner approval.

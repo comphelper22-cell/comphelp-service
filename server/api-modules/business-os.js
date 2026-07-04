@@ -1,4 +1,4 @@
-const business = require("../agents/business-os-agent");
+const business = require("../../agents/business-os-agent");
 
 function clean(value, max = 500) {
   return String(value || "").trim().slice(0, max);

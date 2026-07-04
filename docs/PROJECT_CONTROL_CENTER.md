@@ -27,11 +27,13 @@ Project Control Center Sprint.
 - Project control dashboard tab.
 - Titan API planning actions.
 - Project control agent foundation.
+- CompHelp Brain Kernel architecture for Project Titan Beta Sprint 1.
+- API consolidation hotfix for Vercel Hobby compatibility.
 
 ## Next 3 Sprints
 
 1. v0.7 Sprint 2 - Supabase readiness and platform health checks.
-2. v0.8 Sprint 1 - CompHelp Brain shared memory foundation.
+2. Project Titan Beta Sprint 2 - Brain memory write policy and persistence design.
 3. v0.9 Sprint 1 - CRM Core pipeline and activity timeline.
 
 ## Blocked Items
@@ -61,6 +63,7 @@ git diff --stat
 - No `logs/*.jsonl` staged.
 - No external API calls added.
 - No messaging automation added.
+- Internal dashboard modules route through `/api/system`.
 - Documentation updated.
 
 ## Deploy Checklist
@@ -72,4 +75,3 @@ git diff --stat
 - Push approved.
 - Vercel deploy approved.
 - Production smoke test planned.
-

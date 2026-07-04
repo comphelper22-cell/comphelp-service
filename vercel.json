@@ -79,20 +79,8 @@
       "destination": "/api/social-leads.js"
     },
     {
-      "source": "/api/developer",
-      "destination": "/api/developer.js"
-    },
-    {
-      "source": "/api/business-os",
-      "destination": "/api/business-os.js"
-    },
-    {
-      "source": "/api/platform",
-      "destination": "/api/platform.js"
-    },
-    {
-      "source": "/api/titan",
-      "destination": "/api/titan.js"
+      "source": "/api/system",
+      "destination": "/api/system.js"
     },
     {
       "source": "/admin-test",

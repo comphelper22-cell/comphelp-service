@@ -79,12 +79,20 @@
     return body;
   }
 
+  async function systemApi(moduleName, action, payload) {
+    return routeApi("/api/system", action, { module: moduleName, payload: payload || {} });
+  }
+
   async function businessApi(action, payload) {
-    return routeApi("/api/business-os", action || "dashboard", payload || {});
+    return systemApi("business-os", action || "dashboard", payload || {});
   }
 
   async function titanApi(action, payload) {
-    return routeApi("/api/titan", action || "titanStatus", payload || {});
+    return systemApi("titan", action || "titanStatus", payload || {});
+  }
+
+  async function brainApi(action, payload) {
+    return systemApi("brain", action || "brainStatus", payload || {});
   }
 
   async function getDashboard() {
@@ -410,6 +418,32 @@
     }
   }
 
+  function renderBrain(payload) {
+    var target = $("#brainMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var modules = data.modules || (data.brain && data.brain.modules) || {};
+    var memory = data.memory || data.memoryStatus || {};
+    var knowledge = data.knowledge || data.knowledgeStatus || {};
+    var cards = [
+      ["Brain Status", data.status || "ready"],
+      ["Memory", memory.status || (data.types ? data.types.length : "ready")],
+      ["Recommendations", data.recommendations ? data.recommendations.length : "ready"],
+      ["Executive Summary", data.businessHealth || "ready"],
+      ["Knowledge", knowledge.status || (data.registry ? data.registry.length : "ready")],
+      ["Health", data.ok === false ? "needs review" : "healthy"],
+      ["Context", modules.contextEngine || "ready"],
+      ["AI Connected", data.externalAiConnected ? "yes" : "no"],
+      ["Learning", data.learningEnabled ? "on" : "off"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#brainResult")) {
+      $("#brainResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -433,7 +467,7 @@
   }
 
   async function refreshDeveloperCenter(action, writeOutput) {
-    var result = await routeApi("/api/developer", action || "fullReport", {});
+    var result = await systemApi("developer", action || "fullReport", {});
     renderDeveloperCenter(result, writeOutput);
     return result;
   }
@@ -542,7 +576,9 @@
           var payload = formData(form);
           var apiAction = action === "vendor" && payload.crudMode ? payload.crudMode : action;
           var result;
-          if (form.dataset.endpoint) {
+          if (form.dataset.module) {
+            result = await systemApi(form.dataset.module, form.dataset.apiAction || apiAction, payload);
+          } else if (form.dataset.endpoint) {
             result = await routeApi(form.dataset.endpoint, form.dataset.apiAction || apiAction, payload);
           } else {
             result = action === "project" ? await uploadProject(form) : await api(apiAction, payload);
@@ -712,6 +748,31 @@
         }
       });
     }
+
+    [
+      ["#refreshBrainStatus", "brainStatus"],
+      ["#showBrainHealth", "brainHealth"],
+      ["#showBrainRecommendation", "recommendation"],
+      ["#showExecutiveSummary", "executiveSummary"],
+      ["#showMemoryStatus", "memoryStatus"],
+      ["#showKnowledgeStatus", "knowledgeStatus"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderBrain(await brainApi(action, {}));
+          } catch (error) {
+            $("#brainResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
 
     if ($("#refreshTitanStatus")) {
       $("#refreshTitanStatus").addEventListener("click", async function () {

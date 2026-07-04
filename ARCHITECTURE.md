@@ -36,10 +36,16 @@ Backend:
 API layer:
 
 - `/api/marketplace` handles current marketplace dashboard resources.
-- `/api/business-os` handles business dashboard, CRM, estimates, dispatcher, analytics, and reports.
-- `/api/developer` handles Developer Center reports, validation, deployment readiness, and database status.
-- `/api/platform` handles the v0.7 core platform foundation for organizations, users, roles, permissions, sessions, audit logs, notifications, and preferences.
+- `/api/system` is the consolidated System API Router for internal modules.
+- `server/api-modules/` preserves internal handlers for developer, business-os, platform, titan, and brain without counting each one as a Vercel Serverless Function.
 - Supporting APIs handle quotes, uploads, outreach, estimates, follow-ups, social leads, and vendor dispatch.
+
+API Consolidation Hotfix:
+
+- Vercel Hobby limits projects to 12 Serverless Functions.
+- Internal API modules route through `/api/system` using `{ module, action, payload }`.
+- The dashboard uses `/api/system` for developer, business-os, platform, titan, and brain calls.
+- Legacy code is preserved in `server/api-modules/`.
 
 Database layer:
 
@@ -104,6 +110,21 @@ Titan is foundation-only until explicitly expanded. It does not scrape competito
 
 ## Project Control Center
 
-The Project Control Center sits beside Project Titan as the planning and focus layer. It stores the current mission, release, sprint, backlog, decisions, and next actions in Markdown documents and exposes safe internal summaries through `/api/titan`.
+The Project Control Center sits beside Project Titan as the planning and focus layer. It stores the current mission, release, sprint, backlog, decisions, and next actions in Markdown documents and exposes safe internal summaries through `/api/system` module `titan`.
 
 The Control Center does not automate work. It organizes work so future agents and engineers can choose the right next task without losing the long-term vision.
+
+## CompHelp Brain Kernel
+
+The CompHelp Brain Kernel is the internal intelligence layer for every future AI agent. It is not a CRM feature and does not connect to external AI providers in Beta Sprint 1.
+
+Brain modules:
+
+- Context Engine.
+- Memory Manager.
+- Recommendation Engine.
+- Decision Engine.
+- Knowledge Registry.
+- Executive Summary Engine.
+
+The Brain exposes safe internal architecture through `/api/system` module `brain` and a dashboard section. Memory writes and AI learning are intentionally disabled until a future approved storage and privacy policy exists.

@@ -71,8 +71,21 @@ function validateVercel(errors) {
   }
   const vercel = JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
   const routes = JSON.stringify(vercel.rewrites || []);
-  for (const route of ["/api/marketplace", "/api/admin-test", "/api/developer", "/api/business-os", "/api/platform", "/api/titan", "/marketplace", "/admin-test"]) {
+  for (const route of ["/api/marketplace", "/api/admin-test", "/api/system", "/marketplace", "/admin-test"]) {
     if (!routes.includes(route)) errors.push(`vercel.json missing route: ${route}`);
+  }
+}
+
+function validateApiFunctionCount(warnings) {
+  const apiDir = path.join(ROOT, "api");
+  const apiFiles = fs.existsSync(apiDir)
+    ? fs.readdirSync(apiDir).filter((file) => file.endsWith(".js"))
+    : [];
+  if (apiFiles.length > 10) {
+    warnings.push(`Vercel Hobby warning: /api has ${apiFiles.length} JS functions. Keep at 10 or fewer when possible.`);
+  }
+  if (apiFiles.length > 12) {
+    warnings.push(`Vercel Hobby limit risk: /api has ${apiFiles.length} JS functions. Limit is 12.`);
   }
 }
 
@@ -98,6 +111,7 @@ function main() {
 
   validatePackageJson(errors);
   validateVercel(errors);
+  validateApiFunctionCount(warnings);
 
   if (!fs.existsSync(path.join(ROOT, "api", "marketplace.js"))) errors.push("api/marketplace.js is missing.");
   if (!fs.existsSync(path.join(ROOT, "api", "marketplace-project-upload.js"))) errors.push("api/marketplace-project-upload.js is missing.");

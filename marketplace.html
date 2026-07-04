@@ -46,6 +46,7 @@
         <button data-target="activity">Activity Logs</button>
         <button data-target="deployment">Deployment</button>
         <button data-target="developer">Developer Center</button>
+        <button data-target="comphelpBrain">CompHelp Brain</button>
         <button data-target="projectTitan">Project Titan</button>
         <button data-target="projectControl">Project Control</button>
         <button data-target="marketing">Marketing</button>
@@ -499,7 +500,7 @@
             </div>
             <div class="grid" id="developerMetrics" style="margin-top:.85rem"></div>
           </div>
-          <form class="panel" data-action="developerReport" data-endpoint="/api/developer" data-api-action="fullReport" data-output="developerResult">
+          <form class="panel" data-action="developerReport" data-module="developer" data-api-action="fullReport" data-output="developerResult">
             <h2>Reports</h2>
             <p class="muted">Creates JSON reports in logs. Push and deployment are intentionally approval-only.</p>
             <button class="btn primary">Generate Developer Report</button>
@@ -508,20 +509,42 @@
           </form>
         </div>
         <div class="two" style="margin-top:.85rem">
-          <form class="panel" data-action="developerGitStatus" data-endpoint="/api/developer" data-api-action="gitStatus" data-output="developerGitResult">
+          <form class="panel" data-action="developerGitStatus" data-module="developer" data-api-action="gitStatus" data-output="developerGitResult">
             <h2>Git Manager</h2>
             <p class="muted">Shows status, changed files, current branch, last commit, and recent commits. It does not push.</p>
             <button class="btn primary">Check Git Status</button>
             <p class="status"></p>
             <pre id="developerGitResult"></pre>
           </form>
-          <form class="panel" data-action="developerDeployment" data-endpoint="/api/developer" data-api-action="deployment" data-output="developerDeployResult">
+          <form class="panel" data-action="developerDeployment" data-module="developer" data-api-action="deployment" data-output="developerDeployResult">
             <h2>Deployment Manager</h2>
             <p class="muted">Creates deployment readiness reports. Deployment requires owner approval.</p>
             <button class="btn primary">Create Deployment Report</button>
             <p class="status"></p>
             <pre id="developerDeployResult"></pre>
           </form>
+        </div>
+      </section>
+
+      <section data-view="comphelpBrain">
+        <div class="two">
+          <div class="panel">
+            <h2>CompHelp Brain</h2>
+            <p class="muted">Internal intelligence kernel for context, memory interfaces, recommendations, decisions, knowledge registry, and executive summaries. Architecture only; no external AI provider is connected.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshBrainStatus" type="button">Brain Status</button>
+              <button class="btn" id="showBrainHealth" type="button">Health</button>
+              <button class="btn" id="showBrainRecommendation" type="button">Recommendations</button>
+              <button class="btn" id="showExecutiveSummary" type="button">Executive Summary</button>
+              <button class="btn" id="showMemoryStatus" type="button">Memory</button>
+              <button class="btn" id="showKnowledgeStatus" type="button">Knowledge</button>
+            </div>
+            <div class="grid" id="brainMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Brain Output</h2>
+            <pre id="brainResult"></pre>
+          </div>
         </div>
       </section>
 

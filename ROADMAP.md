@@ -114,3 +114,15 @@ Titan Delta: AI company daily briefing covering product, engineering, sales, sup
 ## Project Control Center
 
 The Project Control Center is the planning layer that prevents scope creep. It owns the current sprint, next sprints, release plan, ideas backlog, decision log, focus rules, blocked items, and deploy checklist.
+
+## Project Titan Beta
+
+Sprint 1: CompHelp Brain Kernel architecture with context, memory interfaces, recommendations, decisions, knowledge registry, and executive summary.
+
+Sprint 2: approved Brain memory write policy, persistence strategy, and privacy controls.
+
+Sprint 3: CompHelp Brain shared memory reports for agents and the Project Control Center.
+
+## API Consolidation Hotfix
+
+Internal modules developer, business-os, platform, titan, and brain route through `/api/system` to stay compatible with the Vercel Hobby serverless function limit. Module code is preserved in `server/api-modules/`.

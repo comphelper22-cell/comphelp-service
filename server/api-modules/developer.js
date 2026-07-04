@@ -6,7 +6,7 @@ const {
   platformStatus,
   fullReport,
   gitStatus
-} = require("../agents/developer-agent");
+} = require("../../agents/developer-agent");
 
 function clean(value, max = 500) {
   return String(value || "").trim().slice(0, max);
