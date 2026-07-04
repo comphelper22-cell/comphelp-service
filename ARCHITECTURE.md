@@ -158,3 +158,39 @@ Context providers:
 - Technician Context.
 
 Future AI integration must use this context package before model calls. No external AI provider is connected in Sprint 3.
+
+## Business Decision Engine
+
+Project Titan Gamma Sprint 4 adds an explainable Business Decision Engine. The engine consumes Context and Memory, applies registered decision templates and business policies, then returns a structured decision model.
+
+Decision flow:
+
+1. Build context package.
+2. Load memory statistics and relevant memory scopes.
+3. Select registered decision type.
+4. Apply decision policies.
+5. Build decision object.
+6. Score confidence and priority.
+7. Validate required fields.
+8. Record local decision history.
+
+Decision lifecycle:
+
+- draft.
+- evaluated.
+- validated.
+- owner review.
+- handoff to recommendation or workflow.
+
+Policy system:
+
+- High Value Customer.
+- VIP Customer.
+- Emergency Call.
+- Warranty Active.
+- Low Inventory.
+- Technician Busy.
+- Business Hours.
+- After Hours.
+
+Explainable decision model: every decision includes `decisionId`, `type`, `recommendedAction`, `confidence`, `priority`, `risk`, `reasoning`, `usedMemory`, `usedContext`, `alternatives`, and `timestamp`.

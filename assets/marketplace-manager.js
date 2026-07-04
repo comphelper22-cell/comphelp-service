@@ -103,6 +103,10 @@
     return systemApi("context", action || "status", payload || {});
   }
 
+  async function decisionApi(action, payload) {
+    return systemApi("decision", action || "status", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -526,6 +530,31 @@
     }
   }
 
+  function renderDecision(payload) {
+    var target = $("#decisionMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var decision = data.decision || data;
+    var validation = data.validation || {};
+    var policies = data.policies || (data.engine && data.engine.policies) || {};
+    var recent = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+    var cards = [
+      ["Decision Status", data.status || validation.status || "ready"],
+      ["Decision Queue", recent.length || "ready"],
+      ["Decision Confidence", decision.confidence !== undefined ? Math.round(decision.confidence * 100) + "%" : "ready"],
+      ["Recent Decisions", recent.length || "ready"],
+      ["Policy Health", policies.status || "ready"],
+      ["Priority", decision.priority || "ready"],
+      ["Risk", decision.risk || "ready"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#decisionResult")) {
+      $("#decisionResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   async function refreshDeveloperCenter(action, writeOutput) {
     var result = await systemApi("developer", action || "fullReport", {});
     renderDeveloperCenter(result, writeOutput);
@@ -851,6 +880,31 @@
             renderContext(await contextApi(action, {}));
           } catch (error) {
             $("#contextResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshDecisionStatus", "status", {}],
+      ["#evaluateDecision", "evaluate", { type: "leadQualification", flags: { businessHours: true } }],
+      ["#showDecisionHistory", "history", {}],
+      ["#scoreDecision", "score", { contextScore: 88, risk: "LOW" }],
+      ["#showDecisionPolicies", "policies", {}]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      var payload = item[2];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderDecision(await decisionApi(action, payload));
+          } catch (error) {
+            $("#decisionResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

@@ -8,6 +8,8 @@ const memoryRegistry = require("../brain/memory-registry");
 const memoryAgent = require("../agents/memory-agent");
 const contextEngine = require("../brain/context/context-engine");
 const contextAgent = require("../agents/context-agent");
+const decisionEngine = require("../brain/decision/decision-engine");
+const decisionAgent = require("../agents/decision-agent");
 
 const modules = {
   developer,
@@ -42,6 +44,17 @@ function runContextAction(action, payload = {}) {
   return { ok: false, error: "unknown_context_action" };
 }
 
+function runDecisionAction(action, payload = {}) {
+  if (action === "status") return { ok: true, data: decisionAgent.status() };
+  if (action === "evaluate") return decisionEngine.evaluate(payload);
+  if (action === "history") return decisionEngine.history(payload.limit || 20);
+  if (action === "score") return decisionEngine.score(payload);
+  if (action === "validate") return decisionEngine.validate(payload);
+  if (action === "explain") return decisionEngine.explain(payload);
+  if (action === "policies") return decisionEngine.policies();
+  return { ok: false, error: "unknown_decision_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -69,7 +82,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context"]
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision"]
         }
       });
     }
@@ -86,6 +99,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "context") {
       const result = runContextAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "decision") {
+      const result = runDecisionAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

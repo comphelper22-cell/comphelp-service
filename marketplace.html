@@ -49,6 +49,7 @@
         <button data-target="comphelpBrain">CompHelp Brain</button>
         <button data-target="contextCenter">Context</button>
         <button data-target="memoryCenter">Memory</button>
+        <button data-target="decisionCenter">Decisions</button>
         <button data-target="projectTitan">Project Titan</button>
         <button data-target="projectControl">Project Control</button>
         <button data-target="marketing">Marketing</button>
@@ -587,6 +588,27 @@
           <div class="panel">
             <h2>Memory Output</h2>
             <pre id="memoryResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="decisionCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Business Decisions</h2>
+            <p class="muted">Explainable decision engine using context, memory, decision templates, policies, scoring, and validation. No external AI provider is connected.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshDecisionStatus" type="button">Decision Status</button>
+              <button class="btn" id="evaluateDecision" type="button">Evaluate</button>
+              <button class="btn" id="showDecisionHistory" type="button">Decision Queue</button>
+              <button class="btn" id="scoreDecision" type="button">Decision Confidence</button>
+              <button class="btn" id="showDecisionPolicies" type="button">Policy Health</button>
+            </div>
+            <div class="grid" id="decisionMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Decision Output</h2>
+            <pre id="decisionResult"></pre>
           </div>
         </div>
       </section>

@@ -125,6 +125,12 @@ Sprint 3: approved memory governance, privacy rules, retention policy, and audit
 
 Sprint 4: Context Intelligence governance, live data connectors, and model-ready prompt assembly after owner approval.
 
+## Project Titan Gamma
+
+Sprint 4: Business Decision Engine with explainable decisions, policy layer, scoring, validation, history, and dashboard status.
+
+Sprint 5: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation workflows.
+
 ## API Consolidation Hotfix
 
 Internal modules developer, business-os, platform, titan, and brain route through `/api/system` to stay compatible with the Vercel Hobby serverless function limit. Module code is preserved in `server/api-modules/`.

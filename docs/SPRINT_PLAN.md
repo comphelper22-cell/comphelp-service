@@ -132,3 +132,42 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Beta Sprint 3 - Context Intelligence Engine"
 ```
+
+## Current Sprint: Project Titan Gamma Sprint 4
+
+Goal: teach CompHelp AI to make explainable business decisions from Memory and Context.
+
+Scope:
+
+- Business Decision Engine.
+- Decision Builder.
+- Decision Evaluator.
+- Decision Registry.
+- Decision Validator.
+- Decision Score.
+- Decision History.
+- Decision Policy.
+- Decision Agent.
+- System API module `decision`.
+- Dashboard Decision section.
+
+Out of scope:
+
+- External AI providers.
+- OpenAI, Anthropic, Gemini.
+- Deployment architecture changes.
+- Autonomous execution.
+
+Acceptance criteria:
+
+- Every decision returns the required decision model.
+- Initial business decision templates are registered.
+- Policy layer is configurable.
+- Dashboard shows decision status, queue, confidence, recent decisions, and policy health.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Gamma Sprint 4 - Business Decision Engine"
+```
