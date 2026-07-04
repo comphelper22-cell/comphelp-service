@@ -212,3 +212,15 @@ Inputs: memory provider, query, record, and memory registry.
 Outputs: memory status, memory stats, and validation report.
 
 Escalation rules: customer privacy concerns, external memory providers, and bulk clear/delete requests require owner approval.
+
+## Context Agent
+
+Purpose: diagnose and score context before CompHelp AI makes recommendations or decisions.
+
+Responsibilities: context diagnostics, context validation, missing context detection, context scoring, and context health report.
+
+Inputs: customer, organization, user, session, job, task, conversation, memory, knowledge, preferences, and permissions.
+
+Outputs: context status, unified context package, validation report, score report, and registry report.
+
+Escalation rules: customer privacy gaps, missing permissions, low context score, and external AI integration require owner approval.

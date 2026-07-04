@@ -6,6 +6,8 @@ const brain = require("../server/api-modules/brain");
 const memory = require("../brain/memory");
 const memoryRegistry = require("../brain/memory-registry");
 const memoryAgent = require("../agents/memory-agent");
+const contextEngine = require("../brain/context/context-engine");
+const contextAgent = require("../agents/context-agent");
 
 const modules = {
   developer,
@@ -28,6 +30,16 @@ function runMemoryAction(action, payload = {}) {
   if (action === "registry") return { ok: true, data: memoryRegistry.status() };
   if (action === "validate") return { ok: true, data: memoryAgent.validate() };
   return { ok: false, error: "unknown_memory_action" };
+}
+
+function runContextAction(action, payload = {}) {
+  if (action === "status") return { ok: true, data: contextAgent.status(payload) };
+  if (action === "build") return { ok: true, data: contextEngine.build(payload) };
+  if (action === "validate") return { ok: true, data: contextEngine.validate(payload) };
+  if (action === "score") return { ok: true, data: contextEngine.score(payload) };
+  if (action === "inspect") return { ok: true, data: contextEngine.inspect(payload) };
+  if (action === "registry") return { ok: true, data: contextEngine.registry() };
+  return { ok: false, error: "unknown_context_action" };
 }
 
 function clean(value, max = 120) {
@@ -57,7 +69,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory"]
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context"]
         }
       });
     }
@@ -70,6 +82,10 @@ module.exports = async function handler(req, res) {
     if (!action) return sendJson(res, 400, { ok: false, error: "missing_system_action" });
     if (moduleName === "memory") {
       const result = runMemoryAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "context") {
+      const result = runContextAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

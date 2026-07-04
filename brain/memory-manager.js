@@ -27,6 +27,17 @@ function memoryStatus() {
   };
 }
 
+function provideContextData() {
+  return {
+    ok: true,
+    memoryContext: {
+      status: "available",
+      stats: memory.stats().data,
+      registry: memoryRegistry.status()
+    }
+  };
+}
+
 function readMemory(type, query) {
   return memory.load(type, query);
 }
@@ -40,6 +51,7 @@ module.exports = {
   clearMemory: memory.clear,
   deleteMemory: memory.delete,
   memoryStatus,
+  provideContextData,
   readMemory,
   searchMemory: memory.search,
   stats: memory.stats,

@@ -1,4 +1,5 @@
 const contextEngine = require("./context-engine");
+const contextIntelligence = require("./context/context-engine");
 const memoryManager = require("./memory-manager");
 const recommendationEngine = require("./recommendation-engine");
 const decisionEngine = require("./decision-engine");
@@ -17,6 +18,7 @@ function brainStatus(input = {}) {
     learningEnabled: false,
     modules: {
       contextEngine: contextEngine.contextStatus(input).status,
+      contextIntelligence: contextIntelligence.status().status,
       memoryManager: memoryManager.memoryStatus().status,
       memoryRegistry: memoryRegistry.status().status,
       recommendationEngine: "ready",
@@ -50,6 +52,7 @@ module.exports = {
   brainHealth,
   brainStatus,
   contextEngine,
+  contextIntelligence,
   decisionEngine,
   executiveSummary: executiveSummaryEngine.executiveSummary,
   knowledgeRegistry,

@@ -47,6 +47,7 @@
         <button data-target="deployment">Deployment</button>
         <button data-target="developer">Developer Center</button>
         <button data-target="comphelpBrain">CompHelp Brain</button>
+        <button data-target="contextCenter">Context</button>
         <button data-target="memoryCenter">Memory</button>
         <button data-target="projectTitan">Project Titan</button>
         <button data-target="projectControl">Project Control</button>
@@ -545,6 +546,27 @@
           <div class="panel">
             <h2>Brain Output</h2>
             <pre id="brainResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section data-view="contextCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Context Intelligence</h2>
+            <p class="muted">Central context package builder for customer, organization, user, session, job, conversation, memory, knowledge, recommendations, preferences, and permissions.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshContextStatus" type="button">Context Health</button>
+              <button class="btn" id="buildContextPackage" type="button">Current Active Context</button>
+              <button class="btn" id="scoreContextPackage" type="button">Context Score</button>
+              <button class="btn" id="showContextRegistry" type="button">Context Registry</button>
+              <button class="btn" id="validateContextPackage" type="button">Validation</button>
+            </div>
+            <div class="grid" id="contextMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Context Output</h2>
+            <pre id="contextResult"></pre>
           </div>
         </div>
       </section>

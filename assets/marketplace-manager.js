@@ -99,6 +99,10 @@
     return systemApi("memory", action || "status", payload || {});
   }
 
+  async function contextApi(action, payload) {
+    return systemApi("context", action || "status", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -494,6 +498,34 @@
     }
   }
 
+  function renderContext(payload) {
+    var target = $("#contextMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var scores = data.scores || (data.score && data.score.scores) || {};
+    var missing = data.missing || (data.validation && data.validation.missing) || [];
+    var registry = data.registry || {};
+    var cards = [
+      ["Brain Status", data.status || "ready"],
+      ["Context Health", data.ok === false ? "needs review" : "healthy"],
+      ["Context Score", data.overallContextScore || (data.score ? data.score + "%" : "ready")],
+      ["Context Registry", registry.providerCount || (registry.providers ? registry.providers.length : "ready")],
+      ["Current Active Context", data.type || "ai_ready_context_package"],
+      ["Customer", scores.customer || "ready"],
+      ["Organization", scores.organization || "ready"],
+      ["Session", scores.session || "ready"],
+      ["Memory", scores.memory || "ready"],
+      ["Knowledge", scores.knowledge || "ready"],
+      ["Missing", missing.length || 0]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#contextResult")) {
+      $("#contextResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   async function refreshDeveloperCenter(action, writeOutput) {
     var result = await systemApi("developer", action || "fullReport", {});
     renderDeveloperCenter(result, writeOutput);
@@ -795,6 +827,30 @@
             renderBrain(await brainApi(action, {}));
           } catch (error) {
             $("#brainResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshContextStatus", "status"],
+      ["#buildContextPackage", "build"],
+      ["#scoreContextPackage", "score"],
+      ["#showContextRegistry", "registry"],
+      ["#validateContextPackage", "validate"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderContext(await contextApi(action, {}));
+          } catch (error) {
+            $("#contextResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

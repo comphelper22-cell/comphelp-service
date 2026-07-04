@@ -134,3 +134,27 @@ The Brain exposes safe internal architecture through `/api/system` module `brain
 Project Titan Beta Sprint 2 adds a local JSON-backed Shared Memory Engine used by future AI modules. It includes short, long, business, customer, session, and knowledge memory providers. Providers expose the same interface: `save`, `load`, `update`, `delete`, `search`, and `clear`.
 
 Memory is local architecture only. It does not connect to external AI, OpenAI, Supabase memory, vector databases, or external APIs.
+
+## Context Intelligence Engine
+
+Project Titan Beta Sprint 3 adds a centralized Context Intelligence Engine. The engine builds one AI-ready context package before recommendations or decisions are made.
+
+Context lifecycle:
+
+1. Register context providers.
+2. Resolve customer, organization, session, job, conversation, technician, memory, knowledge, recommendations, preferences, and permissions.
+3. Build a unified context package.
+4. Validate missing context.
+5. Score context quality.
+6. Return the package to future AI modules.
+
+Context providers:
+
+- Customer Context.
+- Organization Context.
+- Session Context.
+- Job Context.
+- Conversation Context.
+- Technician Context.
+
+Future AI integration must use this context package before model calls. No external AI provider is connected in Sprint 3.

@@ -96,3 +96,39 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Beta Sprint 2 - Shared Memory Engine"
 ```
+
+## Current Sprint: Project Titan Beta Sprint 3
+
+Goal: teach CompHelp AI to understand context before making decisions.
+
+Scope:
+
+- Context Engine.
+- Context Builder.
+- Context Resolver.
+- Context Validator.
+- Context Registry.
+- Customer, organization, session, job, conversation, and technician providers.
+- Context Agent.
+- System API module `context`.
+- Dashboard Context section.
+
+Out of scope:
+
+- External AI providers.
+- OpenAI, Anthropic, Gemini.
+- Supabase connectors.
+- Deployment architecture changes.
+
+Acceptance criteria:
+
+- Context package includes customer, organization, current user, session, job, previous jobs, memory, knowledge, recommendations, preferences, and permissions.
+- Context score reports overall and per-section scores.
+- Missing context is reported clearly.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Beta Sprint 3 - Context Intelligence Engine"
+```

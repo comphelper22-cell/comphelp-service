@@ -123,6 +123,8 @@ Sprint 2: Shared Memory Engine with local JSON providers, memory registry, Memor
 
 Sprint 3: approved memory governance, privacy rules, retention policy, and audit logging for memory operations.
 
+Sprint 4: Context Intelligence governance, live data connectors, and model-ready prompt assembly after owner approval.
+
 ## API Consolidation Hotfix
 
 Internal modules developer, business-os, platform, titan, and brain route through `/api/system` to stay compatible with the Vercel Hobby serverless function limit. Module code is preserved in `server/api-modules/`.
