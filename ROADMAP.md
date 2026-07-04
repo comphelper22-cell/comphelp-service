@@ -151,7 +151,9 @@ Sprint 12: Marketing & Growth Center with lead sources, campaign performance, lo
 
 Sprint 13: Analytics & Reporting Center with business scorecard, revenue trends, sales trends, operations trends, customer trends, marketing trends, AI insights, weekly reports, and monthly reports.
 
-Sprint 14: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, and analytics actions.
+Sprint 14: Scheduling & Dispatch AI with schedule optimization, technician matching, route suggestions, ETA, capacity planning, emergency dispatch, and Dispatch AI dashboard.
+
+Sprint 15: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, and dispatch actions.
 
 ## API Consolidation Hotfix
 

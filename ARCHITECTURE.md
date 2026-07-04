@@ -506,3 +506,25 @@ Analytics safety:
 - No external analytics, advertising, or BI services are connected.
 - Exports are generated as data objects only.
 - Insights are advisory and require owner review before action.
+
+## Scheduling & Dispatch AI
+
+Project Titan Sprint 14 adds Scheduling & Dispatch AI for schedule optimization, technician matching, route suggestions, ETA windows, capacity planning, emergency dispatch visibility, and dispatch decision support.
+
+Dispatch AI modules:
+
+- `dispatch-ai-engine.js` exposes the Dispatch AI API surface.
+- `dispatch-dashboard.js` combines schedule, technicians, routes, ETA, capacity, emergency jobs, conflicts, and suggestions.
+- `schedule-optimizer.js` orders open jobs by priority and risk.
+- `technician-matcher.js` ranks technician matches by service fit, city, service area, rating, and workload.
+- `route-planner.js` groups suggested stops by technician.
+- `eta-engine.js` creates advisory arrival windows.
+- `capacity-planner.js` scores open job load against available technician capacity.
+- `emergency-dispatch.js` highlights urgent and same-day jobs for owner review.
+
+Dispatch AI safety:
+
+- No external maps or routing APIs are connected.
+- ETA and route suggestions are advisory only.
+- Technicians are not assigned automatically.
+- Emergency jobs require manual customer confirmation.

@@ -143,6 +143,10 @@
     return systemApi("analytics", action || "analytics.dashboard", payload || {});
   }
 
+  async function dispatchAIApi(action, payload) {
+    return systemApi("dispatchAI", action || "dispatchAI.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -950,6 +954,57 @@
     }
   }
 
+  function renderDispatchAIDashboard(payload) {
+    var target = $("#dispatchAIMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var schedule = data.todaySchedule || data.aiDispatchSuggestions || [];
+    var techs = data.technicianAvailability || data.technicians || [];
+    var routes = data.routeSuggestions || (data.routes || []);
+    var eta = data.eta || [];
+    var emergency = data.emergencyJobs || [];
+    var conflicts = data.scheduleConflicts || [];
+    var capacity = data.capacity || data;
+    var suggestions = data.aiDispatchSuggestions || data.matches || [];
+    var cards = [
+      ["Today Schedule", schedule.length || 0],
+      ["Technicians", techs.length || 0],
+      ["Route Suggestions", routes.length || 0],
+      ["ETA Windows", eta.length || 0],
+      ["Emergency Jobs", emergency.length || 0],
+      ["Conflicts", conflicts.length || 0],
+      ["Capacity Load", capacity.loadPercent !== undefined ? capacity.loadPercent + "%" : "ready"],
+      ["Schedule Health", data.scheduleHealth ? data.scheduleHealth.score + "/100" : (capacity.status || "ready")]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#dispatchAISchedule", schedule.slice(0, 8).map(function (item) {
+      return { title: item.jobTitle || item.title, meta: item.recommendedWindow || item.service, detail: item.technician || item.customerName || item.reason, pill: item.conflict ? "conflict" : "scheduled" };
+    }), "No schedule items yet.");
+    renderList("#dispatchAITechnicians", techs.slice(0, 8).map(function (tech) {
+      return { title: tech.name, meta: tech.category || "Technician", detail: (tech.city || "") + " | " + (tech.availability || "Check availability"), pill: tech.workload || tech.status || "ready" };
+    }), "No technician availability yet.");
+    renderList("#dispatchAIRoutes", routes.slice(0, 8).map(function (route) {
+      return { title: route.title || route.technician || route.jobTitle, meta: route.detail || route.routeNote || "Route", detail: route.driveMinutes ? route.driveMinutes + " min estimated drive" : (route.stops ? route.stops.length + " stops" : "Verify in maps"), pill: "route" };
+    }), "No route suggestions yet.");
+    renderList("#dispatchAIETA", eta.slice(0, 8).map(function (item) {
+      return { title: item.jobTitle || item.title, meta: item.technician, detail: item.etaWindow || item.note, pill: item.confidence !== undefined ? Math.round(Number(item.confidence) * 100) + "%" : "ETA" };
+    }), "No ETA windows yet.");
+    renderList("#dispatchAIEmergency", emergency.slice(0, 8).map(function (job) {
+      return { title: job.title || job.jobTitle, meta: job.customerName || job.service, detail: job.recommendedAction || job.suggestedTechnician, pill: job.priority || "HIGH" };
+    }), "No emergency jobs.");
+    renderList("#dispatchAIConflicts", conflicts.slice(0, 8).map(function (conflict) {
+      return { title: conflict.title || conflict.jobTitle || "Schedule conflict", meta: conflict.technician || "Dispatch", detail: conflict.reason || conflict.action || "Owner review recommended.", pill: "conflict" };
+    }), "No schedule conflicts.");
+    renderList("#dispatchAISuggestions", suggestions.slice(0, 8).map(function (item) {
+      return { title: item.jobTitle || item.title, meta: item.technician || item.suggestedTechnician || item.service, detail: item.reason || item.action || item.recommendedAction, pill: item.confidence !== undefined ? Math.round(Number(item.confidence) * 100) + "%" : "AI" };
+    }), "No AI dispatch suggestions yet.");
+    if ($("#dispatchAIResult")) {
+      $("#dispatchAIResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -1195,6 +1250,7 @@
     await customerSuccessApi("customerSuccess.dashboard", {}).then(renderCustomerSuccessDashboard).catch(function () {});
     await marketingGrowthApi("marketing.dashboard", {}).then(renderMarketingGrowthDashboard).catch(function () {});
     await analyticsReportsApi("analytics.dashboard", {}).then(renderAnalyticsReportsDashboard).catch(function () {});
+    await dispatchAIApi("dispatchAI.dashboard", {}).then(renderDispatchAIDashboard).catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -1619,6 +1675,33 @@
             renderAnalyticsReportsDashboard(await analyticsReportsApi(action, {}));
           } catch (error) {
             $("#analyticsReportsResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshDispatchAIDashboard", "dispatchAI.dashboard"],
+      ["#showDispatchAISchedule", "dispatchAI.schedule"],
+      ["#showDispatchAIOptimize", "dispatchAI.optimize"],
+      ["#showDispatchAITechnicians", "dispatchAI.technicians"],
+      ["#showDispatchAIRoutes", "dispatchAI.routes"],
+      ["#showDispatchAIETA", "dispatchAI.eta"],
+      ["#showDispatchAICapacity", "dispatchAI.capacity"],
+      ["#showDispatchAIEmergency", "dispatchAI.emergency"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderDispatchAIDashboard(await dispatchAIApi(action, {}));
+          } catch (error) {
+            $("#dispatchAIResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

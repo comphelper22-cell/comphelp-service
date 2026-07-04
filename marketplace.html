@@ -36,6 +36,7 @@
         <button data-target="customerSuccessCenter">Customer Success</button>
         <button data-target="marketingGrowthCenter">Marketing & Growth</button>
         <button data-target="analyticsReports">Analytics & Reports</button>
+        <button data-target="dispatchAICenter">Dispatch AI</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -355,6 +356,46 @@
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>Weekly Report</h2><div class="list" id="analyticsWeeklyReport"></div></div>
           <div class="panel"><h2>Monthly Report</h2><div class="list" id="analyticsMonthlyReport"></div></div>
+        </div>
+      </section>
+
+      <section data-view="dispatchAICenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Dispatch AI Center</h2>
+            <p class="muted">Scheduling, technician matching, route suggestions, ETA windows, capacity planning, emergency jobs, and AI dispatch recommendations.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshDispatchAIDashboard" type="button">Dispatch Dashboard</button>
+              <button class="btn" id="showDispatchAISchedule" type="button">Today Schedule</button>
+              <button class="btn" id="showDispatchAIOptimize" type="button">Optimize</button>
+              <button class="btn" id="showDispatchAITechnicians" type="button">Technicians</button>
+              <button class="btn" id="showDispatchAIRoutes" type="button">Routes</button>
+              <button class="btn" id="showDispatchAIETA" type="button">ETA</button>
+              <button class="btn" id="showDispatchAICapacity" type="button">Capacity</button>
+              <button class="btn" id="showDispatchAIEmergency" type="button">Emergency</button>
+            </div>
+            <div class="grid" id="dispatchAIMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Dispatch Output</h2>
+            <pre id="dispatchAIResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Today Schedule</h2><div class="list" id="dispatchAISchedule"></div></div>
+          <div class="panel"><h2>Technician Availability</h2><div class="list" id="dispatchAITechnicians"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Route Suggestions</h2><div class="list" id="dispatchAIRoutes"></div></div>
+          <div class="panel"><h2>ETA</h2><div class="list" id="dispatchAIETA"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Emergency Jobs</h2><div class="list" id="dispatchAIEmergency"></div></div>
+          <div class="panel"><h2>Schedule Conflicts</h2><div class="list" id="dispatchAIConflicts"></div></div>
+        </div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>AI Dispatch Suggestions</h2>
+          <div class="list" id="dispatchAISuggestions"></div>
         </div>
       </section>
 

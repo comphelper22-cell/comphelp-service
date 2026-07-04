@@ -587,3 +587,43 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 13 - Analytics Reporting Center"
 ```
+
+## Current Sprint: Project Titan Sprint 14
+
+Goal: improve scheduling, technician assignment, route planning, ETA visibility, emergency dispatch, and dispatch decision support.
+
+Scope:
+
+- Dispatch AI Engine.
+- Schedule Optimizer.
+- Technician Matcher.
+- Route Planner.
+- ETA Engine.
+- Capacity Planner.
+- Emergency Dispatch.
+- Dispatch Dashboard.
+- AI Dispatcher Agent.
+- System API module `dispatchAI`.
+- Marketplace Dispatch AI Center section.
+- Dispatch AI test.
+
+Out of scope:
+
+- External maps APIs.
+- Automatic technician assignment.
+- Customer messaging.
+- Deployment pipeline changes.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Dispatch AI Center shows today schedule, technician availability, route suggestions, ETA, emergency jobs, schedule conflicts, and AI dispatch suggestions.
+- API supports `dispatchAI.status`, `dispatchAI.dashboard`, `dispatchAI.schedule`, `dispatchAI.optimize`, `dispatchAI.technicians`, `dispatchAI.routes`, `dispatchAI.eta`, `dispatchAI.capacity`, and `dispatchAI.emergency`.
+- Uses JSON/demo fallback data safely.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 14 - Scheduling Dispatch AI"
+```

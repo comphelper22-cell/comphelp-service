@@ -30,6 +30,8 @@ const marketingGrowthEngine = require("../marketing/marketing-engine");
 const marketingManagerAgent = require("../agents/marketing-manager-agent");
 const analyticsEngine = require("../analytics/analytics-engine");
 const analyticsAgent = require("../agents/analytics-agent");
+const dispatchAiEngine = require("../dispatch-ai/dispatch-ai-engine");
+const aiDispatcherAgent = require("../agents/ai-dispatcher-agent");
 
 const modules = {
   developer,
@@ -204,6 +206,20 @@ function runAnalyticsAction(action, payload = {}) {
   return { ok: false, error: "unknown_analytics_action" };
 }
 
+function runDispatchAiAction(action, payload = {}) {
+  if (action === "dispatchAI.status") return { ok: true, data: dispatchAiEngine.status() };
+  if (action === "dispatchAI.dashboard") return dispatchAiEngine.dashboard(payload);
+  if (action === "dispatchAI.schedule") return dispatchAiEngine.schedule(payload);
+  if (action === "dispatchAI.optimize") return dispatchAiEngine.optimize(payload);
+  if (action === "dispatchAI.technicians") return dispatchAiEngine.technicians(payload);
+  if (action === "dispatchAI.routes") return dispatchAiEngine.routes(payload);
+  if (action === "dispatchAI.eta") return dispatchAiEngine.eta(payload);
+  if (action === "dispatchAI.capacity") return dispatchAiEngine.capacity(payload);
+  if (action === "dispatchAI.emergency") return dispatchAiEngine.emergency(payload);
+  if (action === "dispatchAI.agent") return { ok: true, data: aiDispatcherAgent.run(payload) };
+  return { ok: false, error: "unknown_dispatch_ai_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -231,7 +247,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
@@ -241,7 +257,8 @@ module.exports = async function handler(req, res) {
           financeActions: ["finance.status", "finance.dashboard", "finance.revenue", "finance.invoices", "finance.cashflow", "finance.expenses", "finance.profit", "finance.forecast", "finance.health", "finance.kpis"],
           customerSuccessActions: ["customerSuccess.status", "customerSuccess.dashboard", "customerSuccess.health", "customerSuccess.timeline", "customerSuccess.ltv", "customerSuccess.risks", "customerSuccess.vip", "customerSuccess.lost", "customerSuccess.recommendations"],
           marketingActions: ["marketing.status", "marketing.dashboard", "marketing.leads", "marketing.campaigns", "marketing.localSeo", "marketing.reviews", "marketing.social", "marketing.email", "marketing.roi", "marketing.recommendations"],
-          analyticsActions: ["analytics.status", "analytics.dashboard", "analytics.kpis", "analytics.trends", "analytics.reports", "analytics.scorecard", "analytics.export", "analytics.insights"]
+          analyticsActions: ["analytics.status", "analytics.dashboard", "analytics.kpis", "analytics.trends", "analytics.reports", "analytics.scorecard", "analytics.export", "analytics.insights"],
+          dispatchAIActions: ["dispatchAI.status", "dispatchAI.dashboard", "dispatchAI.schedule", "dispatchAI.optimize", "dispatchAI.technicians", "dispatchAI.routes", "dispatchAI.eta", "dispatchAI.capacity", "dispatchAI.emergency"]
         }
       });
     }
@@ -302,6 +319,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "analytics") {
       const result = runAnalyticsAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "dispatchAI") {
+      const result = runDispatchAiAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });
