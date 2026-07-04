@@ -35,6 +35,7 @@
         <button data-target="financeCenter">Finance Center</button>
         <button data-target="customerSuccessCenter">Customer Success</button>
         <button data-target="marketingGrowthCenter">Marketing & Growth</button>
+        <button data-target="analyticsReports">Analytics & Reports</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -323,6 +324,37 @@
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>Growth Opportunities</h2><div class="list" id="marketingGrowthOpportunities"></div></div>
           <div class="panel"><h2>AI Marketing Recommendations</h2><div class="list" id="marketingRecommendationList"></div></div>
+        </div>
+      </section>
+
+      <section data-view="analyticsReports">
+        <div class="two">
+          <div class="panel">
+            <h2>Analytics & Reports</h2>
+            <p class="muted">Unified scorecard, trends, weekly reports, monthly reports, and AI insights across sales, operations, finance, customer success, and marketing.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshAnalyticsReports" type="button">Reporting Dashboard</button>
+              <button class="btn" id="showAnalyticsKpis" type="button">KPIs</button>
+              <button class="btn" id="showAnalyticsTrends" type="button">Trends</button>
+              <button class="btn" id="showAnalyticsReports" type="button">Reports</button>
+              <button class="btn" id="showAnalyticsScorecard" type="button">Scorecard</button>
+              <button class="btn" id="showAnalyticsExport" type="button">Export</button>
+              <button class="btn" id="showAnalyticsInsights" type="button">AI Insights</button>
+            </div>
+            <div class="grid" id="analyticsReportMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Analytics Output</h2>
+            <pre id="analyticsReportsResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Business Scorecard</h2><div class="list" id="analyticsScorecardList"></div></div>
+          <div class="panel"><h2>AI Insights Report</h2><div class="list" id="analyticsInsightsList"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Weekly Report</h2><div class="list" id="analyticsWeeklyReport"></div></div>
+          <div class="panel"><h2>Monthly Report</h2><div class="list" id="analyticsMonthlyReport"></div></div>
         </div>
       </section>
 

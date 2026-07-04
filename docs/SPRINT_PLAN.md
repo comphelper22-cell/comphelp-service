@@ -547,3 +547,43 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 12 - Marketing Growth Center"
 ```
+
+## Current Sprint: Project Titan Sprint 13
+
+Goal: create unified reporting and analytics across Sales, Operations, Finance, Customer Success, and Marketing.
+
+Scope:
+
+- Analytics Engine.
+- Reporting Dashboard.
+- KPI Summary.
+- Trend Analysis.
+- Performance Reports.
+- Business Scorecard.
+- Export Reports.
+- AI Insights Report.
+- Analytics Agent.
+- System API module `analytics`.
+- Marketplace Analytics & Reports section.
+- Analytics & Reporting test.
+
+Out of scope:
+
+- External analytics services.
+- Paid BI tools.
+- Real Google, Facebook, or advertising APIs.
+- File export downloads.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Analytics & Reports shows business scorecard, revenue trends, sales trends, operations trends, customer trends, marketing trends, AI insights report, weekly report, and monthly report.
+- API supports `analytics.status`, `analytics.dashboard`, `analytics.kpis`, `analytics.trends`, `analytics.reports`, `analytics.scorecard`, `analytics.export`, and `analytics.insights`.
+- Uses JSON/demo fallback data safely.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 13 - Analytics Reporting Center"
+```

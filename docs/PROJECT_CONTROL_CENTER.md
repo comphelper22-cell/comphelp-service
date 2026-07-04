@@ -41,12 +41,13 @@ Project Control Center Sprint.
 - Finance Center for Project Titan Sprint 10.
 - Customer Success Center for Project Titan Sprint 11.
 - Marketing & Growth Center for Project Titan Sprint 12.
+- Analytics & Reporting Center for Project Titan Sprint 13.
 - API consolidation hotfix for Vercel Hobby compatibility.
 
 ## Next 3 Sprints
 
 1. v0.7 Sprint 2 - Supabase readiness and platform health checks.
-2. Project Titan Sprint 13 - decision governance and approval queue.
+2. Project Titan Sprint 14 - decision governance and approval queue.
 3. v0.9 Sprint 1 - CRM Core pipeline and activity timeline.
 
 ## Blocked Items
@@ -86,6 +87,7 @@ git diff --stat
 - Finance Center shows revenue, invoices, cash flow, profit, expenses, forecast, health, alerts, and recommendations.
 - Customer Success Center shows health, VIPs, at-risk/lost customers, LTV, timeline, repeat revenue, follow-ups, reviews, and recommendations.
 - Marketing & Growth Center shows lead sources, campaign performance, ROI, local SEO, reviews, social performance, email campaigns, growth opportunities, and AI recommendations.
+- Analytics & Reporting Center shows business scorecard, trends, KPIs, weekly/monthly reports, and AI insights across departments.
 - Documentation updated.
 
 ## Deploy Checklist

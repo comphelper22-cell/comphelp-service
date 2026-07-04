@@ -139,6 +139,10 @@
     return systemApi("marketing", action || "marketing.dashboard", payload || {});
   }
 
+  async function analyticsReportsApi(action, payload) {
+    return systemApi("analytics", action || "analytics.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -897,6 +901,55 @@
     }
   }
 
+  function renderAnalyticsReportsDashboard(payload) {
+    var target = $("#analyticsReportMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var scorecard = data.businessScorecard || data;
+    var kpis = data.kpis || data;
+    var insights = data.aiInsightsReport || data.insights || [];
+    var weekly = data.weeklyReport || data.report || {};
+    var monthly = data.monthlyReport || data.report || {};
+    var cards = [
+      ["Business Score", scorecard.overall !== undefined ? scorecard.overall + "/100" : "ready"],
+      ["Revenue", money(kpis.revenue || 0)],
+      ["Leads", kpis.leads || 0],
+      ["Conversion", kpis.conversionRate !== undefined ? kpis.conversionRate + "%" : "ready"],
+      ["Open Jobs", kpis.openJobs || 0],
+      ["Completed Jobs", kpis.completedJobs || 0],
+      ["Customers", kpis.customers || 0],
+      ["Marketing Leads", kpis.marketingLeads || 0],
+      ["Revenue Trends", data.revenueTrends || data.revenueTrend || "ready"],
+      ["Sales Trends", data.salesTrends || data.salesTrend || "ready"],
+      ["Operations Trends", data.operationsTrends || data.operationsTrend || "ready"],
+      ["Customer Trends", data.customerTrends || data.customerTrend || "ready"],
+      ["Marketing Trends", data.marketingTrends || data.marketingTrend || "ready"],
+      ["AI Insights", insights.length || 0]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#analyticsScorecardList", ["sales", "operations", "finance", "customers", "marketing"].map(function (key) {
+      return { title: key.charAt(0).toUpperCase() + key.slice(1), meta: (scorecard[key] !== undefined ? scorecard[key] + "/100" : "ready"), detail: "Scorecard category", pill: scorecard.status || "score" };
+    }), "No scorecard data yet.");
+    renderList("#analyticsInsightsList", insights.slice(0, 6).map(function (item) {
+      return { title: item.title, meta: item.category || "Insight", detail: item.recommendedAction || item.insight, pill: item.priority || "review" };
+    }), "No AI insights yet.");
+    renderList("#analyticsWeeklyReport", weekly.title ? [
+      { title: weekly.title, meta: "Weekly", detail: weekly.summary, pill: "report" }
+    ].concat((weekly.focus || []).map(function (focus) {
+      return { title: focus, meta: "Focus", detail: "Recommended weekly focus item.", pill: "weekly" };
+    })) : [], "No weekly report yet.");
+    renderList("#analyticsMonthlyReport", monthly.title ? [
+      { title: monthly.title, meta: "Monthly", detail: monthly.summary, pill: "report" }
+    ].concat((monthly.focus || []).map(function (focus) {
+      return { title: focus, meta: "Focus", detail: "Recommended monthly focus item.", pill: "monthly" };
+    })) : [], "No monthly report yet.");
+    if ($("#analyticsReportsResult")) {
+      $("#analyticsReportsResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -1141,6 +1194,7 @@
     await financeApi("finance.dashboard", {}).then(renderFinanceDashboard).catch(function () {});
     await customerSuccessApi("customerSuccess.dashboard", {}).then(renderCustomerSuccessDashboard).catch(function () {});
     await marketingGrowthApi("marketing.dashboard", {}).then(renderMarketingGrowthDashboard).catch(function () {});
+    await analyticsReportsApi("analytics.dashboard", {}).then(renderAnalyticsReportsDashboard).catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -1539,6 +1593,32 @@
             renderMarketingGrowthDashboard(await marketingGrowthApi(action, {}));
           } catch (error) {
             $("#marketingGrowthResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshAnalyticsReports", "analytics.dashboard"],
+      ["#showAnalyticsKpis", "analytics.kpis"],
+      ["#showAnalyticsTrends", "analytics.trends"],
+      ["#showAnalyticsReports", "analytics.reports"],
+      ["#showAnalyticsScorecard", "analytics.scorecard"],
+      ["#showAnalyticsExport", "analytics.export"],
+      ["#showAnalyticsInsights", "analytics.insights"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderAnalyticsReportsDashboard(await analyticsReportsApi(action, {}));
+          } catch (error) {
+            $("#analyticsReportsResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

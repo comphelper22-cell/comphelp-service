@@ -149,7 +149,9 @@ Sprint 11: Customer Success Center with health score, VIP customers, at-risk cus
 
 Sprint 12: Marketing & Growth Center with lead sources, campaign performance, local SEO health, reviews, social performance, email campaign drafts, ROI, and AI growth recommendations.
 
-Sprint 13: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, and marketing actions.
+Sprint 13: Analytics & Reporting Center with business scorecard, revenue trends, sales trends, operations trends, customer trends, marketing trends, AI insights, weekly reports, and monthly reports.
+
+Sprint 14: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, and analytics actions.
 
 ## API Consolidation Hotfix
 

@@ -484,3 +484,25 @@ Marketing safety:
 - Campaign data uses JSON/demo fallback until approved integrations exist.
 - Social and email outputs are drafts only.
 - Growth recommendations are advisory and owner-reviewed.
+
+## Analytics & Reporting Center
+
+Project Titan Sprint 13 adds the Analytics & Reporting Center for unified reporting across Sales, Operations, Finance, Customer Success, and Marketing.
+
+Analytics modules:
+
+- `analytics-engine.js` exposes the Analytics & Reporting API surface.
+- `reporting-dashboard.js` combines scorecards, KPIs, trends, reports, and insights.
+- `kpi-summary.js` calculates shared revenue, lead, estimate, job, customer, vendor, and marketing KPIs.
+- `trend-analysis.js` summarizes revenue, sales, operations, customer, marketing, and lead trends.
+- `performance-reports.js` generates weekly and monthly business report drafts.
+- `business-scorecard.js` scores sales, operations, finance, customers, and marketing.
+- `export-reports.js` prepares report exports without writing files or connecting paid services.
+- `ai-insights-report.js` creates explainable owner-reviewed insights.
+
+Analytics safety:
+
+- Reports use JSON/demo fallback data.
+- No external analytics, advertising, or BI services are connected.
+- Exports are generated as data objects only.
+- Insights are advisory and require owner review before action.

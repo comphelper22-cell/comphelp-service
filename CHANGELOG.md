@@ -1,5 +1,14 @@
 # Changelog
 
+## Project Titan Sprint 13 - Analytics & Reporting Center
+
+- Added Analytics & Reporting Center modules for KPIs, trends, performance reports, business scorecard, exports, and AI insights.
+- Added Analytics Agent.
+- Added `analytics.*` actions to `/api/system`.
+- Added Analytics & Reports dashboard UI.
+- Added `tests/analytics-reporting.test.js`.
+- Documented Analytics & Reporting architecture, roadmap, sprint plan, and project control updates.
+
 ## Project Titan Sprint 12 - Marketing & Growth Center
 
 - Added Marketing & Growth Center modules for lead sources, campaigns, local SEO, reviews, social performance, email campaigns, ROI, and growth recommendations.
