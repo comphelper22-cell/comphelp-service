@@ -463,3 +463,45 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 10 - Finance Center"
 ```
+
+## Current Sprint: Project Titan Sprint 11
+
+Goal: build the Customer Success Center to help service businesses retain customers, increase repeat revenue, detect at-risk customers, and identify VIP customers.
+
+Scope:
+
+- Customer Success Engine.
+- Customer Health.
+- Customer Dashboard.
+- Customer Timeline.
+- Customer LTV.
+- Customer Risk.
+- Customer Segments.
+- VIP Customers.
+- Lost Customers.
+- Customer Recommendations.
+- Customer Success Manager Agent.
+- System API module `customerSuccess`.
+- Marketplace Customer Success Center section.
+- Customer Success Center test.
+
+Out of scope:
+
+- New core Brain engines.
+- External AI providers.
+- Deployment pipeline changes.
+- Automatic follow-ups or review requests.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Customer Success Center shows customer health score, VIP customers, at-risk customers, lost customers, customer lifetime value, customer timeline, repeat revenue opportunities, follow-up needed, reviews needed, and AI recommendations.
+- API supports `customerSuccess.status`, `customerSuccess.dashboard`, `customerSuccess.health`, `customerSuccess.timeline`, `customerSuccess.ltv`, `customerSuccess.risks`, `customerSuccess.vip`, `customerSuccess.lost`, and `customerSuccess.recommendations`.
+- Uses JSON/demo fallback data safely.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 11 - Customer Success Center"
+```

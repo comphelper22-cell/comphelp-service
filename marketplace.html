@@ -33,6 +33,7 @@
         <button data-target="salesManager">Sales Manager</button>
         <button data-target="operationsCenter">Operations Center</button>
         <button data-target="financeCenter">Finance Center</button>
+        <button data-target="customerSuccessCenter">Customer Success</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -252,6 +253,42 @@
         <div class="panel" style="margin-top:.85rem">
           <h2>Financial Alerts</h2>
           <div class="list" id="financeAlerts"></div>
+        </div>
+      </section>
+
+      <section data-view="customerSuccessCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Customer Success Center</h2>
+            <p class="muted">Retention dashboard for customer health, VIP customers, at-risk customers, lifetime value, follow-ups, reviews, and repeat revenue opportunities.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshCustomerSuccessDashboard" type="button">Customer Dashboard</button>
+              <button class="btn" id="showCustomerHealth" type="button">Health</button>
+              <button class="btn" id="showCustomerVip" type="button">VIP</button>
+              <button class="btn" id="showCustomerRisks" type="button">At Risk</button>
+              <button class="btn" id="showCustomerLost" type="button">Lost</button>
+              <button class="btn" id="showCustomerLtv" type="button">LTV</button>
+              <button class="btn" id="showCustomerTimeline" type="button">Timeline</button>
+              <button class="btn" id="showCustomerRecommendations" type="button">Recommendations</button>
+            </div>
+            <div class="grid" id="customerSuccessMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Customer Success Output</h2>
+            <pre id="customerSuccessResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>VIP Customers</h2><div class="list" id="customerVipList"></div></div>
+          <div class="panel"><h2>At-Risk Customers</h2><div class="list" id="customerRiskList"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Repeat Revenue Opportunities</h2><div class="list" id="customerRepeatRevenue"></div></div>
+          <div class="panel"><h2>AI Customer Recommendations</h2><div class="list" id="customerRecommendationList"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Follow-up Needed</h2><div class="list" id="customerFollowupNeeded"></div></div>
+          <div class="panel"><h2>Reviews Needed</h2><div class="list" id="customerReviewsNeeded"></div></div>
         </div>
       </section>
 

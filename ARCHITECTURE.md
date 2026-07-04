@@ -436,3 +436,27 @@ Finance safety:
 - No invoices are sent automatically.
 - No collections messages are sent automatically.
 - Financial recommendations are advisory and owner-reviewed.
+
+## Customer Success Center
+
+Project Titan Sprint 11 adds Customer Success Center for retention, repeat revenue, customer risk detection, VIP identification, and owner-approved follow-up recommendations.
+
+Customer Success modules:
+
+- `customer-success-engine.js` exposes the Customer Success API surface.
+- `customer-health.js` scores customer health from 0 to 100.
+- `customer-dashboard.js` combines health, VIPs, risks, lost customers, LTV, timeline, repeat revenue, follow-ups, reviews, and recommendations.
+- `customer-timeline.js` summarizes lead, estimate, project, invoice, and task activity.
+- `customer-ltv.js` creates customer profiles and lifetime value.
+- `customer-risk.js` detects at-risk customers.
+- `customer-segments.js` counts VIP, at-risk, repeat-ready, estimate follow-up, and unknown segments.
+- `vip-customers.js` finds high-value and repeat customers.
+- `lost-customers.js` identifies lost or inactive customer signals.
+- `customer-recommendations.js` combines customer-specific recommendations with the Recommendation Engine.
+
+Customer Success safety:
+
+- Follow-ups are recommendations only.
+- Review requests require owner approval.
+- No fake reviews or customer outcomes are generated.
+- No external AI or messaging integration is connected.

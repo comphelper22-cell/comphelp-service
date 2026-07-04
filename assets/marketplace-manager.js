@@ -131,6 +131,10 @@
     return systemApi("finance", action || "finance.dashboard", payload || {});
   }
 
+  async function customerSuccessApi(action, payload) {
+    return systemApi("customerSuccess", action || "customerSuccess.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -787,6 +791,57 @@
     }
   }
 
+  function renderCustomerSuccessDashboard(payload) {
+    var target = $("#customerSuccessMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var ltv = data.customerLifetimeValue || data;
+    var vip = data.vipCustomers || [];
+    var risks = data.atRiskCustomers || [];
+    var lost = data.lostCustomers || [];
+    var timeline = data.customerTimeline || [];
+    var repeat = data.repeatRevenueOpportunities || [];
+    var followup = data.followupNeeded || [];
+    var reviews = data.reviewsNeeded || [];
+    var recommendations = data.aiCustomerRecommendations || [];
+    var cards = [
+      ["Health Score", data.customerHealthScore || data.overallScore || "ready"],
+      ["VIP Customers", vip.length || 0],
+      ["At Risk", risks.length || 0],
+      ["Lost Customers", lost.length || 0],
+      ["Lifetime Value", money(Array.isArray(ltv) ? ltv.reduce(function (sum, item) { return sum + Number(item.lifetimeValue || 0); }, 0) : 0)],
+      ["Timeline Items", timeline.length || 0],
+      ["Repeat Revenue", repeat.length || 0],
+      ["Follow-ups", followup.length || 0],
+      ["Reviews Needed", reviews.length || 0],
+      ["AI Recommendations", recommendations.length || 0]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#customerVipList", vip.slice(0, 5).map(function (item) {
+      return { title: item.customerName, meta: money(item.lifetimeValue), detail: item.recommendedAction || item.service, pill: "VIP" };
+    }), "No VIP customers yet.");
+    renderList("#customerRiskList", risks.slice(0, 5).map(function (item) {
+      return { title: item.customerName, meta: item.service, detail: item.riskReason || item.recommendedAction, pill: item.priority || "risk" };
+    }), "No at-risk customers.");
+    renderList("#customerRepeatRevenue", repeat.slice(0, 5).map(function (item) {
+      return { title: item.customerName, meta: money(item.lifetimeValue), detail: item.repeatPotential || "Repeat opportunity", pill: "repeat" };
+    }), "No repeat revenue opportunities yet.");
+    renderList("#customerRecommendationList", recommendations.slice(0, 5).map(function (item) {
+      return { title: item.title, meta: item.category || "Customer", detail: item.description, pill: item.priority || "review" };
+    }), "No customer recommendations yet.");
+    renderList("#customerFollowupNeeded", followup.slice(0, 5).map(function (item) {
+      return { title: item.customerName, meta: item.service, detail: item.recommendedAction, pill: item.priority || "follow-up" };
+    }), "No follow-ups needed.");
+    renderList("#customerReviewsNeeded", reviews.slice(0, 5).map(function (item) {
+      return { title: item.customerName, meta: item.service, detail: item.recommendedAction, pill: "review" };
+    }), "No review requests needed.");
+    if ($("#customerSuccessResult")) {
+      $("#customerSuccessResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -1029,6 +1084,7 @@
     await refreshFounderDashboard().catch(function () {});
     await operationsApi("operations.dashboard", {}).then(renderOperationsDashboard).catch(function () {});
     await financeApi("finance.dashboard", {}).then(renderFinanceDashboard).catch(function () {});
+    await customerSuccessApi("customerSuccess.dashboard", {}).then(renderCustomerSuccessDashboard).catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -1372,6 +1428,33 @@
             renderFinanceDashboard(await financeApi(action, {}));
           } catch (error) {
             $("#financeResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshCustomerSuccessDashboard", "customerSuccess.dashboard"],
+      ["#showCustomerHealth", "customerSuccess.health"],
+      ["#showCustomerVip", "customerSuccess.vip"],
+      ["#showCustomerRisks", "customerSuccess.risks"],
+      ["#showCustomerLost", "customerSuccess.lost"],
+      ["#showCustomerLtv", "customerSuccess.ltv"],
+      ["#showCustomerTimeline", "customerSuccess.timeline"],
+      ["#showCustomerRecommendations", "customerSuccess.recommendations"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderCustomerSuccessDashboard(await customerSuccessApi(action, {}));
+          } catch (error) {
+            $("#customerSuccessResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }
