@@ -355,17 +355,33 @@
       </section>
 
       <section data-view="recommendations">
-        <div class="panel">
-          <h2>AI Recommendation Engine</h2>
-          <p class="muted">Selects top vendors by service match, rating, distance, availability, and expected cost.</p>
-          <form data-action="recommendation">
-            <select name="service" required></select>
-            <input name="city" placeholder="City" value="Los Angeles">
-            <textarea name="project" placeholder="Project summary"></textarea>
-            <button class="btn primary">Recommend Top 3</button>
-            <p class="status"></p>
-          </form>
-          <pre id="recommendationResult"></pre>
+        <div class="two">
+          <div class="panel">
+            <h2>AI Recommendation Engine</h2>
+            <p class="muted">Selects top vendors by service match, rating, distance, availability, and expected cost.</p>
+            <form data-action="recommendation">
+              <select name="service" required></select>
+              <input name="city" placeholder="City" value="Los Angeles">
+              <textarea name="project" placeholder="Project summary"></textarea>
+              <button class="btn primary">Recommend Top 3</button>
+              <p class="status"></p>
+            </form>
+            <pre id="recommendationResult"></pre>
+          </div>
+          <div class="panel">
+            <h2>Recommendation Intelligence</h2>
+            <p class="muted">Proactive Business Brain recommendations for revenue, operations, sales, customer attention, and owner priorities. Draft-only; owner approval is required before action.</p>
+            <div class="actions">
+              <button class="btn primary" id="generateBusinessRecommendations" type="button">Today's Recommendations</button>
+              <button class="btn" id="showRevenueOpportunities" type="button">Revenue Opportunities</button>
+              <button class="btn" id="showOperationalImprovements" type="button">Operational Improvements</button>
+              <button class="btn" id="showSalesOpportunities" type="button">Sales Opportunities</button>
+              <button class="btn" id="showCustomerAttention" type="button">Customer Attention</button>
+              <button class="btn" id="showAiPriorityQueue" type="button">AI Priority Queue</button>
+            </div>
+            <div class="grid" id="recommendationMetrics" style="margin-top:.85rem"></div>
+            <pre id="recommendationIntelligenceResult"></pre>
+          </div>
         </div>
       </section>
 

@@ -32,12 +32,13 @@ Project Control Center Sprint.
 - Context Intelligence Engine for Project Titan Beta Sprint 3.
 - Business Decision Engine for Project Titan Gamma Sprint 4.
 - Brain Orchestrator and integration stabilization for Project Titan Sprint 4.5.
+- Recommendation Intelligence Engine for Project Titan Sprint 5.
 - API consolidation hotfix for Vercel Hobby compatibility.
 
 ## Next 3 Sprints
 
 1. v0.7 Sprint 2 - Supabase readiness and platform health checks.
-2. Project Titan Gamma Sprint 5 - decision governance and approval queue.
+2. Project Titan Sprint 6 - decision governance and approval queue.
 3. v0.9 Sprint 1 - CRM Core pipeline and activity timeline.
 
 ## Blocked Items
@@ -69,6 +70,7 @@ git diff --stat
 - No messaging automation added.
 - Internal dashboard modules route through `/api/system`.
 - Brain pipeline validates Memory -> Context -> Decision.
+- Recommendation Intelligence returns explainable owner-approved next actions.
 - Documentation updated.
 
 ## Deploy Checklist

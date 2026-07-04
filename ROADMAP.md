@@ -131,7 +131,9 @@ Sprint 4: Business Decision Engine with explainable decisions, policy layer, sco
 
 Sprint 4.5: Integration and Stabilization with Brain Orchestrator, Memory -> Context -> Decision pipeline validation, health monitoring, diagnostics, performance metrics, and integration tests.
 
-Sprint 5: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation workflows.
+Sprint 5: Recommendation Intelligence with explainable business recommendations, revenue opportunities, operational improvements, sales opportunities, customer attention, priority scoring, and recommendation history.
+
+Sprint 6: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation workflows.
 
 ## API Consolidation Hotfix
 

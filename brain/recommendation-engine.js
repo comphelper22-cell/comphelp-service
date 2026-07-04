@@ -1,27 +1,13 @@
-const { createDecision } = require("./decision-engine");
+const recommendationIntelligence = require("./recommendation/recommendation-engine");
 
 function recommendation(input = {}) {
   const topic = input.topic || "platform";
-  const recommendations = [
-    createDecision({
-      confidence: 0.86,
-      priority: "high",
-      risk: "low",
-      reason: "The Brain Kernel needs stable local interfaces before AI provider integration.",
-      recommendedAction: "Keep Brain Beta 1 architecture-only and validate with npm run check-project."
-    }),
-    createDecision({
-      confidence: 0.8,
-      priority: "medium",
-      risk: "medium",
-      reason: "Future memory features need clear privacy and approval rules.",
-      recommendedAction: "Define Brain memory write policy in Beta 2 before persisting learned facts."
-    })
-  ];
+  const result = recommendationIntelligence.generate({ ...input, record: false });
   return {
-    ok: true,
+    ok: result.ok,
     topic,
-    recommendations,
+    recommendations: result.data.recommendations,
+    topRecommendation: result.data.topRecommendation,
     generatedBy: "CompHelp Brain Recommendation Engine",
     externalAiConnected: false
   };

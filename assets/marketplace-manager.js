@@ -107,6 +107,10 @@
     return systemApi("decision", action || "status", payload || {});
   }
 
+  async function recommendationIntelligenceApi(action, payload) {
+    return systemApi("recommendation", action || "recommendation.status", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -456,6 +460,40 @@
     }).join("");
     if ($("#brainResult")) {
       $("#brainResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
+  function renderRecommendationIntelligence(payload, focus) {
+    var target = $("#recommendationMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var recommendations = data.recommendations || data.aiPriorityQueue || [];
+    var revenue = data.revenueOpportunities || recommendations.filter(function (item) { return Number(item.estimatedRevenue || 0) > 0; });
+    var operations = data.operationalImprovements || recommendations.filter(function (item) { return item.category === "Operations"; });
+    var sales = data.salesOpportunities || recommendations.filter(function (item) { return item.category === "Sales"; });
+    var customers = data.customerAttention || recommendations.filter(function (item) { return item.category === "Customer"; });
+    var top = data.topRecommendation || recommendations[0] || {};
+    var cards = [
+      ["Today's Recommendations", (data.today || recommendations).length || "ready"],
+      ["Revenue Opportunities", revenue.length || 0],
+      ["Operational Improvements", operations.length || 0],
+      ["Sales Opportunities", sales.length || 0],
+      ["Customer Attention", customers.length || 0],
+      ["AI Priority Queue", (data.aiPriorityQueue || recommendations).length || 0],
+      ["Top Priority", top.priority || "ready"],
+      ["Confidence", top.confidence !== undefined ? top.confidence : "ready"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#recommendationIntelligenceResult")) {
+      var output = data;
+      if (focus === "revenue") output = { revenueOpportunities: revenue };
+      if (focus === "operations") output = { operationalImprovements: operations };
+      if (focus === "sales") output = { salesOpportunities: sales };
+      if (focus === "customer") output = { customerAttention: customers };
+      if (focus === "priority") output = { aiPriorityQueue: data.aiPriorityQueue || recommendations, topRecommendation: top };
+      $("#recommendationIntelligenceResult").textContent = JSON.stringify(output, null, 2);
     }
   }
 
@@ -862,6 +900,33 @@
             renderBrain(await brainApi(action, {}));
           } catch (error) {
             $("#brainResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#generateBusinessRecommendations", "recommendation.generate", {}, ""],
+      ["#showRevenueOpportunities", "recommendation.generate", { category: "Finance" }, "revenue"],
+      ["#showOperationalImprovements", "recommendation.generate", { category: "Operations" }, "operations"],
+      ["#showSalesOpportunities", "recommendation.generate", { category: "Sales" }, "sales"],
+      ["#showCustomerAttention", "recommendation.generate", { category: "Customer" }, "customer"],
+      ["#showAiPriorityQueue", "recommendation.priority", {}, "priority"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      var payload = item[2];
+      var focus = item[3];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderRecommendationIntelligence(await recommendationIntelligenceApi(action, payload), focus);
+          } catch (error) {
+            $("#recommendationIntelligenceResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

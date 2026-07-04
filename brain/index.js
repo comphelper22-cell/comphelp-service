@@ -2,6 +2,7 @@ const contextEngine = require("./context-engine");
 const contextIntelligence = require("./context/context-engine");
 const memoryManager = require("./memory-manager");
 const recommendationEngine = require("./recommendation-engine");
+const recommendationIntelligence = require("./recommendation/recommendation-engine");
 const decisionEngine = require("./decision-engine");
 const businessDecisionEngine = require("./decision/decision-engine");
 const knowledgeRegistry = require("./knowledge-registry");
@@ -24,6 +25,7 @@ function brainStatus(input = {}) {
       memoryManager: memoryManager.memoryStatus().status,
       memoryRegistry: memoryRegistry.status().status,
       recommendationEngine: "ready",
+      recommendationIntelligence: recommendationIntelligence.status().status,
       decisionEngine: decisionEngine.decisionStatus().status,
       businessDecisionEngine: businessDecisionEngine.status().status,
       brainOrchestrator: brainOrchestrator.status().status,
@@ -64,5 +66,6 @@ module.exports = {
   knowledgeRegistry,
   memoryManager,
   memoryRegistry,
-  recommendation: recommendationEngine.recommendation
+  recommendation: recommendationEngine.recommendation,
+  recommendationIntelligence
 };

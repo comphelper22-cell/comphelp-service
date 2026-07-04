@@ -226,3 +226,42 @@ flowchart LR
 ```
 
 Health monitoring returns Brain Health, Module Status, Pipeline Status, Missing Dependencies, Average Response Time, Errors, and Warnings. No external AI provider, external API, or deployment architecture change is introduced in Sprint 4.5.
+
+## Recommendation Intelligence Engine
+
+Project Titan Sprint 5 adds a Recommendation Intelligence Engine that turns the Business Brain into an explainable AI Advisor. The engine is rule-based in this sprint and does not connect to OpenAI, Anthropic, Gemini, or any external AI provider.
+
+Recommendation lifecycle:
+
+1. Select recommendation templates from the registry.
+2. Build recommendations from business context.
+3. Estimate revenue and business impact.
+4. Score confidence, priority, and business value.
+5. Validate the required recommendation model.
+6. Rank the AI priority queue.
+7. Store recommendation history when recording is enabled.
+8. Explain the recommendation before owner action.
+
+Business value model:
+
+- Revenue uses explicit project value when available, then conservative service defaults.
+- Business impact is described in plain language such as higher close rate, reduced travel time, stronger cash flow, or improved retention.
+- Every customer-facing or vendor-facing action remains approval-only.
+
+Priority model:
+
+- Priority combines urgency, risk, revenue signal, and recommendation type.
+- Priority score ranks `CRITICAL`, `HIGH`, `MEDIUM`, and `LOW` recommendations.
+- Business value score blends confidence, urgency, and estimated revenue.
+
+Recommendation pipeline:
+
+```mermaid
+flowchart LR
+  Registry["Recommendation Registry"] --> Builder["Recommendation Builder"]
+  Builder --> Score["Score + Priority"]
+  Score --> Validate["Validate"]
+  Validate --> Queue["AI Priority Queue"]
+  Queue --> Explain["Explain"]
+  Queue --> History["History"]
+```

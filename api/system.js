@@ -12,6 +12,8 @@ const decisionEngine = require("../brain/decision/decision-engine");
 const decisionAgent = require("../agents/decision-agent");
 const brainOrchestrator = require("../brain/orchestrator/brain-orchestrator");
 const integrationAgent = require("../agents/integration-agent");
+const recommendationEngine = require("../brain/recommendation/recommendation-engine");
+const recommendationAgent = require("../agents/recommendation-agent");
 
 const modules = {
   developer,
@@ -66,6 +68,17 @@ function runBrainOrchestratorAction(action, payload = {}) {
   return { ok: false, error: "unknown_brain_orchestrator_action" };
 }
 
+function runRecommendationAction(action, payload = {}) {
+  if (action === "recommendation.status") return { ok: true, data: recommendationEngine.status() };
+  if (action === "recommendation.generate") return recommendationEngine.generate(payload);
+  if (action === "recommendation.history") return recommendationEngine.history(payload.limit || 20);
+  if (action === "recommendation.score") return recommendationEngine.score(payload);
+  if (action === "recommendation.priority") return recommendationEngine.priority(payload);
+  if (action === "recommendation.explain") return recommendationEngine.explain(payload);
+  if (action === "recommendation.agent") return { ok: true, data: recommendationAgent.run(payload) };
+  return { ok: false, error: "unknown_recommendation_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -93,8 +106,9 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision"],
-          brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"]
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation"],
+          brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
+          recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"]
         }
       });
     }
@@ -119,6 +133,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "brain" && action.indexOf("brain.") === 0) {
       const result = runBrainOrchestratorAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "recommendation") {
+      const result = runRecommendationAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

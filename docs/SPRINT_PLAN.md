@@ -209,3 +209,44 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 4.5 - Brain integration stabilization"
 ```
+
+## Current Sprint: Project Titan Sprint 5
+
+Goal: increase service company revenue, efficiency, and customer satisfaction through intelligent, explainable recommendations.
+
+Scope:
+
+- Recommendation Intelligence Engine.
+- Recommendation Builder.
+- Recommendation Registry.
+- Recommendation Validator.
+- Recommendation History.
+- Recommendation Score.
+- Recommendation Priority.
+- Recommendation Explainer.
+- Recommendation Rules.
+- Recommendation Agent.
+- System API module `recommendation`.
+- Dashboard Recommendation Intelligence controls.
+
+Out of scope:
+
+- OpenAI, Anthropic, Gemini, or external AI providers.
+- Deployment architecture changes.
+- Autonomous execution.
+- Customer, vendor, email, SMS, or social publishing without approval.
+
+Acceptance criteria:
+
+- Recommendations support sales, operations, finance, marketing, customer, and management categories.
+- Every recommendation returns the required output model.
+- Recommendations include confidence, estimated business value, priority score, and explainable reasoning.
+- Recommendation history is available through JSON fallback.
+- Dashboard shows today's recommendations, revenue opportunities, operational improvements, sales opportunities, customer attention, and AI priority queue.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 5 - Recommendation Intelligence"
+```
