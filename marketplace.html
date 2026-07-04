@@ -68,6 +68,54 @@
 
       <section data-view="dashboard" class="is-active">
         <div class="panel" id="dashboardWarnings" style="display:none;margin-bottom:.85rem"></div>
+        <div class="panel">
+          <div class="top" style="margin-bottom:.85rem">
+            <div>
+              <h2>Founder Command Center</h2>
+              <p class="muted">Business health, revenue opportunities, risks, AI actions, sales pipeline, and workflow activity in one owner view.</p>
+            </div>
+            <button class="btn primary" id="refreshFounderDashboard" type="button">Refresh Intelligence</button>
+          </div>
+          <div class="grid" id="founderHealthCards"></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel">
+            <h2>Today's Top 5 AI Actions</h2>
+            <div class="list" id="founderAiActions"></div>
+          </div>
+          <div class="panel">
+            <h2>Executive Daily Briefing</h2>
+            <p class="muted" id="founderBriefing">Loading executive intelligence...</p>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel">
+            <h2>Revenue Opportunities</h2>
+            <div class="list" id="founderRevenueOpportunities"></div>
+          </div>
+          <div class="panel">
+            <h2>Risks & Alerts</h2>
+            <div class="list" id="founderRisks"></div>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel">
+            <h2>Sales Pipeline</h2>
+            <div class="grid" id="founderSalesPipeline"></div>
+          </div>
+          <div class="panel">
+            <h2>Active Workflows</h2>
+            <div class="grid" id="founderWorkflowActivity"></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>KPI Cards</h2>
+          <div class="grid" id="founderKpiCards"></div>
+        </div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>AI Workforce Status</h2>
+          <div class="grid" id="founderWorkforceStatus"></div>
+        </div>
         <div class="grid" id="metrics"></div>
         <div class="panel" style="margin-top:.85rem">
           <h2>CRM Pipeline</h2>

@@ -119,6 +119,10 @@
     return systemApi("sales", action || "sales.dashboard", payload || {});
   }
 
+  async function workflowApi(action, payload) {
+    return systemApi("workflow", action || "workflow.status", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -231,6 +235,129 @@
     $("#topVendors").innerHTML = vendors.length ? vendors.map(function (vendor) {
       return '<div class="row"><strong>' + escapeHtml(vendor.name) + '</strong><span>' + escapeHtml(vendor.category) + '</span><span>' + escapeHtml(vendor.city) + '</span><span class="pill">' + escapeHtml(vendor.rating) + ' stars</span></div>';
     }).join("") : '<p class="muted">No vendors yet.</p>';
+  }
+
+  function renderFounderDashboard(view) {
+    view = view || {};
+    var executive = view.executive || {};
+    var briefing = view.briefing || {};
+    var sales = view.sales || {};
+    var recommendations = view.recommendations || {};
+    var workflow = view.workflow || {};
+    var brain = view.brain || {};
+    var health = executive.businessHealth || executive.businessHealthScore || {};
+    var kpis = executive.kpis || executive;
+    var salesOverview = sales.salesOverview || {};
+    var salesKpis = sales.kpis || {};
+    var risks = executive.businessRisks || executive.risks || [];
+    var revenueOpportunities = sales.revenueOpportunities || executive.growthOpportunities || recommendations.revenueOpportunities || [];
+    var aiActions = recommendations.aiPriorityQueue || recommendations.recommendations || executive.aiPriorityQueue || [];
+    var workflows = workflow.registry || workflow.workflows || [];
+
+    renderCards("#founderHealthCards", [
+      ["Business Health", scoreLabel(health.overallScore)],
+      ["Revenue Today", money(executive.revenueToday || kpis.revenueToday)],
+      ["Revenue This Month", money(executive.revenueThisMonth || kpis.revenueThisMonth)],
+      ["Top Opportunity", money(salesOverview.expectedRevenue || salesKpis.revenuePipeline)],
+      ["Top Risks", risks.length || 0],
+      ["AI Actions", aiActions.length || 0],
+      ["Sales Priority", salesOverview.priority || "ready"],
+      ["Workflow Engine", workflow.status || "ready"]
+    ]);
+
+    renderList("#founderAiActions", aiActions.slice(0, 5).map(function (item) {
+      return {
+        title: item.title || item.recommendedAction || "Review AI action",
+        meta: item.category || item.priority || "AI recommendation",
+        detail: item.description || item.recommendedAction || "Owner review recommended.",
+        pill: item.priority || "review"
+      };
+    }), "No AI actions yet.");
+
+    var briefingText = briefing.executiveSummary || executive.executiveSummary || "Executive briefing will improve as leads, estimates, projects, invoices, and workflow activity are added.";
+    $("#founderBriefing").textContent = briefingText;
+
+    renderList("#founderRevenueOpportunities", revenueOpportunities.slice(0, 5).map(function (item) {
+      return {
+        title: item.title || item.type || "Revenue opportunity",
+        meta: money(item.expectedRevenue || item.estimatedRevenue),
+        detail: item.description || item.recommendedAction || "Review opportunity.",
+        pill: item.probability !== undefined ? Math.round(Number(item.probability) * 100) + "%" : "opportunity"
+      };
+    }), "No revenue opportunities yet.");
+
+    renderList("#founderRisks", risks.slice(0, 5).map(function (item) {
+      return {
+        title: item.title || "Business risk",
+        meta: item.severity || "LOW",
+        detail: item.recommendedAction || "Review risk.",
+        pill: item.type || "risk"
+      };
+    }), "No major risks detected.");
+
+    renderCards("#founderSalesPipeline", [
+      ["Best Customer", salesOverview.bestNextCustomer || "Next qualified lead"],
+      ["Expected Revenue", money(salesOverview.expectedRevenue || salesKpis.revenuePipeline)],
+      ["Probability", salesOverview.probability !== undefined ? Math.round(Number(salesOverview.probability) * 100) + "%" : "ready"],
+      ["Open Estimates", salesKpis.openEstimates || 0],
+      ["Conversion", (salesKpis.conversionRate || 0) + "%"],
+      ["Follow-ups", (sales.todaysFollowups || []).length || 0]
+    ]);
+
+    renderCards("#founderWorkflowActivity", [
+      ["Registered Workflows", workflow.workflowCount || (workflow.registry && workflow.registry.workflowCount) || workflows.length || 0],
+      ["Supported Events", (workflow.supportedEvents || (workflow.registry && workflow.registry.supportedEvents) || []).length || 0],
+      ["Pending Approval", workflow.pendingApprovals || 0],
+      ["History", workflow.historyCount || 0],
+      ["Events", workflow.eventCount || 0],
+      ["Status", workflow.status || "ready"]
+    ]);
+
+    renderCards("#founderKpiCards", [
+      ["Open Jobs", executive.openJobs || kpis.openJobs || 0],
+      ["Completed Jobs", executive.completedJobs || kpis.completedJobs || 0],
+      ["Open Estimates", executive.openEstimates || kpis.openEstimates || 0],
+      ["Avg Job Value", money(executive.averageJobValue || kpis.averageJobValue)],
+      ["Collections", money(executive.collections || kpis.collections)],
+      ["Technician Use", (executive.technicianUtilization || kpis.technicianUtilization || 0) + "%"],
+      ["Customer Score", (kpis.customerSatisfaction && kpis.customerSatisfaction.score) || "ready"],
+      ["Inventory", (kpis.inventoryStatus && kpis.inventoryStatus.status) || "ready"]
+    ]);
+
+    renderCards("#founderWorkforceStatus", [
+      ["Brain", brain.status || "ready"],
+      ["Executive", executive.generatedAt ? "ready" : "ready"],
+      ["Recommendation", recommendations.generatedAt ? "ready" : "ready"],
+      ["Sales", sales.generatedAt ? "ready" : "ready"],
+      ["Workflow", workflow.status || "ready"],
+      ["External AI", "off"],
+      ["Automation", "approval-first"],
+      ["Data Mode", "JSON-ready"]
+    ]);
+  }
+
+  function renderCards(selector, cards) {
+    var target = $(selector);
+    if (!target) return;
+    target.innerHTML = cards.map(function (card) {
+      return '<article class="card"><p class="muted">' + escapeHtml(card[0]) + '</p><div class="metric">' + escapeHtml(card[1]) + '</div></article>';
+    }).join("");
+  }
+
+  function renderList(selector, items, emptyText) {
+    var target = $(selector);
+    if (!target) return;
+    target.innerHTML = items.length ? items.map(function (item) {
+      return '<div class="row"><strong>' + escapeHtml(item.title) + '</strong><span>' + escapeHtml(item.meta || "") + '</span><span>' + escapeHtml(item.detail || "") + '</span><span class="pill">' + escapeHtml(item.pill || "review") + '</span></div>';
+    }).join("") : '<p class="muted">' + escapeHtml(emptyText) + '</p>';
+  }
+
+  function money(value) {
+    return "$" + escapeHtml(Math.round(Number(value || 0)));
+  }
+
+  function scoreLabel(value) {
+    return value === undefined || value === null ? "ready" : String(value);
   }
 
   function renderVendors(vendors) {
@@ -706,6 +833,97 @@
     }).join("") + '</ul>' : '<p class="muted">Select a service to see project questions.</p>';
   }
 
+  async function refreshFounderDashboard() {
+    var results = await Promise.all([
+      executiveApi("executive.dashboard", {}).catch(function () { return { data: fallbackExecutive() }; }),
+      executiveApi("executive.briefing", {}).catch(function () { return { data: fallbackBriefing() }; }),
+      recommendationIntelligenceApi("recommendation.generate", { record: false }).catch(function () { return { data: fallbackRecommendations() }; }),
+      salesApi("sales.dashboard", {}).catch(function () { return { data: fallbackSales() }; }),
+      workflowApi("workflow.status", {}).catch(function () { return { data: fallbackWorkflow() }; }),
+      workflowApi("workflow.history", { limit: 10 }).catch(function () { return { data: [] }; }),
+      workflowApi("workflow.events", { limit: 10 }).catch(function () { return { data: [] }; }),
+      brainApi("brain.status", {}).catch(function () { return { data: { status: "ready" } }; })
+    ]);
+    var workflowStatus = unwrap(results[4]);
+    var workflowHistory = unwrap(results[5]);
+    var workflowEvents = unwrap(results[6]);
+    renderFounderDashboard({
+      executive: unwrap(results[0]),
+      briefing: unwrap(results[1]),
+      recommendations: unwrap(results[2]),
+      sales: unwrap(results[3]),
+      workflow: {
+        status: workflowStatus.status || "ready",
+        registry: workflowStatus.registry || {},
+        workflowCount: workflowStatus.registry ? workflowStatus.registry.workflowCount : 0,
+        supportedEvents: workflowStatus.registry ? workflowStatus.registry.supportedEvents : [],
+        historyCount: Array.isArray(workflowHistory) ? workflowHistory.length : 0,
+        eventCount: Array.isArray(workflowEvents) ? workflowEvents.length : 0,
+        pendingApprovals: Array.isArray(workflowHistory) ? workflowHistory.filter(function (item) { return item.status === "needs_approval"; }).length : 0
+      },
+      brain: unwrap(results[7])
+    });
+  }
+
+  function unwrap(response) {
+    return response && response.data !== undefined ? response.data : response || {};
+  }
+
+  function fallbackExecutive() {
+    return {
+      businessHealth: { overallScore: 72, status: "demo" },
+      revenueToday: 0,
+      revenueThisMonth: 0,
+      openJobs: 0,
+      openEstimates: 0,
+      averageJobValue: 0,
+      collections: 0,
+      technicianUtilization: 0,
+      businessRisks: [],
+      growthOpportunities: [],
+      aiPriorityQueue: [],
+      kpis: { customerSatisfaction: { score: "ready" }, inventoryStatus: { status: "ready" } }
+    };
+  }
+
+  function fallbackBriefing() {
+    return {
+      executiveSummary: "Add leads, estimates, projects, invoices, and workflow activity to unlock stronger executive intelligence."
+    };
+  }
+
+  function fallbackRecommendations() {
+    return {
+      aiPriorityQueue: [
+        { title: "Review new leads", category: "Sales", priority: "HIGH", description: "Check new requests and book free estimates." },
+        { title: "Follow up on open estimates", category: "Sales", priority: "HIGH", description: "Call the highest probability estimate first." }
+      ],
+      recommendations: []
+    };
+  }
+
+  function fallbackSales() {
+    return {
+      salesOverview: {
+        bestNextCustomer: "Next qualified lead",
+        expectedRevenue: 0,
+        probability: 0,
+        priority: "MEDIUM",
+        recommendedAction: "Add or qualify a lead, then offer a free estimate."
+      },
+      kpis: { openEstimates: 0, wonEstimates: 0, lostEstimates: 0, conversionRate: 0, averageDealSize: 0, revenuePipeline: 0 },
+      todaysFollowups: [],
+      revenueOpportunities: []
+    };
+  }
+
+  function fallbackWorkflow() {
+    return {
+      status: "ready",
+      registry: { workflowCount: 8, supportedEvents: [] }
+    };
+  }
+
   async function refresh() {
     var dashboard = await getDashboard();
     state.config = dashboard.config;
@@ -720,6 +938,7 @@
     renderActivityLogs(dashboard.activityLogs);
     renderDeployment(dashboard.deployment);
     renderQuestions($("select[name='service']").value);
+    await refreshFounderDashboard().catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -948,6 +1167,18 @@
           renderBusinessDashboard(await businessApi("dashboard", {}));
         } catch (error) {
           $("#businessResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    if ($("#refreshFounderDashboard")) {
+      $("#refreshFounderDashboard").addEventListener("click", async function () {
+        var button = $("#refreshFounderDashboard");
+        button.disabled = true;
+        try {
+          await refreshFounderDashboard();
         } finally {
           button.disabled = false;
         }
