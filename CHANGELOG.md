@@ -1,5 +1,13 @@
 # Changelog
 
+## Project Titan Sprint 18 - Production Hardening
+
+- Added production hardening modules for health checks, error boundaries, security checklist, performance audit, deployment audit, and release readiness.
+- Added Production Readiness Agent.
+- Extended `scripts/check-project.js` with API file count, large file, missing test, missing docs, security keyword, and environment variable warnings.
+- Added `tests/production-hardening.test.js`.
+- Updated sprint quality gates and deployment workflow for beta release safety.
+
 ## Project Titan Sprint 17 - Public API & Integrations Foundation
 
 - Added integrations architecture modules for public API registry, API key metadata, webhooks, integration logs, and integration dashboard.

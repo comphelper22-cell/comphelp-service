@@ -18,6 +18,16 @@ const REQUIRED_SCRIPTS = [
   "marketplace-agent"
 ];
 const IGNORE_DIRS = new Set([".git", "node_modules", ".vercel", "logs", "uploads", "outputs", "phase2-crm-clean"]);
+const LARGE_FILE_BYTES = 250 * 1024;
+const SECURITY_KEYWORDS = ["api_key", "client_secret", "private_key", "secret=", "token=", "password="];
+const REQUIRED_ENV_NAMES = [
+  "OPENAI_API_KEY",
+  "GITHUB_TOKEN",
+  "GITHUB_REPO",
+  "VERCEL_TOKEN",
+  "VERCEL_PROJECT_ID",
+  "GOOGLE_SHEETS_WEBHOOK_URL"
+];
 
 function log(action, payload) {
   fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -89,6 +99,74 @@ function validateApiFunctionCount(warnings) {
   }
 }
 
+function validateLargeFiles(files, warnings) {
+  const large = files
+    .map((file) => ({ file, size: fs.statSync(file).size }))
+    .filter((item) => item.size > LARGE_FILE_BYTES)
+    .sort((a, b) => b.size - a.size)
+    .slice(0, 10);
+  for (const item of large) {
+    warnings.push(`Large file warning: ${rel(item.file)} is ${item.size} bytes.`);
+  }
+}
+
+function validateMissingTests(files, warnings) {
+  const jsFiles = files.filter((file) => file.endsWith(".js"));
+  const testFiles = files.filter((file) => /(^|\/|\\)tests(\/|\\).+\.test\.js$/.test(file));
+  const moduleDirs = new Set(jsFiles
+    .map((file) => rel(file).split("/")[0])
+    .filter((dir) => !["api", "assets", "scripts", "tests", "server", "database", "agents"].includes(dir)));
+  if (!testFiles.length) warnings.push("Missing test warning: no tests/*.test.js files found.");
+  for (const dir of moduleDirs) {
+    const hasNamedTest = testFiles.some((file) => rel(file).toLowerCase().includes(dir.replace(/-/g, "").toLowerCase()) || rel(file).toLowerCase().includes(dir.toLowerCase()));
+    if (!hasNamedTest && ["production", "integrations", "billing", "saas"].includes(dir)) {
+      warnings.push(`Missing test warning: ${dir} module should have a focused test.`);
+    }
+  }
+}
+
+function validateMissingDocs(warnings) {
+  const requiredDocs = [
+    "ARCHITECTURE.md",
+    "ROADMAP.md",
+    "CHANGELOG.md",
+    "docs/SPRINT_PLAN.md",
+    "docs/SPRINT_QUALITY_GATES.md",
+    "docs/DEPLOYMENT_WORKFLOW.md"
+  ];
+  for (const doc of requiredDocs) {
+    if (!fs.existsSync(path.join(ROOT, doc))) warnings.push(`Missing docs warning: ${doc} is missing.`);
+  }
+}
+
+function validateSecurityKeywords(files, warnings) {
+  const scanFiles = files.filter((file) => /\.(js|json|html|md)$/i.test(file) && !/(\.env|package-lock\.json)$/i.test(path.basename(file)));
+  const findings = [];
+  for (const file of scanFiles) {
+    const text = fs.readFileSync(file, "utf8");
+    const lower = text.toLowerCase();
+    for (const keyword of SECURITY_KEYWORDS) {
+      if (lower.includes(keyword)) findings.push(`${rel(file)} contains ${keyword}`);
+    }
+  }
+  for (const finding of findings.slice(0, 25)) {
+    warnings.push(`Security keyword scan: ${finding}. Verify it is placeholder/masked and not a real secret.`);
+  }
+  if (findings.length > 25) warnings.push(`Security keyword scan: ${findings.length - 25} additional keyword finding(s) omitted.`);
+}
+
+function validateEnvironmentWarnings(warnings) {
+  const example = path.join(ROOT, ".env.example");
+  if (!fs.existsSync(example)) {
+    warnings.push("Environment variable warning: .env.example is missing.");
+    return;
+  }
+  const text = fs.readFileSync(example, "utf8");
+  for (const name of REQUIRED_ENV_NAMES) {
+    if (!text.includes(`${name}=`)) warnings.push(`Environment variable warning: .env.example missing ${name}=`);
+  }
+}
+
 function main() {
   const errors = [];
   const warnings = [];
@@ -112,6 +190,11 @@ function main() {
   validatePackageJson(errors);
   validateVercel(errors);
   validateApiFunctionCount(warnings);
+  validateLargeFiles(files, warnings);
+  validateMissingTests(files, warnings);
+  validateMissingDocs(warnings);
+  validateSecurityKeywords(files, warnings);
+  validateEnvironmentWarnings(warnings);
 
   if (!fs.existsSync(path.join(ROOT, "api", "marketplace.js"))) errors.push("api/marketplace.js is missing.");
   if (!fs.existsSync(path.join(ROOT, "api", "marketplace-project-upload.js"))) errors.push("api/marketplace-project-upload.js is missing.");

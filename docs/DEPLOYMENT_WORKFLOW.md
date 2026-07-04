@@ -18,6 +18,8 @@ git status
 git diff --stat
 ```
 
+Review all `check-project` warnings before commit. Sprint 18 adds API file count, large file, missing test, missing documentation, security keyword, and environment variable warnings.
+
 ## Commit Workflow
 
 ```powershell
@@ -53,6 +55,11 @@ npm run vercel-deploy
 ## Release Checklist
 
 - Validation passes.
+- Production hardening warnings reviewed.
+- API function count reviewed for Vercel Hobby compatibility.
+- Large files reviewed.
+- Security keyword findings confirmed placeholder/masked or fixed.
+- Required environment variables documented in `.env.example`.
 - Git status reviewed.
 - Diff stat reviewed.
 - Commit message approved.
@@ -69,3 +76,11 @@ npm run vercel-deploy
 4. Run validation.
 5. Verify homepage, dashboard, API health, and lead form.
 
+## Beta Readiness Workflow
+
+1. Run `npm run check-project`.
+2. Run focused production test: `node tests\production-hardening.test.js`.
+3. Review `production/release-readiness.js` output through the Production Readiness Agent.
+4. Confirm no `.env`, `.env.local`, or `logs/*.jsonl` files are staged.
+5. Request owner approval before push.
+6. Request owner approval before deployment.
