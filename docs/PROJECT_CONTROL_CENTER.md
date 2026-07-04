@@ -94,6 +94,7 @@ git diff --stat
 - Dispatch AI Center shows schedule optimization, technician availability, route suggestions, ETA, emergency jobs, conflicts, capacity, and AI dispatch suggestions.
 - SaaS Admin Center shows organizations, teams, roles, permissions, settings, tenant health, and JSON fallback mode.
 - Billing Center shows plans, subscription status, usage, invoices, payment status, and upgrade recommendations without payment processing.
+- Integrations Center shows API keys, webhooks, connected apps, integration logs, and developer notes without external API connections.
 - Documentation updated.
 
 ## Deploy Checklist

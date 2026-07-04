@@ -570,3 +570,23 @@ Billing safety:
 - No real payment processing exists.
 - Card data is never stored.
 - Billing outputs are architecture and planning data until a future approved payment sprint.
+
+## Public API & Integrations Foundation
+
+Project Titan Sprint 17 adds public API architecture and an integration framework for future third-party connections.
+
+Integrations modules:
+
+- `integration-engine.js` exposes the Integrations API surface.
+- `public-api-registry.js` defines planned public API endpoints and connected app placeholders.
+- `api-key-manager.js` tracks API key metadata without storing or exposing real secrets.
+- `webhook-manager.js` tracks webhook definitions with delivery disabled.
+- `integration-logs.js` summarizes sanitized integration logs.
+- `integration-dashboard.js` combines registry, API keys, webhooks, connected apps, logs, and developer notes.
+
+Integrations safety:
+
+- External APIs are not connected.
+- API keys are metadata only and masked in UI/API outputs.
+- Webhook delivery is disabled until signing, retries, and tenant isolation are approved.
+- Public API endpoints must enforce authentication, rate limits, and tenant isolation before production use.

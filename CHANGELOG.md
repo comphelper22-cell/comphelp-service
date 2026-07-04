@@ -1,5 +1,14 @@
 # Changelog
 
+## Project Titan Sprint 17 - Public API & Integrations Foundation
+
+- Added integrations architecture modules for public API registry, API key metadata, webhooks, integration logs, and integration dashboard.
+- Added Integration Manager Agent.
+- Added `integrations.*` actions to `/api/system`.
+- Added Integrations Center dashboard UI.
+- Added `tests/public-api-integrations.test.js`.
+- Documented integrations architecture, roadmap, sprint plan, and project control updates.
+
 ## Project Titan Sprint 16 - Billing & Subscriptions
 
 - Added billing architecture modules for plans, subscriptions, invoices, usage tracking, payment status, and billing dashboard.

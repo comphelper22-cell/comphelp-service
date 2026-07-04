@@ -157,7 +157,9 @@ Sprint 15: SaaS Multi-Tenant Foundation with organizations, teams, roles, permis
 
 Sprint 16: Billing & Subscriptions with draft plans, subscription status, usage tracking, invoice summaries, payment safety status, and Billing Center UI.
 
-Sprint 17: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, SaaS, and billing actions.
+Sprint 17: Public API & Integrations Foundation with API registry, masked API key metadata, webhooks, connected app placeholders, integration logs, developer notes, and Integrations Center UI.
+
+Sprint 18: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, SaaS, billing, and integrations actions.
 
 ## API Consolidation Hotfix
 

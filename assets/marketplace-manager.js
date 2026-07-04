@@ -155,6 +155,10 @@
     return systemApi("billing", action || "billing.dashboard", payload || {});
   }
 
+  async function integrationsApi(action, payload) {
+    return systemApi("integrations", action || "integrations.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -1110,6 +1114,50 @@
     }
   }
 
+  function renderIntegrationsDashboard(payload) {
+    var target = $("#integrationsMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var registry = data.registry || [];
+    var apiKeys = data.apiKeys || [];
+    var webhooks = data.webhooks || [];
+    var connectedApps = data.connectedApps || [];
+    var logs = data.integrationLogs || data.logs || [];
+    var notes = data.developerNotes || [];
+    var health = data.integrationHealth || data;
+    var cards = [
+      ["Registry", registry.length || 0],
+      ["API Keys", apiKeys.length || 0],
+      ["Webhooks", webhooks.length || 0],
+      ["Connected Apps", connectedApps.length || 0],
+      ["Logs", logs.length || 0],
+      ["External APIs", health.externalConnectionsEnabled ? "connected" : "not connected"],
+      ["Webhook Delivery", health.webhookDeliveryEnabled ? "enabled" : "disabled"],
+      ["Secrets", health.realSecretsExposed ? "review" : "masked"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#integrationsApiKeys", apiKeys.slice(0, 8).map(function (key) {
+      return { title: key.name, meta: key.prefix || "not_generated", detail: "Scopes: " + ((key.scopes || []).join(", ") || "none"), pill: key.status || "draft" };
+    }), "No API key metadata yet.");
+    renderList("#integrationsWebhooks", webhooks.slice(0, 8).map(function (webhook) {
+      return { title: webhook.name, meta: webhook.event, detail: webhook.targetUrl || "Target URL not configured", pill: webhook.status || "draft" };
+    }), "No webhooks yet.");
+    renderList("#integrationsConnectedApps", connectedApps.slice(0, 8).map(function (app) {
+      return { title: app.name, meta: app.category || "Integration", detail: "Future connection placeholder.", pill: app.status || "planned" };
+    }), "No connected app plans yet.");
+    renderList("#integrationsLogs", logs.slice(0, 8).map(function (log) {
+      return { title: log.event, meta: log.source || "system", detail: log.message || log.createdAt, pill: log.status || "info" };
+    }), "No integration logs yet.");
+    renderList("#integrationsDeveloperNotes", notes.map(function (note) {
+      return { title: note, meta: "Developer note", detail: "Owner/developer review before production integrations.", pill: "note" };
+    }), "No developer notes yet.");
+    if ($("#integrationsResult")) {
+      $("#integrationsResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -1358,6 +1406,7 @@
     await dispatchAIApi("dispatchAI.dashboard", {}).then(renderDispatchAIDashboard).catch(function () {});
     await saasApi("saas.dashboard", {}).then(renderSaasDashboard).catch(function () {});
     await billingApi("billing.dashboard", {}).then(renderBillingDashboard).catch(function () {});
+    await integrationsApi("integrations.dashboard", {}).then(renderIntegrationsDashboard).catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -1858,6 +1907,30 @@
             renderBillingDashboard(await billingApi(action, {}));
           } catch (error) {
             $("#billingResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshIntegrationsDashboard", "integrations.dashboard"],
+      ["#showIntegrationsRegistry", "integrations.registry"],
+      ["#showIntegrationsApiKeys", "integrations.apiKeys"],
+      ["#showIntegrationsWebhooks", "integrations.webhooks"],
+      ["#showIntegrationsLogs", "integrations.logs"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderIntegrationsDashboard(await integrationsApi(action, {}));
+          } catch (error) {
+            $("#integrationsResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }

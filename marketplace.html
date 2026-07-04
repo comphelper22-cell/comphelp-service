@@ -39,6 +39,7 @@
         <button data-target="dispatchAICenter">Dispatch AI</button>
         <button data-target="saasAdminCenter">SaaS Admin</button>
         <button data-target="billingCenter">Billing</button>
+        <button data-target="integrationsCenter">Integrations</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -465,6 +466,39 @@
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>Payment Status</h2><div class="list" id="billingPaymentStatus"></div></div>
           <div class="panel"><h2>Upgrade Recommendations</h2><div class="list" id="billingUpgradeRecommendations"></div></div>
+        </div>
+      </section>
+
+      <section data-view="integrationsCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Integrations Center</h2>
+            <p class="muted">Public API and integration architecture for future third-party connections. External APIs are not connected and real secrets are never exposed.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshIntegrationsDashboard" type="button">Integration Dashboard</button>
+              <button class="btn" id="showIntegrationsRegistry" type="button">Registry</button>
+              <button class="btn" id="showIntegrationsApiKeys" type="button">API Keys</button>
+              <button class="btn" id="showIntegrationsWebhooks" type="button">Webhooks</button>
+              <button class="btn" id="showIntegrationsLogs" type="button">Logs</button>
+            </div>
+            <div class="grid" id="integrationsMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Integrations Output</h2>
+            <pre id="integrationsResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>API Keys</h2><div class="list" id="integrationsApiKeys"></div></div>
+          <div class="panel"><h2>Webhooks</h2><div class="list" id="integrationsWebhooks"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Connected Apps</h2><div class="list" id="integrationsConnectedApps"></div></div>
+          <div class="panel"><h2>Integration Logs</h2><div class="list" id="integrationsLogs"></div></div>
+        </div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>Developer Notes</h2>
+          <div class="list" id="integrationsDeveloperNotes"></div>
         </div>
       </section>
 

@@ -707,3 +707,42 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 16 - Billing Subscriptions"
 ```
+
+## Current Sprint: Project Titan Sprint 17
+
+Goal: create public API architecture and an integration framework for future third-party connections.
+
+Scope:
+
+- Integration Engine.
+- Public API Registry.
+- API Key Manager.
+- Webhook Manager.
+- Integration Dashboard.
+- Integration Logs.
+- Integration Manager Agent.
+- System API module `integrations`.
+- Marketplace Integrations Center section.
+- Public API & Integrations test.
+
+Out of scope:
+
+- External API connections.
+- Real API secret storage or exposure.
+- Webhook delivery.
+- Public endpoint production launch.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Integrations Center shows API keys, webhooks, connected apps, integration logs, and developer notes.
+- API supports `integrations.status`, `integrations.registry`, `integrations.apiKeys`, `integrations.webhooks`, `integrations.logs`, and `integrations.dashboard`.
+- No external APIs are connected.
+- Real secrets are not exposed.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 17 - Public API Integrations Foundation"
+```
