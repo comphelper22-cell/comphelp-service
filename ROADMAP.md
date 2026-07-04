@@ -143,7 +143,9 @@ Sprint 8: Founder Dashboard UI polish with owner-facing command center, business
 
 Sprint 9: Operations Center with today's jobs, technician board, urgent jobs, at-risk work, dispatch suggestions, schedule health, customer waiting, inventory needs, and operations KPIs.
 
-Sprint 10: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, and operations actions.
+Sprint 10: Finance Center with revenue overview, invoices, cash flow, expenses, profit estimate, forecast, financial health, recommendations, and alerts.
+
+Sprint 11: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, and finance actions.
 
 ## API Consolidation Hotfix
 

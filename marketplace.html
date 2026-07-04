@@ -32,6 +32,7 @@
         <button data-target="executiveDashboard">Executive Dashboard</button>
         <button data-target="salesManager">Sales Manager</button>
         <button data-target="operationsCenter">Operations Center</button>
+        <button data-target="financeCenter">Finance Center</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -219,6 +220,38 @@
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>AI Dispatch Suggestions</h2><div class="list" id="operationsDispatchList"></div></div>
           <div class="panel"><h2>Customer Waiting</h2><div class="list" id="operationsCustomerWaiting"></div></div>
+        </div>
+      </section>
+
+      <section data-view="financeCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Finance Center</h2>
+            <p class="muted">Financial overview for revenue, invoices, cash flow, profit estimate, expenses, forecasts, and financial health.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshFinanceDashboard" type="button">Finance Dashboard</button>
+              <button class="btn" id="showFinanceRevenue" type="button">Revenue</button>
+              <button class="btn" id="showFinanceInvoices" type="button">Invoices</button>
+              <button class="btn" id="showFinanceCashflow" type="button">Cash Flow</button>
+              <button class="btn" id="showFinanceExpenses" type="button">Expenses</button>
+              <button class="btn" id="showFinanceProfit" type="button">Profit</button>
+              <button class="btn" id="showFinanceForecast" type="button">Forecast</button>
+              <button class="btn" id="showFinanceHealth" type="button">Health</button>
+            </div>
+            <div class="grid" id="financeMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Finance Output</h2>
+            <pre id="financeResult"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Top Customers by Revenue</h2><div class="list" id="financeTopCustomers"></div></div>
+          <div class="panel"><h2>AI Financial Recommendations</h2><div class="list" id="financeRecommendations"></div></div>
+        </div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>Financial Alerts</h2>
+          <div class="list" id="financeAlerts"></div>
         </div>
       </section>
 

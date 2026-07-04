@@ -22,6 +22,8 @@ const workflowEngine = require("../workflow/workflow-engine");
 const workflowAgent = require("../agents/workflow-agent");
 const operationsEngine = require("../operations/operations-engine");
 const operationsAgent = require("../agents/operations-agent");
+const financeEngine = require("../finance/finance-engine");
+const financeAgent = require("../agents/finance-agent");
 
 const modules = {
   developer,
@@ -139,6 +141,21 @@ function runOperationsAction(action, payload = {}) {
   return { ok: false, error: "unknown_operations_action" };
 }
 
+function runFinanceAction(action, payload = {}) {
+  if (action === "finance.status") return { ok: true, data: financeEngine.status() };
+  if (action === "finance.dashboard") return financeEngine.dashboard(payload);
+  if (action === "finance.revenue") return financeEngine.revenue(payload);
+  if (action === "finance.invoices") return financeEngine.invoices(payload);
+  if (action === "finance.cashflow") return financeEngine.cashflow(payload);
+  if (action === "finance.expenses") return financeEngine.expenses(payload);
+  if (action === "finance.profit") return financeEngine.profit(payload);
+  if (action === "finance.forecast") return financeEngine.forecast(payload);
+  if (action === "finance.health") return financeEngine.health(payload);
+  if (action === "finance.kpis") return financeEngine.kpis(payload);
+  if (action === "finance.agent") return { ok: true, data: financeAgent.run(payload) };
+  return { ok: false, error: "unknown_finance_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -166,13 +183,14 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
           salesActions: ["sales.status", "sales.pipeline", "sales.estimates", "sales.followups", "sales.conversion", "sales.opportunities", "sales.dashboard"],
           workflowActions: ["workflow.status", "workflow.trigger", "workflow.build", "workflow.history", "workflow.events", "workflow.registry", "workflow.validate"],
-          operationsActions: ["operations.status", "operations.dashboard", "operations.jobs", "operations.technicians", "operations.dispatchSuggestions", "operations.scheduleHealth", "operations.priorities", "operations.customerTimeline", "operations.inventoryNeeds"]
+          operationsActions: ["operations.status", "operations.dashboard", "operations.jobs", "operations.technicians", "operations.dispatchSuggestions", "operations.scheduleHealth", "operations.priorities", "operations.customerTimeline", "operations.inventoryNeeds"],
+          financeActions: ["finance.status", "finance.dashboard", "finance.revenue", "finance.invoices", "finance.cashflow", "finance.expenses", "finance.profit", "finance.forecast", "finance.health", "finance.kpis"]
         }
       });
     }
@@ -217,6 +235,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "operations") {
       const result = runOperationsAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "finance") {
+      const result = runFinanceAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

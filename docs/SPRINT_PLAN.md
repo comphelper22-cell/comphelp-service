@@ -420,3 +420,46 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 9 - Operations Center"
 ```
+
+## Current Sprint: Project Titan Sprint 10
+
+Goal: build the Finance Center for service businesses with real-time financial overview using JSON/demo fallback data.
+
+Scope:
+
+- Finance Engine.
+- Finance Dashboard.
+- Revenue Engine.
+- Invoice Engine.
+- Cash Flow Engine.
+- Expense Engine.
+- Profit Engine.
+- Forecast Engine.
+- Financial Health.
+- Financial KPIs.
+- Finance Agent.
+- System API module `finance`.
+- Marketplace Finance Center section.
+- Finance Center test.
+
+Out of scope:
+
+- Brain module changes.
+- Workflow Engine changes.
+- Operations Center changes.
+- External financial APIs.
+- Payment gateways.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Finance Center shows revenue today, week, month, outstanding invoices, overdue invoices, paid invoices, cash flow, profit estimate, expenses, monthly forecast, financial health score, revenue trend, expense trend, top customers by revenue, AI recommendations, and financial alerts.
+- API supports `finance.status`, `finance.dashboard`, `finance.revenue`, `finance.invoices`, `finance.cashflow`, `finance.expenses`, `finance.profit`, `finance.forecast`, `finance.health`, and `finance.kpis`.
+- Uses JSON/demo fallback data safely.
+- `npm run check-project` passes.
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 10 - Finance Center"
+```

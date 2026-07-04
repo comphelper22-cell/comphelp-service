@@ -412,3 +412,27 @@ Operations safety:
 - Technicians are never assigned automatically.
 - Customers are never contacted automatically.
 - Inventory needs are prompts for owner/dispatcher review.
+
+## Finance Center
+
+Project Titan Sprint 10 adds the Finance Center for service business owners. It focuses on architecture and UI with JSON/demo fallback data, and it does not connect payment gateways or external financial APIs.
+
+Finance modules:
+
+- `finance-engine.js` exposes the Finance Center interface.
+- `finance-dashboard.js` combines finance widgets for the UI.
+- `revenue-engine.js` calculates revenue today, week, month, and trend.
+- `invoice-engine.js` tracks paid, outstanding, and overdue invoices.
+- `cashflow-engine.js` estimates inflow, outflow, and cash flow status.
+- `expense-engine.js` groups expenses by category.
+- `profit-engine.js` estimates profit and margin.
+- `forecast-engine.js` returns monthly and cash flow forecasts.
+- `financial-health.js` scores financial health and alerts.
+- `financial-kpis.js` provides shared finance calculations and JSON/demo fallback data.
+
+Finance safety:
+
+- No payment gateway is connected.
+- No invoices are sent automatically.
+- No collections messages are sent automatically.
+- Financial recommendations are advisory and owner-reviewed.

@@ -127,6 +127,10 @@
     return systemApi("operations", action || "operations.dashboard", payload || {});
   }
 
+  async function financeApi(action, payload) {
+    return systemApi("finance", action || "finance.dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -744,6 +748,45 @@
     }
   }
 
+  function renderFinanceDashboard(payload) {
+    var target = $("#financeMetrics");
+    if (!target || !payload) return;
+    var data = payload.data || payload;
+    var forecast = data.forecast || data;
+    var health = data.health || data;
+    var cards = [
+      ["Revenue Today", money(data.revenueToday)],
+      ["Revenue This Week", money(data.revenueThisWeek)],
+      ["Revenue This Month", money(data.revenueThisMonth)],
+      ["Outstanding Invoices", data.outstandingInvoices || 0],
+      ["Overdue Invoices", data.overdueInvoices || 0],
+      ["Paid Invoices", data.paidInvoices || 0],
+      ["Cash Flow", money(data.cashFlow)],
+      ["Profit Estimate", money(data.profitEstimate)],
+      ["Expenses", money(data.expenses || data.totalExpenses)],
+      ["Monthly Forecast", money(data.monthlyForecast || forecast.monthlyForecast)],
+      ["Health Score", data.financialHealthScore || health.financialHealthScore || "ready"],
+      ["Revenue Trend", data.revenueTrend || "ready"],
+      ["Expense Trend", data.expenseTrend || "ready"],
+      ["Mode", data.demoMode ? "demo" : "live"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#financeTopCustomers", (data.topCustomersByRevenue || []).map(function (customer) {
+      return { title: customer.customerName, meta: money(customer.revenue), detail: "Tracked revenue", pill: "customer" };
+    }), "No customer revenue data yet.");
+    renderList("#financeRecommendations", (data.aiFinancialRecommendations || []).slice(0, 5).map(function (item) {
+      return { title: item.title, meta: item.category || "Finance", detail: item.description, pill: item.priority || "review" };
+    }), "No finance recommendations yet.");
+    renderList("#financeAlerts", (data.financialAlerts || data.alerts || []).map(function (alert) {
+      return { title: alert, meta: "Finance", detail: "Owner review recommended.", pill: "alert" };
+    }), "No critical financial alerts.");
+    if ($("#financeResult")) {
+      $("#financeResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -985,6 +1028,7 @@
     renderQuestions($("select[name='service']").value);
     await refreshFounderDashboard().catch(function () {});
     await operationsApi("operations.dashboard", {}).then(renderOperationsDashboard).catch(function () {});
+    await financeApi("finance.dashboard", {}).then(renderFinanceDashboard).catch(function () {});
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
@@ -1301,6 +1345,33 @@
             renderOperationsDashboard(await operationsApi(action, {}));
           } catch (error) {
             $("#operationsResult").textContent = error.message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    });
+
+    [
+      ["#refreshFinanceDashboard", "finance.dashboard"],
+      ["#showFinanceRevenue", "finance.revenue"],
+      ["#showFinanceInvoices", "finance.invoices"],
+      ["#showFinanceCashflow", "finance.cashflow"],
+      ["#showFinanceExpenses", "finance.expenses"],
+      ["#showFinanceProfit", "finance.profit"],
+      ["#showFinanceForecast", "finance.forecast"],
+      ["#showFinanceHealth", "finance.health"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var button = $(selector);
+          button.disabled = true;
+          try {
+            renderFinanceDashboard(await financeApi(action, {}));
+          } catch (error) {
+            $("#financeResult").textContent = error.message;
           } finally {
             button.disabled = false;
           }
