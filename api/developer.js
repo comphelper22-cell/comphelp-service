@@ -2,6 +2,7 @@ const {
   analyzeProject,
   validateProject,
   deploymentReport,
+  databaseStatus,
   fullReport,
   gitStatus
 } = require("../agents/developer-agent");
@@ -42,11 +43,12 @@ function requireAccess(req) {
   return { ok: true };
 }
 
-function runAction(action) {
+async function runAction(action) {
   if (action === "gitStatus") return { ok: true, git: gitStatus() };
   if (action === "analyze") return { ok: true, report: analyzeProject() };
   if (action === "validate") return { ok: true, validation: validateProject() };
   if (action === "deployment") return { ok: true, deployment: deploymentReport() };
+  if (action === "databaseStatus") return { ok: true, database: await databaseStatus() };
   if (action === "fullReport") return { ok: true, report: fullReport() };
   return { ok: false, error: "unknown_developer_action" };
 }
@@ -56,10 +58,10 @@ module.exports = async function handler(req, res) {
     if (req.method === "OPTIONS") return sendJson(res, 204, {});
     const auth = requireAccess(req);
     if (!auth.ok) return sendJson(res, auth.status, { ok: false, error: auth.error });
-    if (req.method === "GET") return sendJson(res, 200, runAction("fullReport"));
+    if (req.method === "GET") return sendJson(res, 200, await runAction("fullReport"));
     if (req.method !== "POST") return sendJson(res, 405, { ok: false, error: "method_not_allowed" });
     const input = await readBody(req);
-    const result = runAction(clean(input.action || "fullReport", 80));
+    const result = await runAction(clean(input.action || "fullReport", 80));
     return sendJson(res, result.ok ? 200 : 400, result);
   } catch (error) {
     console.error("developer_api_error", error);

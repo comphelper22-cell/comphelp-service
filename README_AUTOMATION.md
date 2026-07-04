@@ -27,6 +27,8 @@ OUTREACH_DAILY_LIMIT=10
 SOCIAL_OUTREACH_DAILY_LIMIT=10
 FOLLOWUP_DAILY_LIMIT=20
 OUTREACH_PAUSED=true
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 Optional:
@@ -48,6 +50,12 @@ Validate project:
 
 ```bash
 npm run check-project
+```
+
+Create a timestamped project backup:
+
+```bash
+npm run backup-project
 ```
 
 Validate, push to GitHub, and trigger Vercel deployment:
@@ -123,6 +131,52 @@ Responsibilities:
 - Recommend cheapest qualified vendor.
 - Calculate expected commission and profit.
 - Create customer quote outputs.
+
+## Phase 6 Business Operating System
+
+Files:
+
+- `database/index.js`
+- `database/leads.js`
+- `database/vendors.js`
+- `database/projects.js`
+- `database/estimates.js`
+- `database/customers.js`
+- `database/tasks.js`
+- `database/activity.js`
+- `database/settings.js`
+- `agents/business-os-agent.js`
+- `api/business-os.js`
+- `scripts/backup-project.js`
+
+Responsibilities:
+
+- Use Supabase when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured.
+- Fall back to `data/marketplace.json` automatically when Supabase is not configured.
+- Manage CRM records for leads, customers, vendors, estimates, projects, tasks, invoices, notes, and activity.
+- Generate estimate outputs with labor, materials, travel, tax, markup, commission, profit, margin, and PDF-ready quote content.
+- Rank vendors and create dispatcher recommendations.
+- Generate daily, weekly, monthly, quarterly, and yearly business analytics.
+- Produce `logs/database-report.json`, `logs/business-report.json`, `logs/backup-report.json`, and `logs/phase6-report.json`.
+- Extend the Marketplace Developer Center with database, backup, Supabase, JSON, API, and deployment readiness health checks.
+
+API route:
+
+```text
+/api/business-os
+```
+
+Supported actions:
+
+```text
+dashboard
+crm
+estimate
+dispatch
+analytics
+reports
+databaseHealth
+```
 
 ## SMM Agent
 

@@ -28,6 +28,7 @@
       <p class="sub">Marketplace Manager V1</p>
       <nav class="nav" aria-label="Dashboard modules">
         <button class="is-active" data-target="dashboard">Dashboard</button>
+        <button data-target="businessDashboard">Business Dashboard</button>
         <button data-target="leads">Lead Manager</button>
         <button data-target="leadFinder">Lead Finder</button>
         <button data-target="socialLeads">Social Leads</button>
@@ -67,6 +68,24 @@
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>Recent Leads</h2><div class="list" id="recentLeads"></div></div>
           <div class="panel"><h2>Top Vendors</h2><div class="list" id="topVendors"></div></div>
+        </div>
+      </section>
+
+      <section data-view="businessDashboard">
+        <div class="two">
+          <div class="panel">
+            <h2>Business Dashboard</h2>
+            <p class="muted">Revenue, leads, pipeline, projects, open estimates, pending jobs, vendor performance, profit, tasks, and notifications.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshBusinessDashboard" type="button">Refresh Business Dashboard</button>
+              <button class="btn" id="generateBusinessReports" type="button">Generate Reports</button>
+            </div>
+            <div class="grid" id="businessMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Business Output</h2>
+            <pre id="businessResult"></pre>
+          </div>
         </div>
       </section>
 
@@ -473,6 +492,7 @@
             <div class="actions">
               <button class="btn primary" id="refreshDeveloperCenter" type="button">Refresh Report</button>
               <button class="btn" id="runDeveloperValidation" type="button">Run Validation</button>
+              <button class="btn" id="checkDatabaseStatus" type="button">Check Database</button>
             </div>
             <div class="grid" id="developerMetrics" style="margin-top:.85rem"></div>
           </div>

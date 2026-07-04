@@ -79,6 +79,10 @@
     return body;
   }
 
+  async function businessApi(action, payload) {
+    return routeApi("/api/business-os", action || "dashboard", payload || {});
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -312,12 +316,37 @@
     }
   }
 
+  function renderBusinessDashboard(payload) {
+    var target = $("#businessMetrics");
+    if (!target || !payload) return;
+    var dashboard = payload.dashboard || payload;
+    var widgets = dashboard.widgets || {};
+    var notifications = widgets.notifications || [];
+    var metrics = [
+      ["Revenue", "$" + (widgets.revenue || 0)],
+      ["Leads", widgets.leads || 0],
+      ["Projects", widgets.projects || 0],
+      ["Open Estimates", widgets.openEstimates || 0],
+      ["Pending Jobs", widgets.pendingJobs || 0],
+      ["Profit", "$" + (widgets.profit || 0)],
+      ["Tasks", widgets.tasks || 0],
+      ["Notifications", notifications.length || 0]
+    ];
+    target.innerHTML = metrics.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    if ($("#businessResult")) {
+      $("#businessResult").textContent = JSON.stringify(payload, null, 2);
+    }
+  }
+
   function renderDeveloperCenter(payload, writeOutput) {
     var target = $("#developerMetrics");
     if (!target || !payload) return;
     var report = payload.report || payload;
     var developer = report.developer || report.report || report;
     var deployment = report.deployment || payload.deployment || {};
+    var database = report.database || payload.database || deployment.database || {};
     var summary = developer.summary || {};
     var git = developer.git || deployment.gitStatus || {};
     var metrics = [
@@ -328,6 +357,13 @@
       ["Deployment", deployment.deploymentStatus || "approval_required"],
       ["Recent Commits", git.recentCommits ? git.recentCommits.length : 0],
       ["Build Status", deployment.buildStatus || "validation_required"],
+      ["Database Mode", database.mode || deployment.databaseHealth || "checking"],
+      ["Supabase Status", database.supabaseConfigured ? "configured" : (deployment.supabaseStatus || "json_fallback")],
+      ["JSON Fallback", database.jsonFallbackAvailable === false ? "missing" : (deployment.jsonStatus || "ready")],
+      ["Last Database Check", database.timestamp || database.generatedAt || "not checked"],
+      ["Database Errors", database.errors ? database.errors.length : 0],
+      ["Backup", deployment.backupStatus || "checking"],
+      ["API", deployment.apiStatus ? deployment.apiStatus.filter(function (item) { return item.exists; }).length + "/" + deployment.apiStatus.length : "checking"],
       ["Syntax Issues", summary.syntaxIssues || 0],
       ["Missing Imports", summary.missingImports || 0],
       ["Duplicate Blocks", summary.duplicateBlocks || 0]
@@ -392,6 +428,7 @@
     await refreshCompliance().catch(function () {});
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
+    await businessApi("dashboard", {}).then(renderBusinessDashboard).catch(function () {});
   }
 
   function attachNavigation() {
@@ -570,6 +607,51 @@
           $("#developerResult").textContent = JSON.stringify(result, null, 2);
         } catch (error) {
           $("#developerResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    if ($("#checkDatabaseStatus")) {
+      $("#checkDatabaseStatus").addEventListener("click", async function () {
+        var button = $("#checkDatabaseStatus");
+        button.disabled = true;
+        try {
+          var result = await refreshDeveloperCenter("databaseStatus");
+          $("#developerResult").textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          $("#developerResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    if ($("#refreshBusinessDashboard")) {
+      $("#refreshBusinessDashboard").addEventListener("click", async function () {
+        var button = $("#refreshBusinessDashboard");
+        button.disabled = true;
+        try {
+          renderBusinessDashboard(await businessApi("dashboard", {}));
+        } catch (error) {
+          $("#businessResult").textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    if ($("#generateBusinessReports")) {
+      $("#generateBusinessReports").addEventListener("click", async function () {
+        var button = $("#generateBusinessReports");
+        button.disabled = true;
+        try {
+          var result = await businessApi("reports", {});
+          renderBusinessDashboard(result);
+          $("#businessResult").textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          $("#businessResult").textContent = error.message;
         } finally {
           button.disabled = false;
         }

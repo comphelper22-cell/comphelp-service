@@ -1,2 +1,6 @@
+.env
+.env.local
 .vercel
-.env*
+logs/*.jsonl
+logs/*-report.json
+backups/

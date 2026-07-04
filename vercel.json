@@ -83,6 +83,10 @@
       "destination": "/api/developer.js"
     },
     {
+      "source": "/api/business-os",
+      "destination": "/api/business-os.js"
+    },
+    {
       "source": "/admin-test",
       "destination": "/admin-test.html"
     },

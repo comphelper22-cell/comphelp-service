@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { database, databaseStatus: writeDatabaseStatus, supabaseConfigured } = require("../database");
 
 const ROOT = path.resolve(__dirname, "..");
 const LOG_DIR = path.join(ROOT, "logs");
@@ -194,12 +195,21 @@ function validateProject() {
 
 function deploymentReport() {
   const git = gitStatus();
+  const databaseHealth = fs.existsSync(path.join(ROOT, "data", "marketplace.json")) ? "json_ready" : "json_missing";
+  const backupReport = path.join(LOG_DIR, "backup-report.json");
+  const apiFiles = ["api/marketplace.js", "api/developer.js", "api/business-os.js"].map((file) => ({ file, exists: fs.existsSync(path.join(ROOT, file)) }));
   return writeReport("deployment-report.json", {
     ok: git.ok,
     readiness: git.clean ? "ready_for_review" : "pending_changes",
     gitStatus: git,
     buildStatus: "validation_required",
     deploymentStatus: "approval_required",
+    databaseHealth,
+    backupStatus: fs.existsSync(backupReport) ? "backup_report_found" : "backup_report_missing",
+    supabaseStatus: supabaseConfigured() ? "configured" : "json_fallback",
+    jsonStatus: databaseHealth,
+    apiStatus: apiFiles,
+    deploymentReadiness: git.clean ? "ready_after_owner_approval" : "pending_changes_need_review",
     safety: {
       autoPush: false,
       autoDeploy: false,
@@ -209,15 +219,25 @@ function deploymentReport() {
   });
 }
 
+async function databaseStatus() {
+  return writeDatabaseStatus();
+}
+
 function fullReport() {
   const developer = analyzeProject();
   const deployment = deploymentReport();
   return { ok: developer.ok && deployment.ok, developer, deployment };
 }
 
-function main() {
+async function main() {
   const action = process.argv[2] || "report";
-  const output = action === "validate" ? validateProject() : action === "deployment" ? deploymentReport() : fullReport();
+  const output = action === "validate"
+    ? validateProject()
+    : action === "deployment"
+      ? deploymentReport()
+      : action === "databaseStatus"
+        ? await databaseStatus()
+        : fullReport();
   console.log(JSON.stringify(output, null, 2));
 }
 
@@ -228,6 +248,7 @@ module.exports = {
   analyzeProject,
   validateProject,
   deploymentReport,
+  databaseStatus,
   fullReport,
   gitStatus
 };

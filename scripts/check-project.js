@@ -9,6 +9,7 @@ const REQUIRED_SCRIPTS = [
   "auto-deploy",
   "github-push",
   "vercel-deploy",
+  "backup-project",
   "smm-agent",
   "seo-agent",
   "estimate-agent",
@@ -70,7 +71,7 @@ function validateVercel(errors) {
   }
   const vercel = JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
   const routes = JSON.stringify(vercel.rewrites || []);
-  for (const route of ["/api/marketplace", "/api/admin-test", "/api/developer", "/marketplace", "/admin-test"]) {
+  for (const route of ["/api/marketplace", "/api/admin-test", "/api/developer", "/api/business-os", "/marketplace", "/admin-test"]) {
     if (!routes.includes(route)) errors.push(`vercel.json missing route: ${route}`);
   }
 }

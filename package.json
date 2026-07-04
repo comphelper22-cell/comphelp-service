@@ -9,6 +9,7 @@
     "auto-deploy": "node scripts/auto-deploy.js",
     "github-push": "node scripts/github-push.js",
     "vercel-deploy": "node scripts/vercel-deploy.js",
+    "backup-project": "node scripts/backup-project.js",
     "smm-agent": "node agents/smm-agent.js",
     "seo-agent": "node agents/seo-agent.js",
     "estimate-agent": "node agents/estimate-agent.js",
