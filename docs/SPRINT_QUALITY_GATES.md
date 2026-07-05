@@ -5,6 +5,7 @@ Every sprint must pass quality gates before commit, push, or deploy.
 ## Required Gates
 
 - `npm run check-project` passes.
+- `npm run lint` passes.
 - API file count is reviewed for Vercel Hobby compatibility.
 - Large file warnings are reviewed.
 - Missing test warnings are reviewed.
@@ -20,6 +21,8 @@ Every sprint must pass quality gates before commit, push, or deploy.
 - JSON fallback remains compatible.
 - Dashboard changes remain responsive.
 - Documentation updated.
+- GitHub Actions project-check workflow exists for push and pull request validation.
+- Archive files are ignored through `.gitignore`.
 
 ## Release Blockers
 
@@ -40,3 +43,12 @@ Every sprint must pass quality gates before commit, push, or deploy.
 - `production/performance-audit.js` large file findings are accepted or reduced.
 - `production/deployment-audit.js` confirms `/api` function count is within deployment limits.
 - `production/release-readiness.js` produces a release checklist before beta deploy.
+
+## Sprint 21.5 Hardening Gates
+
+- `docs/SECURITY_AUDIT.md` documents keyword scan findings.
+- `tests/security-audit.test.js` reports no live token patterns.
+- `tests/code-quality.test.js` verifies lint and CI configuration.
+- Repository modules expose the consistent repository interface.
+- `.gitignore` excludes `backups/`, `*.zip`, `*.7z`, and `*.rar`.
+- GitHub Actions runs `npm run check-project` and `npm run lint`.

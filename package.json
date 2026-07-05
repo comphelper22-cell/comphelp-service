@@ -5,6 +5,7 @@
   "description": "Automation, deployment, and business operations agents for CompHelp Service.",
   "scripts": {
     "check-project": "node scripts/check-project.js",
+    "lint": "node scripts/lint-check.js",
     "setup-env": "node scripts/setup-env.js",
     "auto-deploy": "node scripts/auto-deploy.js",
     "github-push": "node scripts/github-push.js",

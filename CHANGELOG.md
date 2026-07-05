@@ -1,5 +1,14 @@
 # Changelog
 
+## Project Titan Sprint 21.5 - Database Foundation Hardening
+
+- Added security audit documentation for secret keyword findings.
+- Added archive ignore rules for zip, 7z, and rar files.
+- Added lightweight lint script and `npm run lint`.
+- Added GitHub Actions workflow for project check and lint.
+- Added security audit and code quality tests.
+- Updated quality gates and technical debt documentation.
+
 ## Project Titan Sprint 21 - Database Foundation
 
 - Added database core modules for config, client wrapper, validation, health, migrations, seed status, and structured errors.
