@@ -610,3 +610,24 @@ Release safety:
 - Release Center is review-only.
 - No external services, authentication, database, payment gateway, or integrations are added.
 - Commit, push, and deploy still require explicit owner approval.
+
+## Database Foundation Layer
+
+Project Titan Sprint 21 adds a SaaS-ready database foundation while keeping JSON fallback as the safe default.
+
+Database modules:
+
+- `database/core/` provides configuration, health, validation, migration readiness, seed readiness, errors, and a client wrapper.
+- `database/schema/` defines declarative table models and validation rules.
+- `database/repositories/` exposes consistent CRUD, search, pagination, and validation interfaces.
+- `database/sql/` stores review-only PostgreSQL/Supabase migration drafts.
+- `supabase/` stores readiness placeholders for client configuration, auth, storage, and RLS policy examples.
+- `agents/database-agent.js` reports schema, repository, migration, seed, and Supabase readiness.
+
+Database safety:
+
+- JSON fallback remains active.
+- No production Supabase project is connected.
+- SQL files are not executed automatically.
+- RLS policies are examples only.
+- Real credentials must never be committed.

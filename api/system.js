@@ -38,6 +38,11 @@ const billingEngine = require("../billing/billing-engine");
 const billingAgent = require("../agents/billing-agent");
 const integrationEngine = require("../integrations/integration-engine");
 const integrationManagerAgent = require("../agents/integration-manager-agent");
+const databaseAgent = require("../agents/database-agent");
+const { databaseHealth } = require("../database/core/database-health");
+const { databaseConfig } = require("../database/core/database-config");
+const { listMigrations } = require("../database/core/database-migrations");
+const { seedStatus } = require("../database/core/database-seed");
 
 const modules = {
   developer,
@@ -260,6 +265,29 @@ function runIntegrationsAction(action, payload = {}) {
   return { ok: false, error: "unknown_integrations_action" };
 }
 
+function runDatabaseAction(action, payload = {}) {
+  if (action === "database.status") return databaseAgent.run(payload);
+  if (action === "database.health") return { ok: true, data: databaseHealth() };
+  if (action === "database.schema") return databaseAgent.schemaReport(payload);
+  if (action === "database.repositories") return databaseAgent.repositoryReport(payload);
+  if (action === "database.migrations") return listMigrations(payload);
+  if (action === "database.seed") return seedStatus(payload);
+  if (action === "database.supabaseReady") {
+    const config = databaseConfig();
+    return {
+      ok: true,
+      data: {
+        configured: config.supabaseConfigured,
+        missingEnv: config.missingEnv,
+        jsonFallbackEnabled: config.jsonFallbackEnabled,
+        productionConnectionActive: false,
+        readyForManualConfiguration: true
+      }
+    };
+  }
+  return { ok: false, error: "unknown_database_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -287,7 +315,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations", "database"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
@@ -301,7 +329,8 @@ module.exports = async function handler(req, res) {
           dispatchAIActions: ["dispatchAI.status", "dispatchAI.dashboard", "dispatchAI.schedule", "dispatchAI.optimize", "dispatchAI.technicians", "dispatchAI.routes", "dispatchAI.eta", "dispatchAI.capacity", "dispatchAI.emergency"],
           saasActions: ["saas.status", "saas.organizations", "saas.teams", "saas.permissions", "saas.settings", "saas.dashboard"],
           billingActions: ["billing.status", "billing.plans", "billing.subscriptions", "billing.invoices", "billing.usage", "billing.dashboard"],
-          integrationsActions: ["integrations.status", "integrations.registry", "integrations.apiKeys", "integrations.webhooks", "integrations.logs", "integrations.dashboard"]
+          integrationsActions: ["integrations.status", "integrations.registry", "integrations.apiKeys", "integrations.webhooks", "integrations.logs", "integrations.dashboard"],
+          databaseActions: ["database.status", "database.health", "database.schema", "database.repositories", "database.migrations", "database.seed", "database.supabaseReady"]
         }
       });
     }
@@ -378,6 +407,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "integrations") {
       const result = runIntegrationsAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "database") {
+      const result = runDatabaseAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

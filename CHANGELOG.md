@@ -1,5 +1,15 @@
 # Changelog
 
+## Project Titan Sprint 21 - Database Foundation
+
+- Added database core modules for config, client wrapper, validation, health, migrations, seed status, and structured errors.
+- Added SaaS-ready schema definitions and repositories for core business tables.
+- Added review-only SQL migration drafts, indexes, RLS policy examples, and demo seed SQL.
+- Added Supabase readiness placeholders without connecting a production database.
+- Added Database Agent and `/api/system` database actions.
+- Added database foundation, repository, and Supabase readiness tests.
+- Documented the data model, repository pattern, Supabase readiness, and migration plan.
+
 ## Project Titan Sprint 20 - V1.0 Release Candidate
 
 - Added Release Center dashboard UI.

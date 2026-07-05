@@ -19,6 +19,15 @@ const TABLES = {
   invoices: "marketplace_invoices",
   quoteRequests: "marketplace_quote_requests",
   commissions: "marketplace_commissions"
+  ,
+  companies: "companies",
+  technicians: "technicians",
+  jobs: "jobs",
+  payments: "payments",
+  notes: "notes",
+  files: "files",
+  inventory: "inventory",
+  aiMemory: "ai_memory"
 };
 
 function supabaseConfigured(env = process.env) {

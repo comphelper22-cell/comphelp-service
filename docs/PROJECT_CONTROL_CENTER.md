@@ -50,12 +50,13 @@ Project Titan Sprint 20 - V1.0 Release Candidate.
 - Billing & Subscriptions for Project Titan Sprint 16.
 - API consolidation hotfix for Vercel Hobby compatibility.
 - V1.0 Release Candidate packaging for Project Titan Sprint 20.
+- Database Foundation for Project Titan Sprint 21.
 
 ## Next 3 Sprints
 
-1. Sprint 21 - beta onboarding and customer demo feedback.
-2. Phase 2 - decision governance and approval queue.
-3. Phase 2 - production data readiness and Supabase verification.
+1. Sprint 22 - decision governance and approval queue.
+2. Phase 2 - staging Supabase verification.
+3. Phase 2 - beta onboarding and customer demo feedback.
 
 ## Blocked Items
 
@@ -100,6 +101,7 @@ git diff --stat
 - Billing Center shows plans, subscription status, usage, invoices, payment status, and upgrade recommendations without payment processing.
 - Integrations Center shows API keys, webhooks, connected apps, integration logs, and developer notes without external API connections.
 - Release Center shows system health, installed modules, architecture diagram, performance score, security score, test coverage, deployment status, release notes, version history, and overall readiness.
+- Database Foundation shows JSON fallback readiness, Supabase configuration status, schemas, repositories, migrations, seed readiness, and RLS examples.
 - Documentation updated.
 
 ## Deploy Checklist

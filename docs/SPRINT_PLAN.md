@@ -796,3 +796,54 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 20 - V1 Release Candidate"
 ```
+
+## Current Sprint: Project Titan Sprint 21
+
+Goal: build the database foundation for real SaaS usage without connecting a production database.
+
+Scope:
+
+- Database core modules.
+- SaaS-ready schema definitions.
+- Repository pattern.
+- Review-only SQL migration drafts.
+- Supabase readiness placeholders.
+- Database Agent diagnostics.
+- `/api/system` database actions.
+- Database foundation documentation.
+- Database foundation tests.
+
+Out of scope:
+
+- Real Supabase production connection.
+- Real credentials.
+- Authentication.
+- Demo mode removal.
+- Existing API rewrites.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- JSON fallback remains compatible.
+- Every major table has base audit, status, organization, and metadata fields.
+- Repositories support create, findById, findAll, update, remove, search, paginate, and validate.
+- Database API actions return structured JSON.
+- SQL migrations are present but not auto-executed.
+- `npm run check-project` passes.
+
+Validation commands:
+
+```powershell
+node tests\database-foundation.test.js
+node tests\repositories.test.js
+node tests\supabase-ready.test.js
+npm run check-project
+git status
+git diff --stat
+```
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 21 - Database Foundation"
+```

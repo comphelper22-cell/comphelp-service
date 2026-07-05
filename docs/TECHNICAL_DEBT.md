@@ -1,5 +1,14 @@
 # Technical Debt
 
+## Sprint 21 Database Foundation
+
+- Supabase Auth remains placeholder-only.
+- Supabase Storage remains placeholder-only.
+- RLS policies are examples and require staging verification before activation.
+- JSON fallback remains the active default and needs a future migration/export tool.
+- Repository validation is schema-driven but not yet connected to UI form-level errors.
+- SQL migrations are not executed automatically and require manual review.
+
 ## V1 RC Technical Debt
 
 - Split large dashboard JavaScript into smaller modules.

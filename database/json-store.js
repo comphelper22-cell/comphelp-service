@@ -27,6 +27,15 @@ const DEFAULT_DATA = {
   invoices: [],
   quoteRequests: [],
   commissions: []
+  ,
+  companies: [],
+  technicians: [],
+  jobs: [],
+  payments: [],
+  notes: [],
+  files: [],
+  inventory: [],
+  aiMemory: []
 };
 
 function now() {

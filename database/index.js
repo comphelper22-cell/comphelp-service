@@ -21,7 +21,15 @@ const TABLE_CHECKS = [
   "sessions",
   "auditLogs",
   "notifications",
-  "preferences"
+  "preferences",
+  "companies",
+  "technicians",
+  "jobs",
+  "payments",
+  "notes",
+  "files",
+  "inventory",
+  "aiMemory"
 ];
 
 function clean(value, max = 1000) {

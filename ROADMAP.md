@@ -165,7 +165,9 @@ Sprint 19: Beta Launch Package with Beta Center, demo mode, demo data, feature t
 
 Sprint 20: V1.0 Release Candidate with Release Center, system health, installed modules, architecture diagram, performance/security/test scores, deployment status, release notes, version history, and overall readiness scoring.
 
-Sprint 21: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, SaaS, billing, integrations, beta, and release actions.
+Sprint 21: Database Foundation with SaaS-ready schema, repositories, JSON fallback compatibility, Supabase readiness placeholders, SQL migration drafts, and database diagnostics.
+
+Sprint 22: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, SaaS, billing, integrations, beta, release, and database actions.
 
 ## API Consolidation Hotfix
 
