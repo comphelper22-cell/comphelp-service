@@ -12,6 +12,8 @@ const DEFAULT_DATA = {
   projects: [],
   estimates: [],
   customers: [],
+  customerNotes: [],
+  customerTimeline: [],
   tasks: [],
   activity: [],
   activityLogs: [],

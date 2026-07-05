@@ -1,5 +1,21 @@
 # Technical Debt
 
+## Epic 2 Real Customer CRM
+
+- CRM uses JSON fallback storage until an approved database migration.
+- Customer notes support add, edit, delete, and pin in the API; UI currently focuses on add/list/pinned visibility.
+- Customer timeline derives events from available local records and should be expanded when estimates, jobs, invoices, and payments use normalized customer IDs.
+- Revenue and average response time remain placeholder/dashboard values until production finance/activity data is connected.
+
+## Phase 2 Epic 1 Identity & Authentication
+
+- Real authentication provider is not connected.
+- OAuth is not connected.
+- Password storage and reset delivery are placeholder-only.
+- JWT signing is disabled until secrets management and provider choice are approved.
+- RBAC decisions are advisory and not yet enforced as middleware.
+- Session persistence and revocation are architecture-only.
+
 ## Sprint 21.5 Hardening
 
 - Archived/generated folders such as `outputs` and `phase2-crm-clean` still contain keyword scan noise and should be reviewed before a production repository cleanup sprint.

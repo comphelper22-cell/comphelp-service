@@ -847,3 +847,93 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 21 - Database Foundation"
 ```
+
+## Current Sprint: Phase 2 Epic 1
+
+Goal: build enterprise-ready identity and authentication architecture without connecting real authentication services.
+
+Scope:
+
+- Identity engine and validation.
+- Auth engine and placeholder flows.
+- Session model.
+- Organization model.
+- RBAC roles and permissions.
+- User profile/settings/preferences/activity models.
+- Identity Agent diagnostics.
+- System API status actions.
+- Authentication and security documentation.
+- Focused identity tests.
+
+Out of scope:
+
+- Real Supabase Auth connection.
+- OAuth providers.
+- Password storage.
+- Demo mode removal.
+- Deployment changes.
+- Git push or Vercel deployment.
+
+Validation commands:
+
+```powershell
+node tests\authentication.test.js
+node tests\roles.test.js
+node tests\organization.test.js
+node tests\session.test.js
+npm run check-project
+npm run lint
+git status
+git diff --stat
+```
+
+Recommended commit:
+
+```powershell
+git commit -m "Phase 2 Epic 1 - Identity Authentication Platform"
+```
+
+## Current Sprint: Project Titan Epic 2
+
+Goal: transform the CRM foundation into a working JSON-backed customer management system.
+
+Scope:
+
+- Customer CRUD.
+- Archive and restore.
+- Customer search and filters.
+- Customer profile details.
+- Customer timeline.
+- Customer notes.
+- Customer dashboard metrics.
+- AI customer summary.
+- System API customer actions.
+- Marketplace Manager Customer CRM UI.
+- CRM documentation and tests.
+
+Out of scope:
+
+- Production database connection.
+- Authentication enforcement.
+- Deployment changes.
+- Git push or Vercel deployment.
+
+Validation commands:
+
+```powershell
+node tests\customer-crud.test.js
+node tests\customer-search.test.js
+node tests\customer-timeline.test.js
+node tests\customer-notes.test.js
+node tests\customer-summary.test.js
+npm run check-project
+npm run lint
+git status
+git diff --stat
+```
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Epic 2 - Real Customer CRM"
+```

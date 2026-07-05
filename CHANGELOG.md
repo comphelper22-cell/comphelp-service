@@ -1,5 +1,21 @@
 # Changelog
 
+## Project Titan Epic 2 - Real Customer CRM
+
+- Added real JSON-backed customer CRM service with create, edit, delete, archive, restore, search, profile, timeline, notes, dashboard, and AI summary actions.
+- Added `/api/system` customer actions.
+- Added Customer CRM screen to Marketplace Manager.
+- Added CRM user, API, and customer model documentation.
+- Added customer CRUD, search, timeline, notes, and summary tests.
+
+## Project Titan Phase 2 Epic 1 - Identity & Authentication Platform
+
+- Added identity, authentication, organization, RBAC, and user architecture modules.
+- Added Identity Agent diagnostics for auth readiness, roles, sessions, organization isolation, and security.
+- Added `/api/system` actions for identity, auth, session, organization, and roles status.
+- Added authentication, RBAC, organization, session, and security model documentation.
+- Added focused tests for authentication, roles, organization, and session architecture.
+
 ## Project Titan Sprint 21.5 - Database Foundation Hardening
 
 - Added security audit documentation for secret keyword findings.

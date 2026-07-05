@@ -36,6 +36,7 @@
         <button data-target="operationsCenter">Operations Center</button>
         <button data-target="financeCenter">Finance Center</button>
         <button data-target="customerSuccessCenter">Customer Success</button>
+        <button data-target="customerCrm">Customer CRM</button>
         <button data-target="marketingGrowthCenter">Marketing & Growth</button>
         <button data-target="analyticsReports">Analytics & Reports</button>
         <button data-target="dispatchAICenter">Dispatch AI</button>
@@ -370,6 +371,87 @@
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>Follow-up Needed</h2><div class="list" id="customerFollowupNeeded"></div></div>
           <div class="panel"><h2>Reviews Needed</h2><div class="list" id="customerReviewsNeeded"></div></div>
+        </div>
+      </section>
+
+      <section data-view="customerCrm">
+        <div class="two">
+          <form class="panel" id="customerForm">
+            <h2>Customer CRM</h2>
+            <p class="muted">Create, edit, archive, restore, search, and manage real JSON-backed customer records.</p>
+            <input name="id" type="hidden">
+            <input name="fullName" placeholder="Full name" required>
+            <input name="company" placeholder="Company">
+            <input name="phone" placeholder="Phone">
+            <input name="email" type="email" placeholder="Email">
+            <input name="address" placeholder="Address">
+            <div class="grid" style="grid-template-columns:2fr .8fr .8fr">
+              <input name="city" placeholder="City">
+              <input name="state" placeholder="State" value="CA">
+              <input name="zip" placeholder="ZIP">
+            </div>
+            <select name="status">
+              <option value="new">New</option>
+              <option value="active">Active</option>
+              <option value="returning">Returning</option>
+              <option value="commercial">Commercial</option>
+              <option value="residential">Residential</option>
+              <option value="archived">Archived</option>
+            </select>
+            <input name="tags" placeholder="Tags, comma separated">
+            <input name="leadSource" placeholder="Lead source">
+            <input name="assignedSales" placeholder="Assigned sales">
+            <input name="assignedTechnician" placeholder="Assigned technician">
+            <textarea name="notes" placeholder="Customer notes"></textarea>
+            <div class="actions">
+              <button class="btn primary" type="submit">Save Customer</button>
+              <button class="btn" id="resetCustomerForm" type="button">New Customer</button>
+              <button class="btn" id="archiveCustomerButton" type="button">Archive</button>
+              <button class="btn" id="restoreCustomerButton" type="button">Restore</button>
+              <button class="btn warn" id="deleteCustomerButton" type="button">Delete</button>
+            </div>
+            <p class="status" id="customerFormStatus"></p>
+          </form>
+          <div class="panel">
+            <h2>Customer Dashboard</h2>
+            <div class="grid" id="customerCrmMetrics"></div>
+            <div class="actions" style="margin-top:.85rem">
+              <input id="customerSearchInput" placeholder="Search name, phone, email, company, status, tags">
+              <select id="customerFilter">
+                <option value="active">Active</option>
+                <option value="all">All</option>
+                <option value="archived">Archived</option>
+                <option value="new">New</option>
+                <option value="returning">Returning</option>
+                <option value="commercial">Commercial</option>
+                <option value="residential">Residential</option>
+              </select>
+              <button class="btn" id="searchCustomers" type="button">Search</button>
+            </div>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Customer List</h2><div class="list" id="customerCrmList"></div></div>
+          <div class="panel"><h2>Customer Detail</h2><pre id="customerCrmDetail"></pre></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel">
+            <h2>Customer Notes</h2>
+            <form id="customerNoteForm">
+              <input name="customerId" type="hidden">
+              <textarea name="body" placeholder="Add internal note"></textarea>
+              <label class="muted"><input name="pinned" type="checkbox"> Pinned note</label>
+              <label class="muted"><input name="internal" type="checkbox" checked> Internal note</label>
+              <button class="btn primary" type="submit">Add Note</button>
+              <p class="status" id="customerNoteStatus"></p>
+            </form>
+            <div class="list" id="customerCrmNotes"></div>
+          </div>
+          <div class="panel"><h2>Customer Timeline</h2><div class="list" id="customerCrmTimeline"></div></div>
+        </div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>AI Summary</h2>
+          <pre id="customerCrmSummary"></pre>
         </div>
       </section>
 

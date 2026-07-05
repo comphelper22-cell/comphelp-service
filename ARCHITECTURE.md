@@ -631,3 +631,43 @@ Database safety:
 - SQL files are not executed automatically.
 - RLS policies are examples only.
 - Real credentials must never be committed.
+
+## Identity & Authentication Platform
+
+Phase 2 Epic 1 adds an enterprise-ready identity architecture without connecting a real authentication provider.
+
+Identity modules:
+
+- `identity/` defines readiness, validation, health, audit, roles, permissions, session model, and login flow.
+- `auth/` defines login, logout, registration, refresh-token, password reset, session, token, and JWT placeholder modules.
+- `organizations/` defines organization validation, tenant boundary model, and organization status.
+- `roles/` defines permissions, role-permission mapping, and RBAC decisions.
+- `users/` defines user profile, settings, preferences, and activity models.
+- `agents/identity-agent.js` provides authentication readiness and security diagnostics.
+
+Identity safety:
+
+- Supabase Auth is not connected.
+- OAuth providers are not connected.
+- Passwords are not stored.
+- Signed tokens are not issued.
+- Demo mode and JSON fallback remain compatible.
+
+## Real Customer CRM
+
+Project Titan Epic 2 adds a working customer management layer backed by JSON fallback storage.
+
+CRM capabilities:
+
+- Customer create, edit, soft delete, archive, restore, search, profile, recent customer, and dashboard actions.
+- Customer notes with internal and pinned note support.
+- Customer timeline built from customer events, estimates, jobs, invoices, payments, and notes.
+- Customer summary with last contact, open jobs, invoice count, outstanding balance placeholder, and recommended next action.
+- Marketplace Manager Customer CRM UI for list, details, timeline, notes, search, and filters.
+
+CRM safety:
+
+- Production database is not connected.
+- JSON fallback remains active.
+- Delete uses soft delete.
+- Archive and restore preserve customer history.

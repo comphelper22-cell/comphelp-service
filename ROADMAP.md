@@ -169,6 +169,10 @@ Sprint 21: Database Foundation with SaaS-ready schema, repositories, JSON fallba
 
 Sprint 22: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, SaaS, billing, integrations, beta, release, and database actions.
 
+Phase 2 Epic 1: Identity & Authentication Platform with authentication readiness, session model, organization isolation, RBAC, user profile models, and security documentation without connecting real auth providers.
+
+Phase 2 Epic 2: Real Customer CRM with working JSON-backed customer CRUD, archive/restore, search, filters, details, notes, timeline, dashboard metrics, AI summary, API actions, and Marketplace Manager UI.
+
 ## API Consolidation Hotfix
 
 Internal modules developer, business-os, platform, titan, and brain route through `/api/system` to stay compatible with the Vercel Hobby serverless function limit. Module code is preserved in `server/api-modules/`.

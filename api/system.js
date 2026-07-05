@@ -43,6 +43,12 @@ const { databaseHealth } = require("../database/core/database-health");
 const { databaseConfig } = require("../database/core/database-config");
 const { listMigrations } = require("../database/core/database-migrations");
 const { seedStatus } = require("../database/core/database-seed");
+const identityEngine = require("../identity/identity-engine");
+const authEngine = require("../auth/auth-engine");
+const organizationEngine = require("../organizations/organization-engine");
+const { rbacStatus } = require("../roles/rbac-engine");
+const identityAgent = require("../agents/identity-agent");
+const { customerCrm } = require("../crm/customer-crm");
 
 const modules = {
   developer,
@@ -288,6 +294,50 @@ function runDatabaseAction(action, payload = {}) {
   return { ok: false, error: "unknown_database_action" };
 }
 
+function runIdentityAction(action, payload = {}) {
+  if (action === "identity.status") return identityEngine.status(payload);
+  if (action === "identity.health") return identityEngine.health(payload);
+  if (action === "identity.agent") return identityAgent.run(payload);
+  return { ok: false, error: "unknown_identity_action" };
+}
+
+function runAuthAction(action, payload = {}) {
+  if (action === "auth.status") return authEngine.status(payload);
+  if (action === "auth.login") return authEngine.login(payload);
+  if (action === "auth.logout") return authEngine.logout(payload);
+  if (action === "auth.register") return authEngine.register(payload);
+  if (action === "auth.refresh") return authEngine.refreshToken(payload);
+  if (action === "auth.passwordReset") return authEngine.passwordReset(payload);
+  if (action === "session.status") return authEngine.sessionStatus(payload);
+  return { ok: false, error: "unknown_auth_action" };
+}
+
+function runOrganizationAction(action, payload = {}) {
+  if (action === "organization.status") return organizationEngine.status(payload);
+  return { ok: false, error: "unknown_organization_action" };
+}
+
+function runRolesAction(action, payload = {}) {
+  if (action === "roles.status") return rbacStatus(payload);
+  return { ok: false, error: "unknown_roles_action" };
+}
+
+function runCustomerAction(action, payload = {}) {
+  if (action === "customer.create") return customerCrm.create(payload);
+  if (action === "customer.update") return customerCrm.update(payload.id || payload.customerId, payload);
+  if (action === "customer.delete") return customerCrm.delete(payload.id || payload.customerId);
+  if (action === "customer.archive") return customerCrm.archive(payload.id || payload.customerId);
+  if (action === "customer.restore") return customerCrm.restore(payload.id || payload.customerId);
+  if (action === "customer.search") return customerCrm.search(payload);
+  if (action === "customer.profile") return customerCrm.profile(payload.id || payload.customerId);
+  if (action === "customer.timeline") return customerCrm.timeline(payload.id || payload.customerId);
+  if (action === "customer.note") return customerCrm.note(payload);
+  if (action === "customer.summary") return customerCrm.summary(payload.id || payload.customerId);
+  if (action === "customer.dashboard") return customerCrm.dashboard(payload);
+  if (action === "customer.recent") return customerCrm.recent(payload.limit || 10);
+  return { ok: false, error: "unknown_customer_action" };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -315,7 +365,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations", "database"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations", "database", "identity", "auth", "organization", "roles", "customer"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
@@ -330,7 +380,12 @@ module.exports = async function handler(req, res) {
           saasActions: ["saas.status", "saas.organizations", "saas.teams", "saas.permissions", "saas.settings", "saas.dashboard"],
           billingActions: ["billing.status", "billing.plans", "billing.subscriptions", "billing.invoices", "billing.usage", "billing.dashboard"],
           integrationsActions: ["integrations.status", "integrations.registry", "integrations.apiKeys", "integrations.webhooks", "integrations.logs", "integrations.dashboard"],
-          databaseActions: ["database.status", "database.health", "database.schema", "database.repositories", "database.migrations", "database.seed", "database.supabaseReady"]
+          databaseActions: ["database.status", "database.health", "database.schema", "database.repositories", "database.migrations", "database.seed", "database.supabaseReady"],
+          identityActions: ["identity.status", "identity.health"],
+          authActions: ["auth.status", "auth.login", "auth.logout", "auth.register", "auth.refresh", "auth.passwordReset", "session.status"],
+          organizationActions: ["organization.status"],
+          rolesActions: ["roles.status"],
+          customerActions: ["customer.create", "customer.update", "customer.delete", "customer.archive", "customer.restore", "customer.search", "customer.profile", "customer.timeline", "customer.note", "customer.summary", "customer.dashboard", "customer.recent"]
         }
       });
     }
@@ -411,6 +466,26 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "database") {
       const result = runDatabaseAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "identity") {
+      const result = runIdentityAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "auth") {
+      const result = runAuthAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "organization") {
+      const result = runOrganizationAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "roles") {
+      const result = runRolesAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "customer") {
+      const result = runCustomerAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

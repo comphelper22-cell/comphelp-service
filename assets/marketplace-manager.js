@@ -135,6 +135,10 @@
     return systemApi("customerSuccess", action || "customerSuccess.dashboard", payload || {});
   }
 
+  async function customerApi(action, payload) {
+    return systemApi("customer", action || "customer.dashboard", payload || {});
+  }
+
   async function marketingGrowthApi(action, payload) {
     return systemApi("marketing", action || "marketing.dashboard", payload || {});
   }
@@ -970,6 +974,86 @@
     }
   }
 
+  function renderCustomerCrmDashboard(payload) {
+    var data = unwrap(payload);
+    renderCards("#customerCrmMetrics", [
+      ["Total Customers", data.totalCustomers || 0],
+      ["New This Month", data.newThisMonth || 0],
+      ["Returning", data.returning || 0],
+      ["Jobs", data.jobs || 0],
+      ["Revenue", money(data.revenuePlaceholder || 0)],
+      ["Avg Response", data.averageResponseTimePlaceholder || "ready"]
+    ]);
+  }
+
+  async function refreshCustomerCrm() {
+    var dashboard = await customerApi("customer.dashboard", {});
+    renderCustomerCrmDashboard(dashboard);
+    var query = $("#customerSearchInput") ? $("#customerSearchInput").value : "";
+    var filter = $("#customerFilter") ? $("#customerFilter").value : "active";
+    var search = await customerApi("customer.search", { query: query, filter: filter });
+    renderCustomerList(unwrap(search));
+  }
+
+  function renderCustomerList(customers) {
+    var target = $("#customerCrmList");
+    if (!target) return;
+    target.innerHTML = customers && customers.length ? customers.map(function (customer) {
+      return '<div class="row"><strong>' + escapeHtml(customer.fullName || customer.name) + '<br><span class="muted">' + escapeHtml(customer.company || "") + '</span></strong><span>' + escapeHtml(customer.phone || "") + '<br><span class="muted">' + escapeHtml(customer.email || "") + '</span></span><span>' + escapeHtml(customer.city || "") + ' ' + escapeHtml(customer.state || "") + '<br><span class="muted">' + escapeHtml((customer.tags || []).join(", ")) + '</span></span><span><button class="btn" data-customer-profile="' + escapeHtml(customer.id) + '" type="button">Open</button></span></div>';
+    }).join("") : '<p class="muted">No customers found.</p>';
+    $all("[data-customer-profile]", target).forEach(function (button) {
+      button.addEventListener("click", function () {
+        loadCustomerProfile(button.dataset.customerProfile).catch(function (error) {
+          $("#customerCrmDetail").textContent = error.message;
+        });
+      });
+    });
+  }
+
+  async function loadCustomerProfile(customerId) {
+    var profileResponse = await customerApi("customer.profile", { customerId: customerId });
+    var profile = unwrap(profileResponse);
+    fillCustomerForm(profile.customer);
+    renderCustomerProfile(profile);
+  }
+
+  function renderCustomerProfile(profile) {
+    var customer = profile.customer || {};
+    $("#customerCrmDetail").textContent = JSON.stringify(customer, null, 2);
+    $("#customerCrmSummary").textContent = JSON.stringify(profile.summary || {}, null, 2);
+    if ($("#customerNoteForm")) $("#customerNoteForm").elements.customerId.value = customer.id || "";
+    renderList("#customerCrmTimeline", (profile.timeline || []).map(function (item) {
+      return { title: item.title, meta: item.type, detail: item.description, pill: String(item.timestamp || "").slice(0, 10) };
+    }), "No timeline events yet.");
+    renderList("#customerCrmNotes", (profile.notes || []).map(function (note) {
+      return { title: note.pinned ? "Pinned Note" : "Note", meta: note.internal ? "Internal" : "Customer", detail: note.body, pill: String(note.updatedAt || note.createdAt || "").slice(0, 10) };
+    }), "No notes yet.");
+  }
+
+  function fillCustomerForm(customer) {
+    var form = $("#customerForm");
+    if (!form || !customer) return;
+    Object.keys(customer).forEach(function (key) {
+      if (form.elements[key]) {
+        form.elements[key].value = Array.isArray(customer[key]) ? customer[key].join(", ") : customer[key] || "";
+      }
+    });
+    if (form.elements.fullName) form.elements.fullName.value = customer.fullName || customer.name || "";
+  }
+
+  function resetCustomerForm() {
+    var form = $("#customerForm");
+    if (!form) return;
+    form.reset();
+    form.elements.id.value = "";
+    form.state.value = "CA";
+    $("#customerCrmDetail").textContent = "";
+    $("#customerCrmSummary").textContent = "";
+    $("#customerCrmTimeline").innerHTML = '<p class="muted">Select a customer.</p>';
+    $("#customerCrmNotes").innerHTML = '<p class="muted">Select a customer.</p>';
+    if ($("#customerNoteForm")) $("#customerNoteForm").elements.customerId.value = "";
+  }
+
   function renderMarketingGrowthDashboard(payload) {
     var target = $("#marketingGrowthMetrics");
     if (!target || !payload) return;
@@ -1602,6 +1686,7 @@
     await operationsApi("operations.dashboard", {}).then(renderOperationsDashboard).catch(function () {});
     await financeApi("finance.dashboard", {}).then(renderFinanceDashboard).catch(function () {});
     await customerSuccessApi("customerSuccess.dashboard", {}).then(renderCustomerSuccessDashboard).catch(function () {});
+    await refreshCustomerCrm().catch(function () {});
     await marketingGrowthApi("marketing.dashboard", {}).then(renderMarketingGrowthDashboard).catch(function () {});
     await analyticsReportsApi("analytics.dashboard", {}).then(renderAnalyticsReportsDashboard).catch(function () {});
     await dispatchAIApi("dispatchAI.dashboard", {}).then(renderDispatchAIDashboard).catch(function () {});
@@ -1655,6 +1740,94 @@
       $("#appShell").classList.remove("is-authenticated");
       $("#loginPanel").style.display = "grid";
     });
+
+    if ($("#customerForm")) {
+      $("#customerForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        var form = event.currentTarget;
+        var payload = formData(form);
+        var action = payload.id ? "customer.update" : "customer.create";
+        $("#customerFormStatus").textContent = "Saving customer...";
+        try {
+          var result = await customerApi(action, payload);
+          var customer = unwrap(result);
+          $("#customerFormStatus").textContent = "Customer saved.";
+          await refreshCustomerCrm();
+          await loadCustomerProfile(customer.id);
+        } catch (error) {
+          $("#customerFormStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+        }
+      });
+    }
+
+    if ($("#resetCustomerForm")) {
+      $("#resetCustomerForm").addEventListener("click", resetCustomerForm);
+    }
+
+    if ($("#searchCustomers")) {
+      $("#searchCustomers").addEventListener("click", function () {
+        refreshCustomerCrm().catch(function (error) {
+          $("#customerCrmDetail").textContent = error.message;
+        });
+      });
+    }
+
+    if ($("#customerFilter")) {
+      $("#customerFilter").addEventListener("change", function () {
+        refreshCustomerCrm().catch(function () {});
+      });
+    }
+
+    [
+      ["#archiveCustomerButton", "customer.archive", "Customer archived."],
+      ["#restoreCustomerButton", "customer.restore", "Customer restored."],
+      ["#deleteCustomerButton", "customer.delete", "Customer deleted."]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      var message = item[2];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var customerId = $("#customerForm").elements.id.value;
+          if (!customerId) {
+            $("#customerFormStatus").innerHTML = '<span class="danger">Select a customer first.</span>';
+            return;
+          }
+          try {
+            await customerApi(action, { customerId: customerId });
+            $("#customerFormStatus").textContent = message;
+            await refreshCustomerCrm();
+            if (action === "customer.delete") {
+              resetCustomerForm();
+            } else {
+              await loadCustomerProfile(customerId);
+            }
+          } catch (error) {
+            $("#customerFormStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+          }
+        });
+      }
+    });
+
+    if ($("#customerNoteForm")) {
+      $("#customerNoteForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        var form = event.currentTarget;
+        var payload = formData(form);
+        payload.pinned = form.elements.pinned.checked;
+        payload.internal = form.elements.internal.checked;
+        $("#customerNoteStatus").textContent = "Saving note...";
+        try {
+          await customerApi("customer.note", payload);
+          $("#customerNoteStatus").textContent = "Note saved.";
+          form.elements.body.value = "";
+          form.elements.pinned.checked = false;
+          await loadCustomerProfile(payload.customerId);
+        } catch (error) {
+          $("#customerNoteStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+        }
+      });
+    }
 
     $all("form[data-action]").forEach(function (form) {
       form.addEventListener("submit", async function (event) {
