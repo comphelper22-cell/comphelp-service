@@ -29,6 +29,7 @@
       <nav class="nav" aria-label="Dashboard modules">
         <button class="is-active" data-target="dashboard">Dashboard</button>
         <button data-target="betaCenter">Beta Center</button>
+        <button data-target="releaseCenter">Release Center</button>
         <button data-target="businessDashboard">Business Dashboard</button>
         <button data-target="executiveDashboard">Executive Dashboard</button>
         <button data-target="salesManager">Sales Manager</button>
@@ -175,6 +176,38 @@
         <div class="two" style="margin-top:.85rem">
           <div class="panel"><h2>Release Checklist</h2><div class="list" id="betaReleaseChecklist"></div></div>
           <div class="panel"><h2>Beta Output</h2><pre id="betaResult"></pre></div>
+        </div>
+      </section>
+
+      <section data-view="releaseCenter">
+        <div class="two">
+          <div class="panel">
+            <h2>Release Center</h2>
+            <p class="muted">V1.0 release candidate review for system health, installed modules, architecture, performance, security, testing, deployment, release notes, and version history.</p>
+            <div class="actions">
+              <button class="btn primary" id="refreshReleaseCenter" type="button">Release Dashboard</button>
+              <button class="btn" id="showReleaseHealth" type="button">System Health</button>
+              <button class="btn" id="showReleaseNotes" type="button">Release Notes</button>
+              <button class="btn" id="showReleaseReadiness" type="button">Readiness</button>
+            </div>
+            <div class="grid" id="releaseMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Architecture Diagram</h2>
+            <div class="list" id="releaseArchitecture"></div>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>System Health</h2><div class="list" id="releaseSystemHealth"></div></div>
+          <div class="panel"><h2>Installed Modules</h2><div class="list" id="releaseInstalledModules"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Release Notes</h2><div class="list" id="releaseNotes"></div></div>
+          <div class="panel"><h2>Version History</h2><div class="list" id="releaseVersionHistory"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Deployment Status</h2><div class="list" id="releaseDeploymentStatus"></div></div>
+          <div class="panel"><h2>Overall Readiness</h2><pre id="releaseResult"></pre></div>
         </div>
       </section>
 

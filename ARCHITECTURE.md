@@ -590,3 +590,23 @@ Integrations safety:
 - API keys are metadata only and masked in UI/API outputs.
 - Webhook delivery is disabled until signing, retries, and tenant isolation are approved.
 - Public API endpoints must enforce authentication, rate limits, and tenant isolation before production use.
+
+## V1.0 Release Candidate Layer
+
+Project Titan Sprint 20 adds a release-candidate layer for product readiness review, not new business functionality.
+
+Release modules:
+
+- `release-manager.js` exposes release status helpers.
+- `release-validator.js` checks navigation consistency, required docs, focused tests, and API function count.
+- `release-report.js` combines architecture, performance, security, UI, documentation, score, and readiness review.
+- `system-health.js` checks critical files, installed modules, API count, and test count.
+- `version-manager.js` records the V1 release candidate version and history.
+- `quality-score.js` calculates overall product, performance, security, docs, accessibility, API, and test scores.
+- `performance-review.js` surfaces large-file and dashboard-size considerations.
+
+Release safety:
+
+- Release Center is review-only.
+- No external services, authentication, database, payment gateway, or integrations are added.
+- Commit, push, and deploy still require explicit owner approval.

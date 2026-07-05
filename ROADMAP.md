@@ -159,7 +159,13 @@ Sprint 16: Billing & Subscriptions with draft plans, subscription status, usage 
 
 Sprint 17: Public API & Integrations Foundation with API registry, masked API key metadata, webhooks, connected app placeholders, integration logs, developer notes, and Integrations Center UI.
 
-Sprint 18: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, SaaS, billing, and integrations actions.
+Sprint 18: Production Hardening with health checks, security review, performance audit, deployment audit, release readiness, and stricter project validation warnings.
+
+Sprint 19: Beta Launch Package with Beta Center, demo mode, demo data, feature tour, feedback center, known limitations, demo guides, and first customer checklist.
+
+Sprint 20: V1.0 Release Candidate with Release Center, system health, installed modules, architecture diagram, performance/security/test scores, deployment status, release notes, version history, and overall readiness scoring.
+
+Sprint 21: Decision governance, approval queue, conflict resolution, and safe handoff to recommendation, sales, workflow, operations, finance, customer success, marketing, analytics, dispatch, SaaS, billing, integrations, beta, and release actions.
 
 ## API Consolidation Hotfix
 

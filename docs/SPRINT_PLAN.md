@@ -746,3 +746,53 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Sprint 17 - Public API Integrations Foundation"
 ```
+
+## Current Sprint: Project Titan Sprint 20
+
+Goal: prepare CompHelp AI for its first production-quality release candidate without adding new business modules or external integrations.
+
+Scope:
+
+- Release Manager.
+- Release Validator.
+- Release Report.
+- System Health.
+- Version Manager.
+- Quality Score.
+- Performance Review.
+- Release Center dashboard section.
+- V1 release documentation package.
+- Release Candidate validation test.
+
+Out of scope:
+
+- New business modules.
+- New AI agents.
+- Database changes.
+- Authentication changes.
+- Payment gateway.
+- External integrations.
+- Git push or Vercel deployment.
+
+Acceptance criteria:
+
+- Release Center shows system health, installed modules, architecture diagram, performance score, security score, test coverage, deployment status, release notes, version history, and overall readiness.
+- Release utilities return structured, production-safe reports.
+- V1 release notes, user guide, admin guide, architecture guide, deployment guide, known issues, and technical debt docs exist.
+- `tests/release-candidate.test.js` passes.
+- `npm run check-project` passes.
+
+Validation commands:
+
+```powershell
+node tests\release-candidate.test.js
+npm run check-project
+git status
+git diff --stat
+```
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Sprint 20 - V1 Release Candidate"
+```

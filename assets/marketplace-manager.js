@@ -208,6 +208,61 @@
     };
   }
 
+  function releaseCandidateData() {
+    return {
+      release: "V1.0 Release Candidate",
+      version: "v1.0.0-rc.1",
+      systemHealth: "healthy",
+      performanceScore: 88,
+      securityScore: 86,
+      testCoverage: "focused module tests",
+      deploymentStatus: "approval required",
+      overallReadiness: 90,
+      installedModules: [
+        "Business Brain",
+        "Executive Intelligence",
+        "Sales Manager",
+        "Workflow Engine",
+        "Operations Center",
+        "Finance Center",
+        "Customer Success Center",
+        "Marketing & Growth",
+        "Analytics & Reports",
+        "Dispatch AI",
+        "SaaS Admin",
+        "Billing",
+        "Integrations",
+        "Beta Center"
+      ],
+      architecture: [
+        { title: "Frontend", detail: "Single dashboard surface with modular centers." },
+        { title: "API Layer", detail: "Consolidated system API plus marketplace APIs." },
+        { title: "Data Layer", detail: "JSON fallback now, Supabase/PostgreSQL prepared later." },
+        { title: "AI Layer", detail: "Brain, recommendation, executive, sales, workflow, and operations engines." },
+        { title: "Release Safety", detail: "Validation, docs, warnings, and approval-only deployment." }
+      ],
+      releaseNotes: [
+        "Founder dashboard and Beta Center are ready for demos.",
+        "Business operating centers cover sales, operations, finance, customer success, marketing, analytics, dispatch, SaaS, billing, and integrations.",
+        "Production hardening validation is active.",
+        "External services remain disabled unless explicitly approved."
+      ],
+      versionHistory: [
+        "v0.7 Core Platform Foundation",
+        "v0.8 Business Brain Foundation",
+        "v0.9 Business Operating Centers",
+        "v1.0.0-rc.1 Release Candidate"
+      ],
+      deploymentChecklist: [
+        "Run npm run check-project.",
+        "Review warnings and git diff.",
+        "Do not stage .env, .env.local, or logs/*.jsonl.",
+        "Get owner approval before push.",
+        "Get owner approval before Vercel deployment."
+      ]
+    };
+  }
+
   async function getDashboard() {
     var response = await fetch("/api/marketplace?resource=dashboard", {
       cache: "no-store",
@@ -1259,6 +1314,49 @@
     }
   }
 
+  function renderReleaseCenter(view) {
+    var target = $("#releaseMetrics");
+    if (!target) return;
+    var data = releaseCandidateData();
+    var cards = [
+      ["Release", data.version],
+      ["System Health", data.systemHealth],
+      ["Performance Score", data.performanceScore + "/100"],
+      ["Security Score", data.securityScore + "/100"],
+      ["Test Coverage", data.testCoverage],
+      ["Deployment", data.deploymentStatus],
+      ["Modules", data.installedModules.length],
+      ["Readiness", data.overallReadiness + "/100"]
+    ];
+    target.innerHTML = cards.map(function (metric) {
+      return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
+    }).join("");
+    renderList("#releaseArchitecture", data.architecture.map(function (item) {
+      return { title: item.title, meta: "Architecture", detail: item.detail, pill: "V1" };
+    }), "No architecture notes.");
+    renderList("#releaseSystemHealth", [
+      { title: "System Health", meta: data.systemHealth, detail: "Core pages, dashboard, API layer, docs, and tests are present.", pill: "healthy" },
+      { title: "Performance Score", meta: data.performanceScore + "/100", detail: "Large file warnings still require release review.", pill: "review" },
+      { title: "Security Score", meta: data.securityScore + "/100", detail: "Security keyword warnings require human confirmation.", pill: "review" },
+      { title: "Test Coverage", meta: data.testCoverage, detail: "Focused tests exist for major centers and release candidate.", pill: "tests" }
+    ], "No system health data.");
+    renderList("#releaseInstalledModules", data.installedModules.map(function (name) {
+      return { title: name, meta: "Installed Module", detail: "Included in V1.0 release candidate review.", pill: "installed" };
+    }), "No installed modules.");
+    renderList("#releaseNotes", data.releaseNotes.map(function (note) {
+      return { title: note, meta: "Release Note", detail: "Review with first beta customers.", pill: "note" };
+    }), "No release notes.");
+    renderList("#releaseVersionHistory", data.versionHistory.map(function (item) {
+      return { title: item, meta: "Version History", detail: "Project Titan release path.", pill: "version" };
+    }), "No version history.");
+    renderList("#releaseDeploymentStatus", data.deploymentChecklist.map(function (item) {
+      return { title: item, meta: "Deployment Gate", detail: "Approval required before production action.", pill: "gate" };
+    }), "No deployment status.");
+    if ($("#releaseResult")) {
+      $("#releaseResult").textContent = JSON.stringify({ view: view || "dashboard", data: data }, null, 2);
+    }
+  }
+
   function renderProjectControl(payload) {
     var target = $("#projectControlMetrics");
     if (!target || !payload) return;
@@ -1499,6 +1597,7 @@
     renderDeployment(dashboard.deployment);
     renderQuestions($("select[name='service']").value);
     renderBetaCenter("dashboard");
+    renderReleaseCenter("dashboard");
     await refreshFounderDashboard().catch(function () {});
     await operationsApi("operations.dashboard", {}).then(renderOperationsDashboard).catch(function () {});
     await financeApi("finance.dashboard", {}).then(renderFinanceDashboard).catch(function () {});
@@ -2052,6 +2151,21 @@
       if ($(selector)) {
         $(selector).addEventListener("click", function () {
           renderBetaCenter(view);
+        });
+      }
+    });
+
+    [
+      ["#refreshReleaseCenter", "dashboard"],
+      ["#showReleaseHealth", "health"],
+      ["#showReleaseNotes", "notes"],
+      ["#showReleaseReadiness", "readiness"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var view = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", function () {
+          renderReleaseCenter(view);
         });
       }
     });

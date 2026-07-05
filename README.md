@@ -297,3 +297,29 @@ toolHandlers.postToFacebook({
 Live competitor research requires `SERPAPI_KEY`. Without it, market reports are clearly labeled as strategic local-model reports.
 
 Instagram publishing requires a public `imageUrl`. TikTok direct posting depends on approved API permissions, so the TikTok tool creates a draft/scheduler payload by default.
+
+## V1.0 Release Candidate
+
+The V1.0 Release Candidate adds a Release Center and V1 documentation package for customer-ready beta review.
+
+Start release review from:
+
+- `marketplace.html` -> Release Center
+- `docs/V1_RELEASE_NOTES.md`
+- `docs/V1_USER_GUIDE.md`
+- `docs/V1_ADMIN_GUIDE.md`
+- `docs/V1_ARCHITECTURE.md`
+- `docs/V1_DEPLOYMENT_GUIDE.md`
+- `docs/KNOWN_ISSUES.md`
+- `docs/TECHNICAL_DEBT.md`
+
+Release candidate validation:
+
+```powershell
+node tests\release-candidate.test.js
+npm run check-project
+git status
+git diff --stat
+```
+
+Do not push or deploy the release candidate without explicit owner approval.

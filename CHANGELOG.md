@@ -1,5 +1,13 @@
 # Changelog
 
+## Project Titan Sprint 20 - V1.0 Release Candidate
+
+- Added Release Center dashboard UI.
+- Added release utilities for system health, validation, reporting, versioning, quality score, and performance review.
+- Added V1 release notes, user guide, admin guide, architecture guide, deployment guide, known issues, and technical debt docs.
+- Added `tests/release-candidate.test.js`.
+- Updated README, roadmap, architecture, project control, and sprint plan for V1.0 RC readiness.
+
 ## Project Titan Sprint 19 - Beta Launch Package
 
 - Added beta launch modules for demo mode, demo data, scenarios, checklist, feedback, feature tour, release readiness, customer demo, and known limitations.

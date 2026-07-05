@@ -8,11 +8,11 @@ Build CompHelp AI into an AI Business Operating System for service businesses wh
 
 ## Current Release
 
-v0.7 Platform Foundation.
+V1.0 Release Candidate.
 
 ## Current Sprint
 
-Project Control Center Sprint.
+Project Titan Sprint 20 - V1.0 Release Candidate.
 
 ## Completed Milestones
 
@@ -20,6 +20,9 @@ Project Control Center Sprint.
 - Phase 6.1 database layer with Supabase readiness and JSON fallback.
 - Release v0.7 Sprint 1 core platform foundation.
 - Project Titan Sprint Alpha engineering operating system foundation.
+- Project Titan Sprints 1-17 business operating system foundations.
+- Sprint 18 production hardening.
+- Sprint 19 beta launch package.
 
 ## Active Work
 
@@ -46,12 +49,13 @@ Project Control Center Sprint.
 - SaaS Multi-Tenant Foundation for Project Titan Sprint 15.
 - Billing & Subscriptions for Project Titan Sprint 16.
 - API consolidation hotfix for Vercel Hobby compatibility.
+- V1.0 Release Candidate packaging for Project Titan Sprint 20.
 
 ## Next 3 Sprints
 
-1. v0.7 Sprint 2 - Supabase readiness and platform health checks.
-2. Project Titan Sprint 16 - decision governance and approval queue.
-3. v0.9 Sprint 1 - CRM Core pipeline and activity timeline.
+1. Sprint 21 - beta onboarding and customer demo feedback.
+2. Phase 2 - decision governance and approval queue.
+3. Phase 2 - production data readiness and Supabase verification.
 
 ## Blocked Items
 
@@ -95,6 +99,7 @@ git diff --stat
 - SaaS Admin Center shows organizations, teams, roles, permissions, settings, tenant health, and JSON fallback mode.
 - Billing Center shows plans, subscription status, usage, invoices, payment status, and upgrade recommendations without payment processing.
 - Integrations Center shows API keys, webhooks, connected apps, integration logs, and developer notes without external API connections.
+- Release Center shows system health, installed modules, architecture diagram, performance score, security score, test coverage, deployment status, release notes, version history, and overall readiness.
 - Documentation updated.
 
 ## Deploy Checklist
