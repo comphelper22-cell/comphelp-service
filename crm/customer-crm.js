@@ -90,7 +90,21 @@ function createCustomerCrm(options = {}) {
   }
 
   function archive(customerId) {
-    return update(customerId, { status: "archived", archivedAt: now(), archived_at: now() });
+    const data = read();
+    const index = data.customers.findIndex((customer) => customer.id === customerId && !customer.deleted_at);
+    if (index === -1) return fail("customer_not_found");
+    const timestamp = now();
+    data.customers[index] = {
+      ...data.customers[index],
+      status: "archived",
+      archivedAt: timestamp,
+      archived_at: timestamp,
+      updatedAt: timestamp,
+      updated_at: timestamp
+    };
+    data.customerTimeline.unshift(timelineItem(customerId, "Customer Archived", "customer", "Customer archived.", timestamp));
+    write(data);
+    return ok(data.customers[index]);
   }
 
   function restore(customerId) {
@@ -340,11 +354,11 @@ function money(value) {
 }
 
 function ok(data) {
-  return { ok: true, data };
+  return { ok: true, data, error: null, warnings: [], generatedAt: now() };
 }
 
 function fail(error) {
-  return { ok: false, error: String(error || "customer_crm_error") };
+  return { ok: false, data: null, error: String(error || "customer_crm_error"), warnings: [], generatedAt: now() };
 }
 
 const defaultCrm = createCustomerCrm();

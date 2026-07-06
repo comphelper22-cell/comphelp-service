@@ -42,6 +42,20 @@ Filters include active, archived, new, returning, commercial, and residential.
 
 The CRM timeline combines customer events, estimates, jobs, invoices, payments, notes, and AI recommendation events when available.
 
+Guaranteed customer lifecycle events:
+
+- Customer Created
+- Customer Updated
+- Customer Archived
+- Customer Restored
+- Customer Deleted
+- Internal Note
+- Customer Note
+
 ## Notes
 
 Notes support pinned and internal flags. Deleted notes are soft-deleted.
+
+## UI States
+
+The Customer CRM shows loading text while customers load, clear empty states for searches and filters, success messages after save/archive/restore/delete actions, and inline errors when an action fails.

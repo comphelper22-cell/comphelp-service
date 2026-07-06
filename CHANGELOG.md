@@ -1,5 +1,13 @@
 # Changelog
 
+## Project Titan Epic 2.1 - CRM Integration & Cleanup
+
+- Added end-to-end customer CRM integration test.
+- Standardized Customer CRM response envelopes with `ok`, `data`, `error`, `warnings`, and `generatedAt`.
+- Added dedicated customer archive timeline events.
+- Improved Customer CRM loading, empty, success, and error states.
+- Updated CRM API, user guide, customer model, and technical debt documentation.
+
 ## Project Titan Epic 2 - Real Customer CRM
 
 - Added real JSON-backed customer CRM service with create, edit, delete, archive, restore, search, profile, timeline, notes, dashboard, and AI summary actions.

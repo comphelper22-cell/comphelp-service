@@ -987,20 +987,24 @@
   }
 
   async function refreshCustomerCrm() {
+    var target = $("#customerCrmList");
+    if (target) target.innerHTML = '<p class="muted">Loading customers...</p>';
     var dashboard = await customerApi("customer.dashboard", {});
     renderCustomerCrmDashboard(dashboard);
     var query = $("#customerSearchInput") ? $("#customerSearchInput").value : "";
     var filter = $("#customerFilter") ? $("#customerFilter").value : "active";
     var search = await customerApi("customer.search", { query: query, filter: filter });
-    renderCustomerList(unwrap(search));
+    renderCustomerList(unwrap(search), query, filter);
   }
 
-  function renderCustomerList(customers) {
+  function renderCustomerList(customers, query, filter) {
     var target = $("#customerCrmList");
     if (!target) return;
+    var emptyText = query ? "No customers match that search." : "No customers found for this filter.";
+    if (filter === "archived") emptyText = "No archived customers.";
     target.innerHTML = customers && customers.length ? customers.map(function (customer) {
       return '<div class="row"><strong>' + escapeHtml(customer.fullName || customer.name) + '<br><span class="muted">' + escapeHtml(customer.company || "") + '</span></strong><span>' + escapeHtml(customer.phone || "") + '<br><span class="muted">' + escapeHtml(customer.email || "") + '</span></span><span>' + escapeHtml(customer.city || "") + ' ' + escapeHtml(customer.state || "") + '<br><span class="muted">' + escapeHtml((customer.tags || []).join(", ")) + '</span></span><span><button class="btn" data-customer-profile="' + escapeHtml(customer.id) + '" type="button">Open</button></span></div>';
-    }).join("") : '<p class="muted">No customers found.</p>';
+    }).join("") : '<p class="muted">' + escapeHtml(emptyText) + '</p>';
     $all("[data-customer-profile]", target).forEach(function (button) {
       button.addEventListener("click", function () {
         loadCustomerProfile(button.dataset.customerProfile).catch(function (error) {
@@ -1011,10 +1015,12 @@
   }
 
   async function loadCustomerProfile(customerId) {
+    if ($("#customerCrmDetail")) $("#customerCrmDetail").textContent = "Loading customer profile...";
     var profileResponse = await customerApi("customer.profile", { customerId: customerId });
     var profile = unwrap(profileResponse);
     fillCustomerForm(profile.customer);
     renderCustomerProfile(profile);
+    if ($("#customerFormStatus")) $("#customerFormStatus").textContent = "Customer loaded.";
   }
 
   function renderCustomerProfile(profile) {

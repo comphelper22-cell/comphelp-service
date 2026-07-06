@@ -48,3 +48,17 @@ The customer model is designed for JSON fallback now and Supabase/PostgreSQL lat
 ## Delete Strategy
 
 Delete is a soft delete using `deleted_at`. Archive uses `status: archived`. Restore clears archive/delete fields and returns the customer to active status when appropriate.
+
+## Timeline Events
+
+Customer lifecycle actions write timeline events to `customerTimeline`:
+
+- `Customer Created`
+- `Customer Updated`
+- `Customer Archived`
+- `Customer Restored`
+- `Customer Deleted`
+- `Internal Note`
+- `Customer Note`
+
+Timeline views also derive events from related estimates, projects/jobs, invoices, and paid invoices when matching customer data exists.

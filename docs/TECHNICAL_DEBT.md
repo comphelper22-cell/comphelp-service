@@ -7,6 +7,12 @@
 - Customer timeline derives events from available local records and should be expanded when estimates, jobs, invoices, and payments use normalized customer IDs.
 - Revenue and average response time remain placeholder/dashboard values until production finance/activity data is connected.
 
+## Epic 2.1 CRM Integration & Cleanup
+
+- Customer API response envelopes are now consistent, but broader `/api/system` modules still use mixed envelope shapes.
+- CRM integration tests use temporary JSON files and should later be mirrored with browser-level UI tests.
+- Note edit/delete controls are still API-first and should be added to the UI when permissions are enforced.
+
 ## Phase 2 Epic 1 Identity & Authentication
 
 - Real authentication provider is not connected.
