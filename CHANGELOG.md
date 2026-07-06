@@ -1,5 +1,12 @@
 # Changelog
 
+## Project Titan Epic 4 - Real Revenue Flow
+
+- Added JSON-backed estimate, invoice, payment status, customer financials, revenue dashboard, and AI revenue recommendation workflows.
+- Added revenue actions to `/api/system`.
+- Enhanced Marketplace Estimate Manager with Estimate Builder, Invoice View, Payment Status, Customer Financials, and Revenue Dashboard.
+- Added revenue flow tests and documentation.
+
 ## Project Titan Epic 3 - Real Job Dispatch & Scheduling
 
 - Added working JSON-backed job dispatch service.

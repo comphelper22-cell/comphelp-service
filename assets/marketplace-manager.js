@@ -155,6 +155,10 @@
     return systemApi("job", action || "job.dashboard", payload || {});
   }
 
+  async function revenueApi(action, payload) {
+    return systemApi("revenue", action || "revenue.dashboard", payload || {});
+  }
+
   async function saasApi(action, payload) {
     return systemApi("saas", action || "saas.dashboard", payload || {});
   }
@@ -1134,6 +1138,34 @@
     $("#jobDispatchTimeline").innerHTML = '<p class="muted">Select a job.</p>';
   }
 
+  function renderRevenueDashboard(payload) {
+    var data = unwrap(payload);
+    renderCards("#estimateMetrics", [
+      ["Revenue Today", money(data.revenueToday || 0)],
+      ["This Week", money(data.revenueThisWeek || 0)],
+      ["This Month", money(data.revenueThisMonth || 0)],
+      ["Outstanding", money(data.outstandingBalance || 0)],
+      ["Overdue", data.overdueInvoices || 0],
+      ["Paid", data.paidInvoices || 0],
+      ["Conversion", (data.estimateConversionRate || 0) + "%"],
+      ["Avg Ticket", money(data.averageTicket || 0)]
+    ]);
+    renderList("#revenueEstimateList", (data.estimates || []).map(function (estimate) {
+      return { title: estimate.id, meta: estimate.customerName, detail: money(estimate.total || estimate.recommended), pill: estimate.status || "draft" };
+    }), "No estimates yet.");
+    renderList("#revenueInvoiceList", (data.invoices || []).map(function (invoice) {
+      return { title: invoice.invoiceNumber || invoice.id, meta: invoice.customerName, detail: money(invoice.outstandingBalance ?? invoice.total), pill: invoice.paymentStatus || invoice.status };
+    }), "No invoices yet.");
+    renderList("#revenueRecommendationList", (data.aiRevenueRecommendations || []).map(function (item) {
+      return { title: item.title, meta: item.customerName, detail: money(item.estimatedRevenue || 0), pill: item.priority || "review" };
+    }), "No revenue recommendations yet.");
+    $("#estimateResult").textContent = JSON.stringify(data, null, 2);
+  }
+
+  async function refreshRevenueFlow() {
+    renderRevenueDashboard(await revenueApi("revenue.dashboard", {}));
+  }
+
   function renderMarketingGrowthDashboard(payload) {
     var target = $("#marketingGrowthMetrics");
     if (!target || !payload) return;
@@ -1771,6 +1803,7 @@
     await analyticsReportsApi("analytics.dashboard", {}).then(renderAnalyticsReportsDashboard).catch(function () {});
     await dispatchAIApi("dispatchAI.dashboard", {}).then(renderDispatchAIDashboard).catch(function () {});
     await refreshJobDispatch().catch(function () {});
+    await refreshRevenueFlow().catch(function () {});
     await saasApi("saas.dashboard", {}).then(renderSaasDashboard).catch(function () {});
     await billingApi("billing.dashboard", {}).then(renderBillingDashboard).catch(function () {});
     await integrationsApi("integrations.dashboard", {}).then(renderIntegrationsDashboard).catch(function () {});
@@ -1969,6 +2002,118 @@
         });
       }
     });
+
+    if ($("#revenueEstimateForm")) {
+      $("#revenueEstimateForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        var form = event.currentTarget;
+        var payload = formData(form);
+        var action = payload.id ? "estimate.update" : "estimate.create";
+        $("#revenueEstimateStatus").textContent = "Saving estimate...";
+        try {
+          var result = await revenueApi(action, payload);
+          var estimate = unwrap(result);
+          form.elements.id.value = estimate.id;
+          $("#revenueEstimateStatus").textContent = "Estimate saved.";
+          $("#estimateResult").textContent = JSON.stringify(estimate, null, 2);
+          await refreshRevenueFlow();
+        } catch (error) {
+          $("#revenueEstimateStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+        }
+      });
+    }
+
+    [
+      ["#approveEstimateButton", "estimate.approve"],
+      ["#rejectEstimateButton", "estimate.reject"],
+      ["#convertEstimateButton", "estimate.convertToJob"]
+    ].forEach(function (item) {
+      if ($(item[0])) {
+        $(item[0]).addEventListener("click", async function () {
+          var estimateId = $("#revenueEstimateForm").elements.id.value;
+          if (!estimateId) {
+            $("#revenueEstimateStatus").innerHTML = '<span class="danger">Save or select an estimate first.</span>';
+            return;
+          }
+          try {
+            var result = await revenueApi(item[1], { estimateId: estimateId });
+            $("#revenueEstimateStatus").textContent = "Estimate updated.";
+            $("#estimateResult").textContent = JSON.stringify(result, null, 2);
+            await refreshRevenueFlow();
+            await refreshJobDispatch().catch(function () {});
+          } catch (error) {
+            $("#revenueEstimateStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+          }
+        });
+      }
+    });
+
+    if ($("#revenueInvoiceForm")) {
+      $("#revenueInvoiceForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        var form = event.currentTarget;
+        var payload = formData(form);
+        var action = payload.id ? "invoice.update" : "invoice.create";
+        $("#revenueInvoiceStatus").textContent = "Saving invoice...";
+        try {
+          var result = await revenueApi(action, payload);
+          var invoice = unwrap(result);
+          form.elements.id.value = invoice.id;
+          $("#revenueInvoiceStatus").textContent = "Invoice saved.";
+          await refreshRevenueFlow();
+        } catch (error) {
+          $("#revenueInvoiceStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+        }
+      });
+    }
+
+    [
+      ["#markInvoiceSent", "invoice.markSent"],
+      ["#markInvoicePaid", "invoice.markPaid"],
+      ["#markInvoiceOverdue", "invoice.markOverdue"]
+    ].forEach(function (item) {
+      if ($(item[0])) {
+        $(item[0]).addEventListener("click", async function () {
+          var invoiceId = $("#revenueInvoiceForm").elements.id.value;
+          if (!invoiceId) {
+            $("#revenueInvoiceStatus").innerHTML = '<span class="danger">Save or select an invoice first.</span>';
+            return;
+          }
+          try {
+            await revenueApi(item[1], { invoiceId: invoiceId });
+            $("#revenueInvoiceStatus").textContent = "Invoice updated.";
+            await refreshRevenueFlow();
+          } catch (error) {
+            $("#revenueInvoiceStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+          }
+        });
+      }
+    });
+
+    if ($("#revenuePaymentForm")) {
+      $("#revenuePaymentForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        try {
+          var result = await revenueApi("payment.record", formData(event.currentTarget));
+          $("#revenuePaymentStatus").textContent = "Payment status recorded.";
+          $("#customerFinancialResult").textContent = JSON.stringify(result, null, 2);
+          await refreshRevenueFlow();
+        } catch (error) {
+          $("#revenuePaymentStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+        }
+      });
+    }
+
+    if ($("#loadCustomerFinancials")) {
+      $("#loadCustomerFinancials").addEventListener("click", async function () {
+        try {
+          var query = $("#customerFinancialSearch").value.trim();
+          $("#customerFinancialResult").textContent = JSON.stringify(await revenueApi("customer.financials", { customerName: query, customerId: query }), null, 2);
+        } catch (error) {
+          $("#customerFinancialResult").textContent = error.message;
+        }
+      });
+    }
 
     $all("form[data-action]").forEach(function (form) {
       form.addEventListener("submit", async function (event) {

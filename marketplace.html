@@ -840,28 +840,78 @@
 
       <section data-view="estimates">
         <div class="two">
-          <form class="panel" data-action="estimate">
-            <h2>Generate Estimate</h2>
+          <form class="panel" id="revenueEstimateForm">
+            <h2>Estimate Builder</h2>
+            <input name="id" type="hidden">
+            <input name="customerId" placeholder="Customer ID optional">
             <input name="customerName" placeholder="Customer name" required>
             <input name="email" type="email" placeholder="Customer email for estimate">
             <select name="service" required></select>
             <input name="city" placeholder="City" value="Los Angeles">
-            <input name="jobSize" placeholder="Job size" value="Small job">
-            <input name="propertyType" placeholder="Property type">
-            <input name="units" type="number" min="1" value="1" placeholder="Number of cameras/devices">
             <input name="laborHours" type="number" min="0" step=".5" placeholder="Labor hours">
+            <input name="laborRate" type="number" min="0" step="1" placeholder="Labor rate" value="85">
             <input name="materialCost" type="number" min="0" step="1" placeholder="Material cost">
+            <input name="discount" type="number" min="0" step="1" placeholder="Discount">
+            <input name="taxPlaceholder" type="number" min="0" step="1" placeholder="Tax placeholder">
             <select name="urgency"><option>standard</option><option>same-day</option><option>urgent</option></select>
             <textarea name="notes" placeholder="Project details"></textarea>
-            <button class="btn primary">Create Estimate</button>
-            <p class="status"></p>
+            <div class="actions">
+              <button class="btn primary" type="submit">Save Estimate</button>
+              <button class="btn" id="approveEstimateButton" type="button">Approve</button>
+              <button class="btn" id="rejectEstimateButton" type="button">Reject</button>
+              <button class="btn" id="convertEstimateButton" type="button">Convert to Job</button>
+            </div>
+            <p class="status" id="revenueEstimateStatus"></p>
           </form>
           <div class="panel">
-            <h2>Estimate Output</h2>
+            <h2>Revenue Dashboard</h2>
             <div class="grid" id="estimateMetrics"></div>
             <pre id="estimateResult"></pre>
-            <div class="actions"><button class="btn" id="downloadQuote">Open PDF Quote</button><button class="btn" id="emailEstimate" type="button">Email Estimate</button></div>
+            <div class="actions"><button class="btn primary" id="refreshRevenueDashboard" type="button">Refresh Revenue</button></div>
           </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <form class="panel" id="revenueInvoiceForm">
+            <h2>Invoice View</h2>
+            <input name="id" type="hidden">
+            <input name="jobId" placeholder="Completed job ID optional">
+            <input name="customerId" placeholder="Customer ID optional">
+            <input name="customerName" placeholder="Customer name">
+            <input name="laborHours" type="number" min="0" step=".5" placeholder="Labor hours">
+            <input name="laborRate" type="number" min="0" step="1" value="85" placeholder="Labor rate">
+            <input name="materialCost" type="number" min="0" step="1" placeholder="Materials">
+            <input name="discount" type="number" min="0" step="1" placeholder="Discount">
+            <input name="taxPlaceholder" type="number" min="0" step="1" placeholder="Tax placeholder">
+            <select name="paymentStatus"><option>unpaid</option><option>partial</option><option>paid</option><option>overdue</option><option>refunded</option></select>
+            <textarea name="notes" placeholder="Invoice notes"></textarea>
+            <div class="actions">
+              <button class="btn primary" type="submit">Save Invoice</button>
+              <button class="btn" id="markInvoiceSent" type="button">Mark Sent</button>
+              <button class="btn" id="markInvoicePaid" type="button">Mark Paid</button>
+              <button class="btn" id="markInvoiceOverdue" type="button">Mark Overdue</button>
+            </div>
+            <p class="status" id="revenueInvoiceStatus"></p>
+          </form>
+          <form class="panel" id="revenuePaymentForm">
+            <h2>Payment Status</h2>
+            <input name="invoiceId" placeholder="Invoice ID" required>
+            <input name="amount" type="number" min="0" step="1" placeholder="Payment amount">
+            <select name="status"><option>paid</option><option>partial</option><option>refunded</option></select>
+            <input name="method" placeholder="Payment method placeholder" value="manual">
+            <button class="btn primary" type="submit">Record Payment</button>
+            <p class="status" id="revenuePaymentStatus"></p>
+            <h2>Customer Financial Tab</h2>
+            <input id="customerFinancialSearch" placeholder="Customer ID or name">
+            <button class="btn" id="loadCustomerFinancials" type="button">Load Financials</button>
+          </form>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Estimate List</h2><div class="list" id="revenueEstimateList"></div></div>
+          <div class="panel"><h2>Invoice List</h2><div class="list" id="revenueInvoiceList"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>AI Revenue Recommendations</h2><div class="list" id="revenueRecommendationList"></div></div>
+          <div class="panel"><h2>Customer Financials</h2><pre id="customerFinancialResult"></pre></div>
         </div>
       </section>
 

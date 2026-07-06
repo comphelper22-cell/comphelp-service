@@ -50,6 +50,7 @@ const { rbacStatus } = require("../roles/rbac-engine");
 const identityAgent = require("../agents/identity-agent");
 const { customerCrm } = require("../crm/customer-crm");
 const { jobDispatch } = require("../job-dispatch/job-dispatch");
+const { revenueFlow } = require("../revenue-flow/revenue-flow");
 
 const modules = {
   developer,
@@ -353,6 +354,23 @@ function runJobAction(action, payload = {}) {
   return { ok: false, data: null, error: "unknown_job_action", warnings: [], generatedAt: new Date().toISOString() };
 }
 
+function runRevenueAction(action, payload = {}) {
+  if (action === "estimate.create") return revenueFlow.createEstimate(payload);
+  if (action === "estimate.update") return revenueFlow.updateEstimate(payload.id || payload.estimateId, payload);
+  if (action === "estimate.approve") return revenueFlow.approveEstimate(payload.id || payload.estimateId);
+  if (action === "estimate.reject") return revenueFlow.rejectEstimate(payload.id || payload.estimateId, payload.reason);
+  if (action === "estimate.convertToJob") return revenueFlow.convertEstimateToJob(payload.id || payload.estimateId);
+  if (action === "invoice.create") return payload.jobId ? revenueFlow.createInvoiceFromJob(payload.jobId) : revenueFlow.createInvoice(payload);
+  if (action === "invoice.update") return revenueFlow.updateInvoice(payload.id || payload.invoiceId, payload);
+  if (action === "invoice.markSent") return revenueFlow.markInvoice(payload.id || payload.invoiceId, "sent", payload);
+  if (action === "invoice.markPaid") return revenueFlow.markInvoice(payload.id || payload.invoiceId, "paid", payload);
+  if (action === "invoice.markOverdue") return revenueFlow.markInvoice(payload.id || payload.invoiceId, "overdue", payload);
+  if (action === "payment.record") return revenueFlow.recordPayment(payload);
+  if (action === "revenue.dashboard") return revenueFlow.dashboard(payload);
+  if (action === "customer.financials") return revenueFlow.customerFinancials(payload.customerId || payload.customerName || payload.id);
+  return { ok: false, data: null, error: "unknown_revenue_action", warnings: [], generatedAt: new Date().toISOString() };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -380,7 +398,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations", "database", "identity", "auth", "organization", "roles", "customer", "job"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations", "database", "identity", "auth", "organization", "roles", "customer", "job", "revenue"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
@@ -401,7 +419,8 @@ module.exports = async function handler(req, res) {
           organizationActions: ["organization.status"],
           rolesActions: ["roles.status"],
           customerActions: ["customer.create", "customer.update", "customer.delete", "customer.archive", "customer.restore", "customer.search", "customer.profile", "customer.timeline", "customer.note", "customer.summary", "customer.dashboard", "customer.recent"],
-          jobActions: ["job.create", "job.update", "job.assign", "job.schedule", "job.status", "job.timeline", "job.complete", "job.dashboard", "job.details", "job.aiDispatch"]
+          jobActions: ["job.create", "job.update", "job.assign", "job.schedule", "job.status", "job.timeline", "job.complete", "job.dashboard", "job.details", "job.aiDispatch"],
+          revenueActions: ["estimate.create", "estimate.update", "estimate.approve", "estimate.reject", "estimate.convertToJob", "invoice.create", "invoice.update", "invoice.markSent", "invoice.markPaid", "invoice.markOverdue", "payment.record", "revenue.dashboard", "customer.financials"]
         }
       });
     }
@@ -506,6 +525,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "job") {
       const result = runJobAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "revenue") {
+      const result = runRevenueAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

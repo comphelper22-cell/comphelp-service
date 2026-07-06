@@ -175,6 +175,8 @@ Phase 2 Epic 2: Real Customer CRM with working JSON-backed customer CRUD, archiv
 
 Phase 2 Epic 3: Real Job Dispatch & Scheduling with working job model, assignment history, scheduling, conflict detection, timeline, completion, invoice placeholder, AI dispatch suggestions, API actions, and Marketplace Manager UI.
 
+Phase 2 Epic 4: Real Revenue Flow with estimate approval, estimate-to-job conversion, invoice status, manual payment status, customer financials, revenue dashboard, and AI revenue recommendations without payment processor integration.
+
 ## API Consolidation Hotfix
 
 Internal modules developer, business-os, platform, titan, and brain route through `/api/system` to stay compatible with the Vercel Hobby serverless function limit. Module code is preserved in `server/api-modules/`.

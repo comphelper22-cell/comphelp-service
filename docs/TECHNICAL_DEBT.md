@@ -1,5 +1,13 @@
 # Technical Debt
 
+## Epic 4 Real Revenue Flow
+
+- Payment records are manual placeholders; no payment processor is connected.
+- Tax is placeholder-only and not jurisdiction-aware.
+- Invoice delivery is not implemented.
+- Estimate-to-job conversion is functional but should later preserve richer estimate/job relationship metadata.
+- Customer financials depend on normalized customer names or IDs until database migration.
+
 ## Epic 3 Real Job Dispatch & Scheduling
 
 - Dispatch uses JSON fallback until database migration.

@@ -689,3 +689,23 @@ Dispatch safety:
 - JSON fallback remains active.
 - Invoice generation is placeholder-only.
 - AI Dispatch is rules-based and does not connect external AI or maps.
+
+## Real Revenue Flow
+
+Project Titan Epic 4 adds a JSON-backed money flow for service businesses.
+
+Revenue capabilities:
+
+- Estimate creation, editing, approval, rejection, and conversion to jobs.
+- Estimate line items for labor, materials, discount, tax placeholder, and total.
+- Invoice creation, editing, sent/paid/overdue status, partial payment placeholder, and outstanding balance.
+- Manual payment status records without card data or payment processor integration.
+- Customer financial history with estimates, invoices, payments, outstanding balance, and lifetime revenue.
+- Revenue dashboard and rules-based AI revenue recommendations.
+
+Revenue safety:
+
+- Real payment processors are not connected.
+- Card data is never stored.
+- Production database is not connected.
+- Tax and invoice delivery remain placeholders.

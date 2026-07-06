@@ -982,3 +982,47 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Epic 3 - Real Job Dispatch Scheduling"
 ```
+
+## Current Sprint: Project Titan Epic 4
+
+Goal: build the working money flow from customer estimate to invoice and payment status.
+
+Scope:
+
+- Estimate builder.
+- Estimate approval/rejection.
+- Estimate-to-job conversion.
+- Invoice creation and status updates.
+- Manual payment status.
+- Customer financial history.
+- Revenue dashboard.
+- AI revenue recommendations.
+- Marketplace Manager revenue UI.
+- Revenue tests and documentation.
+
+Out of scope:
+
+- Real payment processor.
+- Card data storage.
+- Production database connection.
+- Invoice email delivery.
+
+Validation commands:
+
+```powershell
+node tests\estimate-flow.test.js
+node tests\invoice-flow.test.js
+node tests\payment-status.test.js
+node tests\revenue-dashboard.test.js
+node tests\customer-financials.test.js
+npm run check-project
+npm run lint
+git status
+git diff --stat
+```
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Epic 4 - Real Revenue Flow"
+```

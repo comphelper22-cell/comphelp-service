@@ -30,12 +30,12 @@ const DEFAULT_DATA = {
   notifications: [],
   preferences: [],
   invoices: [],
+  payments: [],
   quoteRequests: [],
   commissions: []
   ,
   companies: [],
   technicians: [],
-  payments: [],
   notes: [],
   files: [],
   inventory: [],
