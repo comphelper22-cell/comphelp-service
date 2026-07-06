@@ -1,5 +1,13 @@
 # Technical Debt
 
+## Epic 3 Real Job Dispatch & Scheduling
+
+- Dispatch uses JSON fallback until database migration.
+- Calendar slots are simple fixed windows and should later support business hours, holidays, travel time, and technician-specific availability.
+- Invoice generation is placeholder-only.
+- AI Dispatch is rules-based and does not connect external AI or maps.
+- Attachments remain placeholders until storage integration is approved.
+
 ## Epic 2 Real Customer CRM
 
 - CRM uses JSON fallback storage until an approved database migration.

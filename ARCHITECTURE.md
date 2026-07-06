@@ -671,3 +671,21 @@ CRM safety:
 - JSON fallback remains active.
 - Delete uses soft delete.
 - Archive and restore preserve customer history.
+
+## Real Job Dispatch & Scheduling
+
+Project Titan Epic 3 adds a working dispatch workflow backed by JSON fallback storage.
+
+Dispatch capabilities:
+
+- Job create, update, assign, reassign, remove assignment, schedule, status update, complete, details, dashboard, timeline, and AI dispatch actions.
+- Scheduling conflict detection prevents double-booking the same technician.
+- Completion generates a draft invoice placeholder and an AI recommendation event.
+- Marketplace Manager Job Dispatch UI provides jobs dashboard, dispatch board, technician assignment, status timeline, and schedule view.
+
+Dispatch safety:
+
+- Production database is not connected.
+- JSON fallback remains active.
+- Invoice generation is placeholder-only.
+- AI Dispatch is rules-based and does not connect external AI or maps.

@@ -937,3 +937,48 @@ Recommended commit:
 ```powershell
 git commit -m "Project Titan Epic 2 - Real Customer CRM"
 ```
+
+## Current Sprint: Project Titan Epic 3
+
+Goal: build a working JSON-backed job dispatch and scheduling workflow.
+
+Scope:
+
+- Job model.
+- Job CRUD/update.
+- Technician assignment, reassignment, and removal.
+- Scheduling and conflict detection.
+- Job status updates.
+- Job completion.
+- Invoice placeholder.
+- Job timeline.
+- AI Dispatch suggestions.
+- Marketplace Manager Job Dispatch UI.
+- Dispatch tests and documentation.
+
+Out of scope:
+
+- Production database connection.
+- External maps.
+- Real invoice delivery.
+- Deployment changes.
+
+Validation commands:
+
+```powershell
+node tests\job-crud.test.js
+node tests\job-assignment.test.js
+node tests\job-scheduling.test.js
+node tests\dispatch-flow.test.js
+node tests\job-dashboard.test.js
+npm run check-project
+npm run lint
+git status
+git diff --stat
+```
+
+Recommended commit:
+
+```powershell
+git commit -m "Project Titan Epic 3 - Real Job Dispatch Scheduling"
+```

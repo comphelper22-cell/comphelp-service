@@ -40,6 +40,7 @@
         <button data-target="marketingGrowthCenter">Marketing & Growth</button>
         <button data-target="analyticsReports">Analytics & Reports</button>
         <button data-target="dispatchAICenter">Dispatch AI</button>
+        <button data-target="jobDispatch">Job Dispatch</button>
         <button data-target="saasAdminCenter">SaaS Admin</button>
         <button data-target="billingCenter">Billing</button>
         <button data-target="integrationsCenter">Integrations</button>
@@ -556,6 +557,71 @@
         <div class="panel" style="margin-top:.85rem">
           <h2>AI Dispatch Suggestions</h2>
           <div class="list" id="dispatchAISuggestions"></div>
+        </div>
+      </section>
+
+      <section data-view="jobDispatch">
+        <div class="two">
+          <form class="panel" id="jobForm">
+            <h2>Job Dispatch</h2>
+            <p class="muted">Create jobs, assign technicians, schedule work, update status, and complete jobs using JSON fallback data.</p>
+            <input name="id" type="hidden">
+            <input name="customerName" placeholder="Customer name" required>
+            <input name="customerId" placeholder="Customer ID optional">
+            <input name="title" placeholder="Job title">
+            <input name="service" placeholder="Service">
+            <input name="address" placeholder="Job address">
+            <input name="city" placeholder="City" value="Los Angeles">
+            <select name="priority">
+              <option value="normal">Normal</option>
+              <option value="emergency">Emergency</option>
+              <option value="high">High</option>
+              <option value="low">Low</option>
+            </select>
+            <select name="status">
+              <option value="new">New</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="assigned">Assigned</option>
+              <option value="en_route">En Route</option>
+              <option value="on_site">On Site</option>
+              <option value="in_progress">In Progress</option>
+              <option value="waiting_parts">Waiting Parts</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="archived">Archived</option>
+            </select>
+            <input name="assignedTechnician" placeholder="Assigned technician">
+            <input name="startDate" type="datetime-local">
+            <input name="estimatedHours" type="number" min="0" step=".5" placeholder="Estimated hours">
+            <input name="actualHours" type="number" min="0" step=".5" placeholder="Actual hours">
+            <textarea name="internalNotes" placeholder="Internal notes"></textarea>
+            <textarea name="completionNotes" placeholder="Completion notes"></textarea>
+            <div class="actions">
+              <button class="btn primary" type="submit">Save Job</button>
+              <button class="btn" id="resetJobForm" type="button">New Job</button>
+              <button class="btn" id="assignJobButton" type="button">Assign</button>
+              <button class="btn" id="scheduleJobButton" type="button">Schedule</button>
+              <button class="btn" id="completeJobButton" type="button">Complete</button>
+            </div>
+            <p class="status" id="jobFormStatus"></p>
+          </form>
+          <div class="panel">
+            <h2>Jobs Dashboard</h2>
+            <div class="grid" id="jobDispatchMetrics"></div>
+            <div class="actions" style="margin-top:.85rem">
+              <button class="btn primary" id="refreshJobDispatch" type="button">Refresh Jobs</button>
+              <button class="btn" id="suggestJobDispatch" type="button">AI Dispatch</button>
+            </div>
+            <pre id="jobDispatchAi"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Dispatch Board</h2><div class="list" id="jobDispatchList"></div></div>
+          <div class="panel"><h2>Job Details</h2><pre id="jobDispatchDetails"></pre></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Status Timeline</h2><div class="list" id="jobDispatchTimeline"></div></div>
+          <div class="panel"><h2>Schedule View</h2><div class="list" id="jobDispatchSchedule"></div></div>
         </div>
       </section>
 

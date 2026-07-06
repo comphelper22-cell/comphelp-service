@@ -1,5 +1,14 @@
 # Changelog
 
+## Project Titan Epic 3 - Real Job Dispatch & Scheduling
+
+- Added working JSON-backed job dispatch service.
+- Added job create, update, assignment, scheduling, status, timeline, completion, dashboard, details, and AI dispatch actions.
+- Added Marketplace Manager Job Dispatch UI.
+- Added scheduling conflict detection and double-booking prevention.
+- Added invoice placeholder and AI recommendation events when jobs are completed.
+- Added job dispatch tests and documentation.
+
 ## Project Titan Epic 2.1 - CRM Integration & Cleanup
 
 - Added end-to-end customer CRM integration test.

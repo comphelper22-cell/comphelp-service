@@ -49,6 +49,7 @@ const organizationEngine = require("../organizations/organization-engine");
 const { rbacStatus } = require("../roles/rbac-engine");
 const identityAgent = require("../agents/identity-agent");
 const { customerCrm } = require("../crm/customer-crm");
+const { jobDispatch } = require("../job-dispatch/job-dispatch");
 
 const modules = {
   developer,
@@ -338,6 +339,20 @@ function runCustomerAction(action, payload = {}) {
   return { ok: false, error: "unknown_customer_action" };
 }
 
+function runJobAction(action, payload = {}) {
+  if (action === "job.create") return jobDispatch.create(payload);
+  if (action === "job.update") return jobDispatch.update(payload.id || payload.jobId, payload);
+  if (action === "job.assign") return jobDispatch.assign(payload.id || payload.jobId, payload);
+  if (action === "job.schedule") return jobDispatch.schedule(payload.id || payload.jobId, payload);
+  if (action === "job.status") return jobDispatch.status(payload.id || payload.jobId, payload.status, payload.notes);
+  if (action === "job.timeline") return jobDispatch.timeline(payload.id || payload.jobId);
+  if (action === "job.complete") return jobDispatch.complete(payload.id || payload.jobId, payload);
+  if (action === "job.dashboard") return jobDispatch.dashboard(payload);
+  if (action === "job.details") return jobDispatch.details(payload.id || payload.jobId);
+  if (action === "job.aiDispatch") return { ok: true, data: jobDispatch.aiDispatch(), error: null, warnings: [], generatedAt: new Date().toISOString() };
+  return { ok: false, data: null, error: "unknown_job_action", warnings: [], generatedAt: new Date().toISOString() };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -365,7 +380,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations", "database", "identity", "auth", "organization", "roles", "customer"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations", "database", "identity", "auth", "organization", "roles", "customer", "job"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
@@ -385,7 +400,8 @@ module.exports = async function handler(req, res) {
           authActions: ["auth.status", "auth.login", "auth.logout", "auth.register", "auth.refresh", "auth.passwordReset", "session.status"],
           organizationActions: ["organization.status"],
           rolesActions: ["roles.status"],
-          customerActions: ["customer.create", "customer.update", "customer.delete", "customer.archive", "customer.restore", "customer.search", "customer.profile", "customer.timeline", "customer.note", "customer.summary", "customer.dashboard", "customer.recent"]
+          customerActions: ["customer.create", "customer.update", "customer.delete", "customer.archive", "customer.restore", "customer.search", "customer.profile", "customer.timeline", "customer.note", "customer.summary", "customer.dashboard", "customer.recent"],
+          jobActions: ["job.create", "job.update", "job.assign", "job.schedule", "job.status", "job.timeline", "job.complete", "job.dashboard", "job.details", "job.aiDispatch"]
         }
       });
     }
@@ -486,6 +502,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "customer") {
       const result = runCustomerAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "job") {
+      const result = runJobAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

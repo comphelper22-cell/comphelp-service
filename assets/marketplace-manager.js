@@ -151,6 +151,10 @@
     return systemApi("dispatchAI", action || "dispatchAI.dashboard", payload || {});
   }
 
+  async function jobApi(action, payload) {
+    return systemApi("job", action || "job.dashboard", payload || {});
+  }
+
   async function saasApi(action, payload) {
     return systemApi("saas", action || "saas.dashboard", payload || {});
   }
@@ -1060,6 +1064,76 @@
     if ($("#customerNoteForm")) $("#customerNoteForm").elements.customerId.value = "";
   }
 
+  function renderJobDispatch(payload) {
+    var data = unwrap(payload);
+    renderCards("#jobDispatchMetrics", [
+      ["Open Jobs", data.openJobs || 0],
+      ["Today's Jobs", data.todaysJobs || 0],
+      ["Completed", data.completedJobs || 0],
+      ["Avg Hours", data.averageCompletionTime || 0],
+      ["Emergency", data.emergencyJobs || 0],
+      ["Technicians", Object.keys(data.technicianWorkload || {}).length]
+    ]);
+    renderList("#jobDispatchList", (data.jobs || []).map(function (job) {
+      return { title: job.jobNumber + " " + (job.title || job.service), meta: job.customerName || "Customer", detail: (job.assignedTechnician || "Unassigned") + " | " + (job.startDate || "Not scheduled"), pill: job.priority || job.status };
+    }), "No jobs yet.");
+    renderList("#jobDispatchSchedule", (data.availableSlots || []).slice(0, 8).map(function (slot) {
+      return { title: slot.label, meta: slot.startDate, detail: slot.endDate, pill: "available" };
+    }), "No available slots.");
+    if ($("#jobDispatchAi")) $("#jobDispatchAi").textContent = JSON.stringify(data.aiDispatch || {}, null, 2);
+    attachJobOpenButtons(data.jobs || []);
+  }
+
+  function attachJobOpenButtons(jobs) {
+    var target = $("#jobDispatchList");
+    if (!target || !jobs.length) return;
+    target.innerHTML = jobs.map(function (job) {
+      return '<div class="row"><strong>' + escapeHtml(job.jobNumber) + '<br><span class="muted">' + escapeHtml(job.title || job.service) + '</span></strong><span>' + escapeHtml(job.customerName || "") + '<br><span class="muted">' + escapeHtml(job.address || "") + '</span></span><span>' + escapeHtml(job.assignedTechnician || "Unassigned") + '<br><span class="muted">' + escapeHtml(job.startDate || "Not scheduled") + '</span></span><span><button class="btn" data-job-open="' + escapeHtml(job.id) + '" type="button">Open</button></span></div>';
+    }).join("");
+    $all("[data-job-open]", target).forEach(function (button) {
+      button.addEventListener("click", function () {
+        loadJobDetails(button.dataset.jobOpen).catch(function (error) {
+          $("#jobDispatchDetails").textContent = error.message;
+        });
+      });
+    });
+  }
+
+  async function refreshJobDispatch() {
+    if ($("#jobDispatchList")) $("#jobDispatchList").innerHTML = '<p class="muted">Loading jobs...</p>';
+    renderJobDispatch(await jobApi("job.dashboard", {}));
+  }
+
+  async function loadJobDetails(jobId) {
+    var response = await jobApi("job.details", { jobId: jobId });
+    var data = unwrap(response);
+    fillJobForm(data.job);
+    $("#jobDispatchDetails").textContent = JSON.stringify(data.job, null, 2);
+    $("#jobDispatchAi").textContent = JSON.stringify(data.aiDispatch || {}, null, 2);
+    renderList("#jobDispatchTimeline", (data.timeline || []).map(function (item) {
+      return { title: item.title, meta: item.type, detail: item.description, pill: String(item.timestamp || "").slice(0, 10) };
+    }), "No job timeline yet.");
+  }
+
+  function fillJobForm(job) {
+    var form = $("#jobForm");
+    if (!form || !job) return;
+    Object.keys(job).forEach(function (key) {
+      if (form.elements[key]) form.elements[key].value = job[key] || "";
+    });
+    if (job.startDate && form.elements.startDate) form.elements.startDate.value = String(job.startDate).slice(0, 16);
+  }
+
+  function resetJobForm() {
+    var form = $("#jobForm");
+    if (!form) return;
+    form.reset();
+    form.elements.id.value = "";
+    form.elements.city.value = "Los Angeles";
+    $("#jobDispatchDetails").textContent = "";
+    $("#jobDispatchTimeline").innerHTML = '<p class="muted">Select a job.</p>';
+  }
+
   function renderMarketingGrowthDashboard(payload) {
     var target = $("#marketingGrowthMetrics");
     if (!target || !payload) return;
@@ -1696,6 +1770,7 @@
     await marketingGrowthApi("marketing.dashboard", {}).then(renderMarketingGrowthDashboard).catch(function () {});
     await analyticsReportsApi("analytics.dashboard", {}).then(renderAnalyticsReportsDashboard).catch(function () {});
     await dispatchAIApi("dispatchAI.dashboard", {}).then(renderDispatchAIDashboard).catch(function () {});
+    await refreshJobDispatch().catch(function () {});
     await saasApi("saas.dashboard", {}).then(renderSaasDashboard).catch(function () {});
     await billingApi("billing.dashboard", {}).then(renderBillingDashboard).catch(function () {});
     await integrationsApi("integrations.dashboard", {}).then(renderIntegrationsDashboard).catch(function () {});
@@ -1834,6 +1909,66 @@
         }
       });
     }
+
+    if ($("#jobForm")) {
+      $("#jobForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        var form = event.currentTarget;
+        var payload = formData(form);
+        var action = payload.id ? "job.update" : "job.create";
+        $("#jobFormStatus").textContent = "Saving job...";
+        try {
+          var result = await jobApi(action, payload);
+          var job = unwrap(result);
+          $("#jobFormStatus").textContent = "Job saved.";
+          await refreshJobDispatch();
+          await loadJobDetails(job.id);
+        } catch (error) {
+          $("#jobFormStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+        }
+      });
+    }
+
+    if ($("#resetJobForm")) $("#resetJobForm").addEventListener("click", resetJobForm);
+    if ($("#refreshJobDispatch")) $("#refreshJobDispatch").addEventListener("click", function () { refreshJobDispatch().catch(function () {}); });
+    if ($("#suggestJobDispatch")) {
+      $("#suggestJobDispatch").addEventListener("click", async function () {
+        try {
+          $("#jobDispatchAi").textContent = JSON.stringify(unwrap(await jobApi("job.aiDispatch", {})), null, 2);
+        } catch (error) {
+          $("#jobDispatchAi").textContent = error.message;
+        }
+      });
+    }
+
+    [
+      ["#assignJobButton", "job.assign"],
+      ["#scheduleJobButton", "job.schedule"],
+      ["#completeJobButton", "job.complete"]
+    ].forEach(function (item) {
+      var selector = item[0];
+      var action = item[1];
+      if ($(selector)) {
+        $(selector).addEventListener("click", async function () {
+          var form = $("#jobForm");
+          var payload = formData(form);
+          if (!payload.id) {
+            $("#jobFormStatus").innerHTML = '<span class="danger">Select or save a job first.</span>';
+            return;
+          }
+          payload.jobId = payload.id;
+          $("#jobFormStatus").textContent = "Updating job...";
+          try {
+            await jobApi(action, payload);
+            $("#jobFormStatus").textContent = "Job updated.";
+            await refreshJobDispatch();
+            await loadJobDetails(payload.jobId);
+          } catch (error) {
+            $("#jobFormStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
+          }
+        });
+      }
+    });
 
     $all("form[data-action]").forEach(function (form) {
       form.addEventListener("submit", async function (event) {
