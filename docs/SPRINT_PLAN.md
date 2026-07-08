@@ -1,5 +1,49 @@
 # Sprint Plan
 
+## Current Sprint: Project Titan Beta Sprint 2 - Demo Data + Real Workflow Validation
+
+Make the live beta feel like a real working service business by seeding realistic shared data and validating CRM, Jobs, Revenue, Analytics, Dashboard, and AI Assistant against that same source.
+
+## Sprint Goal
+
+Populate the Marketplace with realistic Los Angeles service business demo data and remove disconnected placeholder totals.
+
+## Scope
+
+- 100 customers.
+- 50 jobs.
+- 30 estimates.
+- 25 invoices.
+- 10 technicians.
+- 20 payments.
+- 15 marketing leads.
+- Customer notes, job timelines, invoice statuses, dispatch schedules.
+- Shared JSON fallback data.
+- Beta demo workflow documentation.
+- AI demo command validation.
+
+## Out of Scope
+
+- Production database connection.
+- Real AI API connection.
+- New modules or architecture.
+- Commit, push, or deployment.
+
+## Validation Commands
+
+```powershell
+npm run check-project
+npm run lint
+git status
+git diff --stat
+```
+
+## Commit Message
+
+```powershell
+git commit -m "Beta Sprint 2 - demo data and workflow validation"
+```
+
 ## Current Sprint: Phase 2 Epic 5 - AI Operations Assistant
 
 Build the first real AI assistant that operates on current CompHelp business data without connecting external AI providers.

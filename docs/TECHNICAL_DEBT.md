@@ -1,5 +1,12 @@
 # Technical Debt
 
+## Beta Sprint 2 Demo Data
+
+- Demo data is synthetic and static after deployment; a later beta should add a safe reseed command or date-shifting demo mode.
+- Analytics still reads project-style records, so jobs are mirrored into projects for compatibility.
+- AI Assistant remains deterministic and should later use approved LLM routing with the same fallback data.
+- Demo technician availability is schedule-derived and not a full calendar system.
+
 ## Epic 5 AI Operations Assistant
 
 - The assistant uses deterministic intent parsing and does not connect an external LLM.

@@ -384,6 +384,15 @@ function runAssistantAction(action, payload = {}) {
   return { ok: false, data: null, error: "unknown_assistant_action", warnings: [], generatedAt: new Date().toISOString() };
 }
 
+function chatFallback(message) {
+  const text = clean(message, 1000).toLowerCase();
+  if (/camera|security|cctv/.test(text)) return "CompHelp Service can help with security camera installation. I can collect your name, phone, service, and address for a free estimate.";
+  if (/wifi|network|router|mesh/.test(text)) return "CompHelp Service can help with WiFi and network installation, dead zones, routers, and mesh setup. I can collect your details for a free estimate.";
+  if (/smart|doorbell|lock|home/.test(text)) return "CompHelp Service can help set up smart home devices, doorbells, locks, lights, cameras, and apps. I can collect your details for follow-up.";
+  if (/computer|laptop|repair|data|file/.test(text)) return "CompHelp Service can help with computer repair, setup, troubleshooting, and data recovery requests. I can collect your details for a free estimate.";
+  return "I can help with security cameras, smart home setup, WiFi installation, computer repair, and data recovery. What service do you need help with?";
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -441,6 +450,13 @@ module.exports = async function handler(req, res) {
     if (req.method !== "POST") return sendJson(res, 405, { ok: false, error: "method_not_allowed" });
 
     const body = await readBody(req);
+    if (!body.module && !body.action && body.message !== undefined) {
+      return sendJson(res, 200, {
+        ok: true,
+        reply: chatFallback(body.message),
+        mode: "beta_demo_fallback"
+      });
+    }
     const moduleName = clean(body.module, 80);
     const action = clean(body.action, 120);
     const target = modules[moduleName];

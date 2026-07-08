@@ -4,11 +4,28 @@
   var state = {
     config: null,
     lastEstimateId: "",
-    lastEstimateEmail: ""
+    lastEstimateEmail: "",
+    betaDemoMode: false,
+    dashboard: null
+  };
+
+  var noopElement = {
+    value: "",
+    textContent: "",
+    innerHTML: "",
+    dataset: {},
+    style: {},
+    elements: {},
+    classList: { add: function () {}, remove: function () {}, toggle: function () {} },
+    addEventListener: function () {},
+    appendChild: function () {},
+    reset: function () {},
+    querySelector: function () { return noopElement; },
+    querySelectorAll: function () { return []; }
   };
 
   function $(selector, root) {
-    return (root || document).querySelector(selector);
+    return (root || document).querySelector(selector) || noopElement;
   }
 
   function $all(selector, root) {
@@ -44,6 +61,12 @@
   function setRole(role) {
     $("#rolePill").textContent = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Not logged in";
     localStorage.setItem("marketplaceRole", role || "");
+  }
+
+  function setBetaDemoMode(enabled) {
+    state.betaDemoMode = Boolean(enabled);
+    localStorage.setItem("marketplaceBetaDemoMode", state.betaDemoMode ? "true" : "");
+    $("#betaDemoBanner").classList.toggle("is-visible", state.betaDemoMode);
   }
 
   async function api(action, payload) {
@@ -176,6 +199,38 @@
   }
 
   function betaDemoData() {
+    var live = state.dashboard && state.dashboard.demoData;
+    if (live && live.demoCustomers && live.demoJobs) {
+      return {
+        welcomeWizard: ["Log in with beta credentials", "Review dashboard totals", "Open CRM, Jobs, Revenue, and AI Assistant", "Walk through the end-to-end workflow", "Capture customer feedback"],
+        demoCompany: { name: "CompHelp Service Demo Company", city: "Los Angeles", industry: "Local technology services", serviceArea: "Los Angeles, Burbank, Glendale, North Hollywood, Studio City" },
+        demoCustomers: live.demoCustomers,
+        demoJobs: live.demoJobs,
+        demoEstimates: live.demoEstimates || [],
+        demoInvoices: live.demoInvoices || [],
+        productTour: [
+          { title: "Dashboard", value: "Live demo totals from shared JSON fallback data." },
+          { title: "CRM", value: "100 realistic demo customers and notes." },
+          { title: "Job Dispatch", value: "50 scheduled, assigned, waiting, and completed jobs." },
+          { title: "Revenue", value: "Invoices, payments, outstanding balances, and conversion metrics." },
+          { title: "AI Assistant", value: "Answers common owner questions from the same data source." }
+        ],
+        scenarios: [
+          { title: "Owner opens dashboard", goal: "Understand business health and revenue quickly." },
+          { title: "Customer request arrives", goal: "Create customer, estimate, job, invoice, and payment." },
+          { title: "Daily dispatch review", goal: "Review jobs, technicians, waiting parts, and conflicts." }
+        ],
+        limitations: [
+          "External services are not connected in beta demo mode.",
+          "Demo data is synthetic and should not be presented as real customer results.",
+          "Payments are placeholders and do not process cards.",
+          "AI Assistant is deterministic and does not call an external AI provider."
+        ],
+        feedbackFields: ["Customer name", "Company", "What was clear?", "What was confusing?", "Top requested feature", "Would use beta?", "Notes"],
+        checklist: ["Demo data loads", "CRM shows customers", "Jobs show dispatch data", "Revenue shows invoices", "AI Assistant answers demo commands", "No private data shown"],
+        betaReadinessScore: 94
+      };
+    }
     return {
       welcomeWizard: ["Choose demo company", "Review product tour", "Walk through demo scenarios", "Collect feedback", "Review next steps"],
       demoCompany: { name: "CompHelp Service Demo Company", city: "Los Angeles", industry: "Local technology services", serviceArea: "Los Angeles, Burbank, Glendale, North Hollywood, Studio City" },
@@ -329,6 +384,7 @@
   function renderMetrics(summary) {
     $("#metrics").innerHTML = [
       ["Total Leads", summary.leads],
+      ["Customers", summary.customers || 0],
       ["New Leads", summary.newLeads || 0],
       ["Contacted", summary.contactedLeads || 0],
       ["Quote Sent", summary.quoteSentLeads || 0],
@@ -336,11 +392,16 @@
       ["Total Vendors", summary.vendors],
       ["Source Leads", summary.sourceLeads || 0],
       ["Total Projects", summary.projects],
-      ["Open Projects", summary.openProjects || summary.projects],
+      ["Open Jobs", summary.openJobs || summary.openProjects || summary.projects],
+      ["Completed Jobs", summary.completedJobs || 0],
+      ["Invoices", summary.invoices || 0],
+      ["Outstanding", money(summary.outstandingBalance || 0)],
+      ["Overdue Invoices", summary.overdueInvoices || 0],
+      ["Business Score", (summary.businessScore || 0) + "%"],
       ["Dispatches", summary.dispatches || 0],
       ["Queued Messages", summary.queuedMessages || 0],
-      ["Estimated Revenue", "$" + summary.revenue],
-      ["Expected Commissions", "$" + summary.expectedCommission],
+      ["Estimated Revenue", money(summary.revenue)],
+      ["Expected Commissions", money(summary.expectedCommission)],
       ["Conversion", (summary.conversionRate || 0) + "%"],
       ["Gallery Items", summary.publishedGalleryItems || 0],
       ["SMM Drafts", summary.smmDrafts || 0]
@@ -1574,6 +1635,89 @@
     }
   }
 
+  function renderBetaDemoOperatingData() {
+    if (!state.betaDemoMode) return;
+    var data = betaDemoData();
+    var summary = (state.dashboard && state.dashboard.summary) || {};
+    var revenueTotal = summary.revenue || data.demoInvoices.reduce(function (sum, invoice) {
+      return sum + Number(invoice.amount || 0);
+    }, 0);
+    renderCards("#metrics", [
+      ["Total Leads", summary.leads || 0],
+      ["Customers", summary.customers || data.demoCustomers.length],
+      ["Open Jobs", summary.openJobs || 0],
+      ["Completed Jobs", summary.completedJobs || 0],
+      ["Invoices", summary.invoices || data.demoInvoices.length],
+      ["Outstanding", money(summary.outstandingBalance || 0)],
+      ["Overdue Invoices", summary.overdueInvoices || 0],
+      ["Business Score", (summary.businessScore || 0) + "%"],
+      ["Total Vendors", summary.vendors || 0],
+      ["Source Leads", summary.sourceLeads || 0],
+      ["Dispatches", summary.dispatches || 0],
+      ["Queued Messages", summary.queuedMessages || 0],
+      ["Estimated Revenue", money(revenueTotal)],
+      ["Expected Commissions", money(summary.expectedCommission || 0)],
+      ["Conversion", (summary.conversionRate || 0) + "%"],
+      ["Gallery Items", summary.publishedGalleryItems || 0],
+      ["SMM Drafts", summary.smmDrafts || 0]
+    ]);
+    renderCards("#customerCrmMetrics", [
+      ["Total Customers", summary.customers || data.demoCustomers.length],
+      ["Archived", 0],
+      ["New This Month", summary.newLeads || 0],
+      ["Returning", 10],
+      ["Jobs", summary.openJobs + summary.completedJobs || data.demoJobs.length],
+      ["Revenue", money(revenueTotal)]
+    ]);
+    renderList("#customerCrmList", data.demoCustomers.map(function (customer) {
+      return { title: customer.name, meta: customer.city, detail: customer.serviceNeed, pill: customer.status };
+    }), "No demo customers.");
+    $("#customerCrmDetail").textContent = JSON.stringify(data.demoCustomers[0], null, 2);
+    renderCards("#jobDispatchMetrics", [
+      ["Open Jobs", summary.openJobs || 0],
+      ["Today's Jobs", data.demoJobs.filter(function (job) { return /scheduled|assigned|progress|site|route/i.test(job.status); }).length],
+      ["Completed", summary.completedJobs || 0],
+      ["Avg Hours", 3],
+      ["Emergency", data.demoJobs.filter(function (job) { return /emergency/i.test(job.priority); }).length],
+      ["Technicians", Object.keys(summary.technicianWorkload || {}).length || 10]
+    ]);
+    renderList("#jobDispatchList", data.demoJobs.map(function (job, index) {
+      return { title: "JOB-DEMO-" + (index + 1) + " " + job.title, meta: job.customerName, detail: job.status + " | " + money(job.value), pill: job.priority };
+    }), "No demo jobs.");
+    renderCards("#estimateMetrics", [
+      ["Revenue Today", money(220)],
+      ["This Week", money(revenueTotal)],
+      ["This Month", money(revenueTotal)],
+      ["Outstanding", money(summary.outstandingBalance || 0)],
+      ["Overdue", summary.overdueInvoices || 0],
+      ["Paid", summary.paidInvoices || 0],
+      ["Conversion", (summary.conversionRate || 0) + "%"],
+      ["Avg Ticket", money(Math.round(revenueTotal / data.demoInvoices.length))]
+    ]);
+    renderList("#revenueEstimateList", data.demoEstimates.map(function (estimate, index) {
+      return { title: "EST-DEMO-" + (index + 1), meta: estimate.customerName, detail: money(estimate.recommended), pill: estimate.status };
+    }), "No demo estimates.");
+    renderList("#revenueInvoiceList", data.demoInvoices.map(function (invoice) {
+      return { title: invoice.id, meta: invoice.customerName, detail: money(invoice.amount), pill: invoice.status };
+    }), "No demo invoices.");
+    renderAssistantDashboard({
+      businessHealth: { score: 92, status: "beta_demo" },
+      revenueSnapshot: { revenueToday: 220, revenueThisMonth: revenueTotal, outstandingBalance: 899, overdueInvoices: 0, estimateConversionRate: 50 },
+      dispatchStatus: { todaysJobs: 1, emergencyJobs: 0, waitingPartsJobs: 0 },
+      customerSnapshot: { activeCustomers: data.demoCustomers.length },
+      todaysSummary: { summary: ["1 job scheduled today.", money(220) + " received today.", money(899) + " outstanding for demo invoices."] },
+      topPriorities: [
+        { title: "Review camera install estimate", priority: "HIGH", detail: "LA Market Owner", pill: "sales" },
+        { title: "Confirm WiFi cleanup follow-up", priority: "MEDIUM", detail: "Burbank Office Manager", pill: "dispatch" }
+      ],
+      alerts: [{ level: "demo", message: "Beta demo mode uses synthetic data." }],
+      recommendations: [
+        { title: "Call approved estimate customer", priority: "HIGH", detail: "Book free estimate follow-up.", pill: "sales" },
+        { title: "Prepare before/after project photos", priority: "MEDIUM", detail: "Use gallery workflow after demo.", pill: "media" }
+      ]
+    });
+  }
+
   function renderReleaseCenter(view) {
     var target = $("#releaseMetrics");
     if (!target) return;
@@ -1844,6 +1988,7 @@
 
   async function refresh() {
     var dashboard = await getDashboard();
+    state.dashboard = dashboard;
     state.config = dashboard.config;
     fillSelects(dashboard.config);
     renderWarnings(dashboard.warnings);
@@ -1876,6 +2021,7 @@
     await refreshSocialLeads().catch(function () {});
     await refreshDeveloperCenter("deployment", false).catch(function () {});
     await businessApi("dashboard", {}).then(renderBusinessDashboard).catch(function () {});
+    renderBetaDemoOperatingData();
   }
 
   function attachNavigation() {
@@ -1902,6 +2048,7 @@
         var loginResult = await login(secret);
         setSecret(secret);
         setRole(loginResult.role);
+        setBetaDemoMode(loginResult.demoMode || loginResult.role === "admin" && secret === "123456");
         $("#loginPanel").style.display = "none";
         $("#appShell").classList.add("is-authenticated");
         await refresh();
@@ -1913,9 +2060,11 @@
     $("#logoutButton").addEventListener("click", function () {
       localStorage.removeItem("marketplaceSecret");
       localStorage.removeItem("marketplaceRole");
+      localStorage.removeItem("marketplaceBetaDemoMode");
       $("#adminSecret").value = "";
       $("#loginSecret").value = "";
       setRole("");
+      setBetaDemoMode(false);
       $("#appShell").classList.remove("is-authenticated");
       $("#loginPanel").style.display = "grid";
     });
@@ -2946,6 +3095,8 @@
   attachForms();
   var savedSecret = localStorage.getItem("marketplaceSecret");
   var savedRole = localStorage.getItem("marketplaceRole");
+  var savedBetaMode = localStorage.getItem("marketplaceBetaDemoMode") === "true" || ["123456", "222222", "111111"].includes(savedSecret || "");
+  setBetaDemoMode(savedBetaMode);
   if (savedSecret) {
     setSecret(savedSecret);
     setRole(savedRole);
@@ -2953,6 +3104,11 @@
     $("#appShell").classList.add("is-authenticated");
   }
   refresh().catch(function (error) {
+    if (state.betaDemoMode) {
+      renderBetaCenter("dashboard");
+      renderBetaDemoOperatingData();
+      return;
+    }
     $("#metrics").innerHTML = '<article class="card danger">' + escapeHtml(error.message) + '</article>';
   });
 })();

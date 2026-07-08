@@ -1,5 +1,13 @@
 # Changelog
 
+## Project Titan Beta Sprint 2 - Demo Data and Real Workflow Validation
+
+- Added realistic shared beta demo data for customers, jobs, estimates, invoices, technicians, payments, marketing leads, timelines, and notes.
+- Updated Marketplace dashboard summaries to use shared customers, jobs, invoices, payments, and estimates instead of disconnected placeholder totals.
+- Updated beta demo UI rendering to use the shared dashboard payload.
+- Expanded AI Operations Assistant command coverage for follow-ups, overdue invoices, and open estimates.
+- Added beta demo data, workflow, and AI command documentation.
+
 ## Project Titan Epic 5 - AI Operations Assistant
 
 - Added a JSON-backed AI Operations Assistant for natural-language business questions.

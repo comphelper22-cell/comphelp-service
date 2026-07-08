@@ -235,6 +235,7 @@ function answerIntent(data, intent, question) {
   if (intent.name === "active_customers") return answer("Active customers", customer.activeCustomers, { count: customer.activeCustomers.length });
   if (intent.name === "new_customers_week") return answer("New customers this week", customer.newCustomersThisWeek, { count: customer.newCustomersThisWeek.length });
   if (intent.name === "not_contacted") return answer("Customers without recent contact", customer.inactiveCustomers, { count: customer.inactiveCustomers.length });
+  if (intent.name === "follow_up_customers") return answer("Customers needing follow-up", customer.inactiveCustomers.slice(0, 12), { count: customer.inactiveCustomers.length });
   if (intent.name === "active_jobs_customers") return answer("Customers with active jobs", customer.customersWithActiveJobs, { count: customer.customersWithActiveJobs.length });
   if (intent.name === "emergency_jobs") return answer("Emergency jobs", jobs.emergencyJobs, { count: jobs.emergencyJobs.length });
   if (intent.name === "waiting_parts_jobs") return answer("Waiting-parts jobs", jobs.waitingPartsJobs, { count: jobs.waitingPartsJobs.length });
@@ -245,6 +246,8 @@ function answerIntent(data, intent, question) {
   if (intent.name === "best_technician") return answer("Recommended technician", jobs.bestTechnician ? [jobs.bestTechnician] : [], {});
   if (intent.name === "business_health") return { answer: "Business health summary", items: [], metrics: createBusinessHealth(data) };
   if (intent.name === "paid_invoices") return answer("Paid invoices", revenue.paidInvoices, { count: revenue.paidInvoices.length });
+  if (intent.name === "overdue_invoices") return answer("Overdue invoices", revenue.overdueInvoices, { count: revenue.overdueInvoices.length, outstandingBalance: revenue.overdueInvoices.reduce((sum, invoice) => sum + Number(invoice.outstandingBalance || invoice.total || 0), 0) });
+  if (intent.name === "open_estimates") return answer("Open estimates", data.estimates.filter((estimate) => !/rejected|converted|paid|won|lost/i.test(String(estimate.status || ""))), {});
   if (intent.name === "conversion_rate") return answer(`Estimate conversion rate is ${revenue.estimateConversionRate}%.`, [], { estimateConversionRate: revenue.estimateConversionRate });
   if (intent.name === "top_paying_customers") return answer("Top paying customers", revenue.topPayingCustomers, {});
   return { answer: `I understood this as "${intent.name}". Try asking about jobs, customers, revenue, scheduling, or priorities.`, items: [], metrics: { question } };
@@ -263,6 +266,7 @@ function parseIntent(question) {
     ["active_customers", /active customers/],
     ["new_customers_week", /new customers.*week|customers this week/],
     ["not_contacted", /hasn'?t been contacted|not contacted|inactive customers/],
+    ["follow_up_customers", /need follow.?up|needs follow.?up|follow up customers|customers.*follow/],
     ["active_jobs_customers", /customers.*active jobs|active jobs.*customers/],
     ["emergency_jobs", /emergency jobs/],
     ["waiting_parts_jobs", /waiting parts/],
@@ -273,6 +277,8 @@ function parseIntent(question) {
     ["best_technician", /best technician|recommend technician/],
     ["business_health", /business health|health/],
     ["paid_invoices", /paid invoice/],
+    ["overdue_invoices", /overdue invoices|show overdue|overdue balance/],
+    ["open_estimates", /open estimates|show open estimates|pending estimates/],
     ["conversion_rate", /conversion rate|estimate conversion/],
     ["top_paying_customers", /top paying|best customers|highest revenue customers/]
   ];
