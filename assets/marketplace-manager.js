@@ -159,6 +159,10 @@
     return systemApi("revenue", action || "revenue.dashboard", payload || {});
   }
 
+  async function assistantApi(action, payload) {
+    return systemApi("assistant", action || "assistant.dashboard", payload || {});
+  }
+
   async function saasApi(action, payload) {
     return systemApi("saas", action || "saas.dashboard", payload || {});
   }
@@ -1166,6 +1170,66 @@
     renderRevenueDashboard(await revenueApi("revenue.dashboard", {}));
   }
 
+  function assistantRow(item) {
+    return {
+      title: item.title || item.recommendedAction || item.customerName || item.name || item.fullName || item.jobNumber || item.technician || item.message || "Business item",
+      meta: item.priority || item.status || item.paymentStatus || item.service || item.level || "",
+      detail: item.detail || item.reason || item.customerName || item.target || item.startDate || item.outstandingBalance || "",
+      pill: item.pill || item.recommendedAction || item.status || item.paymentStatus || "review"
+    };
+  }
+
+  function renderAssistantDashboard(payload) {
+    var data = unwrap(payload);
+    var health = data.businessHealth || {};
+    var revenue = data.revenueSnapshot || {};
+    var dispatch = data.dispatchStatus || {};
+    var customer = data.customerSnapshot || {};
+    renderCards("#assistantMetrics", [
+      ["Health", (health.score || 0) + "%"],
+      ["Revenue Today", money(revenue.revenueToday || 0)],
+      ["Outstanding", money(revenue.outstandingBalance || 0)],
+      ["Today's Jobs", dispatch.todaysJobs || 0],
+      ["Alerts", (data.alerts || []).length]
+    ]);
+    renderList("#assistantSummaryList", ((data.todaysSummary && data.todaysSummary.summary) || []).map(function (item) {
+      return { title: item, meta: "today", detail: "", pill: "summary" };
+    }), "No daily summary yet.");
+    if ($("#assistantHealth")) $("#assistantHealth").textContent = JSON.stringify(health, null, 2);
+    renderList("#assistantRevenueSnapshot", [
+      { title: "Revenue today", detail: money(revenue.revenueToday || 0), pill: "paid" },
+      { title: "Revenue this month", detail: money(revenue.revenueThisMonth || 0), pill: "month" },
+      { title: "Outstanding balance", detail: money(revenue.outstandingBalance || 0), pill: "open" },
+      { title: "Estimate conversion", detail: (revenue.estimateConversionRate || 0) + "%", pill: "sales" }
+    ], "No revenue snapshot.");
+    renderList("#assistantDispatchStatus", [
+      { title: "Today's jobs", detail: dispatch.todaysJobs || 0, pill: "jobs" },
+      { title: "Emergency jobs", detail: dispatch.emergencyJobs || 0, pill: "urgent" },
+      { title: "Waiting parts", detail: dispatch.waitingPartsJobs || 0, pill: "parts" },
+      { title: "Active customers", detail: customer.activeCustomers || 0, pill: "crm" }
+    ], "No dispatch status.");
+    renderList("#assistantPriorities", (data.topPriorities || []).map(assistantRow), "No top priorities.");
+    renderList("#assistantAlerts", (data.alerts || []).map(assistantRow), "No alerts.");
+    renderList("#assistantRecommendations", (data.recommendations || []).map(assistantRow), "No recommendations.");
+  }
+
+  async function refreshAssistantDashboard() {
+    renderAssistantDashboard(await assistantApi("assistant.dashboard", {}));
+  }
+
+  async function askOperationsAssistant() {
+    var input = $("#assistantQuestion");
+    var output = $("#assistantAnswer");
+    var question = input ? input.value.trim() : "";
+    if (!question) {
+      if (output) output.textContent = "Ask a question first.";
+      return;
+    }
+    if (output) output.textContent = "Thinking through current business data...";
+    var result = await assistantApi("assistant.ask", { question: question });
+    if (output) output.textContent = JSON.stringify(unwrap(result), null, 2);
+  }
+
   function renderMarketingGrowthDashboard(payload) {
     var target = $("#marketingGrowthMetrics");
     if (!target || !payload) return;
@@ -1804,6 +1868,7 @@
     await dispatchAIApi("dispatchAI.dashboard", {}).then(renderDispatchAIDashboard).catch(function () {});
     await refreshJobDispatch().catch(function () {});
     await refreshRevenueFlow().catch(function () {});
+    await refreshAssistantDashboard().catch(function () {});
     await saasApi("saas.dashboard", {}).then(renderSaasDashboard).catch(function () {});
     await billingApi("billing.dashboard", {}).then(renderBillingDashboard).catch(function () {});
     await integrationsApi("integrations.dashboard", {}).then(renderIntegrationsDashboard).catch(function () {});
@@ -1854,6 +1919,33 @@
       $("#appShell").classList.remove("is-authenticated");
       $("#loginPanel").style.display = "grid";
     });
+
+    if ($("#askOperationsAssistant")) {
+      $("#askOperationsAssistant").addEventListener("click", function () {
+        askOperationsAssistant().catch(function (error) {
+          $("#assistantAnswer").textContent = error.message;
+        });
+      });
+    }
+
+    if ($("#assistantQuestion")) {
+      $("#assistantQuestion").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          askOperationsAssistant().catch(function (error) {
+            $("#assistantAnswer").textContent = error.message;
+          });
+        }
+      });
+    }
+
+    if ($("#refreshAssistantDashboard")) {
+      $("#refreshAssistantDashboard").addEventListener("click", function () {
+        refreshAssistantDashboard().catch(function (error) {
+          $("#assistantAnswer").textContent = error.message;
+        });
+      });
+    }
 
     if ($("#customerForm")) {
       $("#customerForm").addEventListener("submit", async function (event) {

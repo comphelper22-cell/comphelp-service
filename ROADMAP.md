@@ -73,6 +73,25 @@ Scope:
 - SMM drafts.
 - SEO planning.
 - Developer Center.
+- AI Operations Assistant for natural-language questions over CRM, dispatch, revenue, and operations data.
+
+## Phase 2 Epic 5 - AI Operations Assistant
+
+Goal: allow owners, dispatchers, office managers, and technicians to ask natural-language business questions against current JSON-backed business data.
+
+Scope:
+
+- Lightweight intent parser.
+- Customer, job, scheduling, revenue, and operations insights.
+- Business health, daily summary, dashboard widgets, alerts, and recommendations.
+- `/api/system` assistant actions.
+- Marketplace Manager command bar.
+
+Out of scope:
+
+- External AI providers.
+- Production database connection.
+- Automatic customer messaging.
 
 ## v2.0 Multi-Tenant SaaS
 

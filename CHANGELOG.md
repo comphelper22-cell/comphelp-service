@@ -1,5 +1,13 @@
 # Changelog
 
+## Project Titan Epic 5 - AI Operations Assistant
+
+- Added a JSON-backed AI Operations Assistant for natural-language business questions.
+- Added lightweight intent parsing for customer, job, scheduling, revenue, and operations questions.
+- Added `/api/system` assistant actions and Marketplace Manager AI Operations Assistant UI.
+- Added business health, daily summary, revenue snapshot, dispatch status, alerts, and recommendations widgets.
+- Added assistant tests and documentation.
+
 ## Project Titan Epic 4 - Real Revenue Flow
 
 - Added JSON-backed estimate, invoice, payment status, customer financials, revenue dashboard, and AI revenue recommendation workflows.

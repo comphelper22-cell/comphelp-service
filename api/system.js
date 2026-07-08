@@ -51,6 +51,7 @@ const identityAgent = require("../agents/identity-agent");
 const { customerCrm } = require("../crm/customer-crm");
 const { jobDispatch } = require("../job-dispatch/job-dispatch");
 const { revenueFlow } = require("../revenue-flow/revenue-flow");
+const { aiOperationsAssistant } = require("../ai-operations-assistant/assistant");
 
 const modules = {
   developer,
@@ -371,6 +372,18 @@ function runRevenueAction(action, payload = {}) {
   return { ok: false, data: null, error: "unknown_revenue_action", warnings: [], generatedAt: new Date().toISOString() };
 }
 
+function runAssistantAction(action, payload = {}) {
+  if (action === "assistant.ask") return aiOperationsAssistant.ask(payload);
+  if (action === "assistant.summary") return aiOperationsAssistant.summary(payload);
+  if (action === "assistant.dashboard") return aiOperationsAssistant.dashboard(payload);
+  if (action === "assistant.recommendations") return aiOperationsAssistant.recommendations(payload);
+  if (action === "assistant.businessHealth") return aiOperationsAssistant.businessHealth(payload.data);
+  if (action === "assistant.customerInsights") return aiOperationsAssistant.customerInsights(payload.data);
+  if (action === "assistant.jobInsights") return aiOperationsAssistant.jobInsights(payload.data);
+  if (action === "assistant.revenueInsights") return aiOperationsAssistant.revenueInsights(payload.data);
+  return { ok: false, data: null, error: "unknown_assistant_action", warnings: [], generatedAt: new Date().toISOString() };
+}
+
 function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
@@ -398,7 +411,7 @@ module.exports = async function handler(req, res) {
         ok: true,
         data: {
           router: "system",
-          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations", "database", "identity", "auth", "organization", "roles", "customer", "job", "revenue"],
+          modules: ["developer", "business-os", "platform", "titan", "brain", "memory", "context", "decision", "recommendation", "executive", "sales", "workflow", "operations", "finance", "customerSuccess", "marketing", "analytics", "dispatchAI", "saas", "billing", "integrations", "database", "identity", "auth", "organization", "roles", "customer", "job", "revenue", "assistant"],
           brainActions: ["brain.status", "brain.health", "brain.pipeline", "brain.metrics", "brain.diagnostics"],
           recommendationActions: ["recommendation.status", "recommendation.generate", "recommendation.history", "recommendation.score", "recommendation.priority", "recommendation.explain"],
           executiveActions: ["executive.status", "executive.dashboard", "executive.briefing", "executive.kpi", "executive.forecast", "executive.health", "executive.risks", "executive.opportunities", "executive.summary"],
@@ -420,7 +433,8 @@ module.exports = async function handler(req, res) {
           rolesActions: ["roles.status"],
           customerActions: ["customer.create", "customer.update", "customer.delete", "customer.archive", "customer.restore", "customer.search", "customer.profile", "customer.timeline", "customer.note", "customer.summary", "customer.dashboard", "customer.recent"],
           jobActions: ["job.create", "job.update", "job.assign", "job.schedule", "job.status", "job.timeline", "job.complete", "job.dashboard", "job.details", "job.aiDispatch"],
-          revenueActions: ["estimate.create", "estimate.update", "estimate.approve", "estimate.reject", "estimate.convertToJob", "invoice.create", "invoice.update", "invoice.markSent", "invoice.markPaid", "invoice.markOverdue", "payment.record", "revenue.dashboard", "customer.financials"]
+          revenueActions: ["estimate.create", "estimate.update", "estimate.approve", "estimate.reject", "estimate.convertToJob", "invoice.create", "invoice.update", "invoice.markSent", "invoice.markPaid", "invoice.markOverdue", "payment.record", "revenue.dashboard", "customer.financials"],
+          assistantActions: ["assistant.ask", "assistant.summary", "assistant.dashboard", "assistant.recommendations", "assistant.businessHealth", "assistant.customerInsights", "assistant.jobInsights", "assistant.revenueInsights"]
         }
       });
     }
@@ -529,6 +543,10 @@ module.exports = async function handler(req, res) {
     }
     if (moduleName === "revenue") {
       const result = runRevenueAction(action, body.payload || {});
+      return sendJson(res, result.ok ? 200 : 400, result);
+    }
+    if (moduleName === "assistant") {
+      const result = runAssistantAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
     }
     if (!target) return sendJson(res, 400, { ok: false, error: "unknown_system_module" });

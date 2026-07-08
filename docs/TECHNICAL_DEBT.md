@@ -1,5 +1,13 @@
 # Technical Debt
 
+## Epic 5 AI Operations Assistant
+
+- The assistant uses deterministic intent parsing and does not connect an external LLM.
+- Weekly summaries are not yet a distinct aggregation and should be expanded when analytics persistence is available.
+- Technician availability is derived from current jobs and vendors, not a true availability calendar.
+- Recommendations are advisory and should later support tracked outcomes.
+- UI output is JSON-first for transparency; future polish can add richer answer cards.
+
 ## Epic 4 Real Revenue Flow
 
 - Payment records are manual placeholders; no payment processor is connected.

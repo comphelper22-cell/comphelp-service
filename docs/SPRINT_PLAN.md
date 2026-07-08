@@ -1,5 +1,43 @@
 # Sprint Plan
 
+## Current Sprint: Phase 2 Epic 5 - AI Operations Assistant
+
+Build the first real AI assistant that operates on current CompHelp business data without connecting external AI providers.
+
+## Sprint Goal
+
+Let owners, dispatchers, office managers, and technicians ask natural-language questions about customers, jobs, scheduling, revenue, and operations.
+
+## Scope
+
+- JSON-backed AI Operations Assistant.
+- Intent parser.
+- System API assistant actions.
+- Marketplace Manager AI command bar and dashboard widgets.
+- Tests and documentation.
+
+## Out of Scope
+
+- OpenAI, Anthropic, Gemini, or other external AI providers.
+- Production database connection.
+- Automatic messaging.
+- Commit, push, or deploy.
+
+## Validation Commands
+
+```powershell
+npm run check-project
+npm run lint
+git status
+git diff --stat
+```
+
+## Commit Message
+
+```powershell
+git commit -m "Phase 2 Epic 5 - AI operations assistant"
+```
+
 ## Current Sprint
 
 API Consolidation Hotfix - Vercel Hobby Compatibility.

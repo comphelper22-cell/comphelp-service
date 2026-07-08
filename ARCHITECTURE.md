@@ -47,6 +47,14 @@ API Consolidation Hotfix:
 - The dashboard uses `/api/system` for developer, business-os, platform, titan, and brain calls.
 - Legacy code is preserved in `server/api-modules/`.
 
+AI Operations Assistant:
+
+- `ai-operations-assistant/assistant.js` provides a deterministic natural-language operations layer over JSON-backed business data.
+- The assistant parses business intent and routes questions to customer, job, scheduling, revenue, and operations insight functions.
+- `/api/system` exposes assistant actions through the `assistant` module.
+- Marketplace Manager renders the AI command bar, business health, daily summary, revenue snapshot, dispatch status, alerts, and recommendations.
+- No external AI provider is connected in Epic 5.
+
 Database layer:
 
 - `database/` contains the Phase 6.1 abstraction.

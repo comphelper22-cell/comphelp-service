@@ -32,6 +32,7 @@
         <button data-target="releaseCenter">Release Center</button>
         <button data-target="businessDashboard">Business Dashboard</button>
         <button data-target="executiveDashboard">Executive Dashboard</button>
+        <button data-target="aiOperationsAssistant">AI Operations Assistant</button>
         <button data-target="salesManager">Sales Manager</button>
         <button data-target="operationsCenter">Operations Center</button>
         <button data-target="financeCenter">Finance Center</button>
@@ -250,6 +251,41 @@
             <h2>Executive Output</h2>
             <pre id="executiveResult"></pre>
           </div>
+        </div>
+      </section>
+
+      <section data-view="aiOperationsAssistant">
+        <div class="two">
+          <div class="panel">
+            <h2>AI Operations Assistant</h2>
+            <p class="muted">Ask natural-language questions about customers, jobs, scheduling, revenue, and daily operations using current JSON-backed business data.</p>
+            <div class="actions">
+              <input id="assistantQuestion" placeholder="Ask: Show today's jobs. Who owes us money? What should I do today?">
+              <button class="btn primary" id="askOperationsAssistant" type="button">Ask AI</button>
+              <button class="btn" id="refreshAssistantDashboard" type="button">Refresh Dashboard</button>
+            </div>
+            <div class="grid" id="assistantMetrics" style="margin-top:.85rem"></div>
+          </div>
+          <div class="panel">
+            <h2>Ask AI Panel</h2>
+            <pre id="assistantAnswer"></pre>
+          </div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Daily Summary Widget</h2><div class="list" id="assistantSummaryList"></div></div>
+          <div class="panel"><h2>Business Health Widget</h2><pre id="assistantHealth"></pre></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Revenue Snapshot</h2><div class="list" id="assistantRevenueSnapshot"></div></div>
+          <div class="panel"><h2>Dispatch Status</h2><div class="list" id="assistantDispatchStatus"></div></div>
+        </div>
+        <div class="two" style="margin-top:.85rem">
+          <div class="panel"><h2>Top Priorities</h2><div class="list" id="assistantPriorities"></div></div>
+          <div class="panel"><h2>Alerts</h2><div class="list" id="assistantAlerts"></div></div>
+        </div>
+        <div class="panel" style="margin-top:.85rem">
+          <h2>Recommendations Card</h2>
+          <div class="list" id="assistantRecommendations"></div>
         </div>
       </section>
 
