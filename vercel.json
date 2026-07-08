@@ -40,7 +40,7 @@
     },
     {
       "source": "/api/gallery-upload",
-      "destination": "/api/gallery-upload.js"
+      "destination": "/api/marketplace-project-upload.js"
     },
     {
       "source": "/api/marketplace",

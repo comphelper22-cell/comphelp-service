@@ -104,7 +104,7 @@ function marketingPerformance(data) {
   const marketingLeads = data.leads.filter((lead) => /instagram|facebook|google|seo|social|website/i.test(String(lead.source || ""))).length;
   return {
     marketingLeads,
-    status: marketingLeads ? "active" : "needs_more_data"
+    status: marketingLeads ? "active" : "collecting data"
   };
 }
 

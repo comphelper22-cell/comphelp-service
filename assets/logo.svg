@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="CompHelp Service CH logo">
+  <defs>
+    <linearGradient id="comphelpLogoGradient" x1="12" y1="12" x2="84" y2="84" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#25e1b1"/>
+      <stop offset="1" stop-color="#7db2ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="18" fill="url(#comphelpLogoGradient)"/>
+  <path d="M36.5 65.5c-10.9 0-18.8-7.2-18.8-17.5s7.9-17.5 18.8-17.5c6 0 11 2.2 14.2 6.1l-6.1 5.5c-2.1-2.4-4.5-3.6-7.6-3.6-5.6 0-9.4 3.8-9.4 9.5s3.8 9.5 9.4 9.5c3.1 0 5.5-1.2 7.6-3.6l6.1 5.5c-3.2 3.9-8.2 6.1-14.2 6.1Z" fill="#03100d"/>
+  <path d="M78.5 31.2v33.6h-9.5V51.7H56.1v13.1h-9.5V31.2h9.5v12.6h12.9V31.2h9.5Z" fill="#03100d"/>
+</svg>

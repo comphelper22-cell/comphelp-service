@@ -10,19 +10,26 @@
   };
 
   var noopElement = {
+    isMissing: true,
     value: "",
     textContent: "",
     innerHTML: "",
     dataset: {},
     style: {},
-    elements: {},
+    disabled: false,
+    checked: false,
+    elements: null,
     classList: { add: function () {}, remove: function () {}, toggle: function () {} },
     addEventListener: function () {},
     appendChild: function () {},
+    removeAttribute: function () {},
+    setAttribute: function () {},
+    focus: function () {},
     reset: function () {},
     querySelector: function () { return noopElement; },
     querySelectorAll: function () { return []; }
   };
+  noopElement.elements = new Proxy({}, { get: function () { return noopElement; } });
 
   function $(selector, root) {
     return (root || document).querySelector(selector) || noopElement;
@@ -555,22 +562,88 @@
 
   function renderCards(selector, cards) {
     var target = $(selector);
-    if (!target) return;
-    target.innerHTML = cards.map(function (card) {
+    if (!target || target.isMissing) return;
+    var safeCards = (cards || []).filter(function (card) { return card && card.length; });
+    target.innerHTML = safeCards.length ? safeCards.map(function (card) {
       return '<article class="card"><p class="muted">' + escapeHtml(card[0]) + '</p><div class="metric">' + escapeHtml(card[1]) + '</div></article>';
-    }).join("");
+    }).join("") : '<article class="card"><p class="muted">No data available yet.</p><div class="metric">Ready</div></article>';
   }
 
   function renderList(selector, items, emptyText) {
     var target = $(selector);
-    if (!target) return;
+    if (!target || target.isMissing) return;
+    items = Array.isArray(items) ? items : [];
     target.innerHTML = items.length ? items.map(function (item) {
       return '<div class="row"><strong>' + escapeHtml(item.title) + '</strong><span>' + escapeHtml(item.meta || "") + '</span><span>' + escapeHtml(item.detail || "") + '</span><span class="pill">' + escapeHtml(item.pill || "review") + '</span></div>';
-    }).join("") : '<p class="muted">' + escapeHtml(emptyText) + '</p>';
+    }).join("") : '<p class="muted">' + escapeHtml(emptyText || "No data available yet.") + '</p>';
   }
 
   function money(value) {
-    return "$" + escapeHtml(Math.round(Number(value || 0)));
+    var amount = Number(value || 0);
+    return "$" + escapeHtml(Math.round(amount).toLocaleString());
+  }
+
+  function compactLabel(key) {
+    return String(key || "Item")
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/[_-]+/g, " ")
+      .replace(/\b\w/g, function (letter) { return letter.toUpperCase(); });
+  }
+
+  function readableValue(value) {
+    if (value === null || value === undefined || value === "") return "Not available yet";
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (Array.isArray(value)) return value.length + " items";
+    if (typeof value === "object") return Object.keys(value).length + " fields";
+    return String(value);
+  }
+
+  function summarizeObject(value) {
+    if (!value || typeof value !== "object") return [];
+    return Object.keys(value).filter(function (key) {
+      return ["ok", "data", "generatedAt", "timestamp", "warnings"].indexOf(key) === -1;
+    }).slice(0, 8).map(function (key) {
+      return { title: compactLabel(key), meta: readableValue(value[key]), detail: Array.isArray(value[key]) ? "List data" : "Summary field", pill: typeof value[key] };
+    });
+  }
+
+  function renderFriendlyPanel(selector, value, emptyText) {
+    var target = $(selector);
+    if (!target || target.isMissing) return;
+    var data = value && value.data !== undefined ? value.data : value;
+    target.classList.add("data-panel");
+    if (Array.isArray(data)) {
+      renderList(selector, data.slice(0, 10).map(function (item, index) {
+        if (item && typeof item === "object") {
+          return {
+            title: item.title || item.name || item.customerName || item.jobNumber || item.id || ("Item " + (index + 1)),
+            meta: item.status || item.category || item.service || item.city || "",
+            detail: item.description || item.detail || item.reason || item.recommendedAction || readableValue(item),
+            pill: item.priority || item.type || "item"
+          };
+        }
+        return { title: String(item), meta: "", detail: "", pill: "item" };
+      }), emptyText || "No records available yet.");
+      return;
+    }
+    if (data && typeof data === "object") {
+      var rows = summarizeObject(data);
+      renderList(selector, rows, emptyText || "No summary available yet.");
+      return;
+    }
+    target.innerHTML = '<p class="muted">' + escapeHtml(data || emptyText || "No details available yet.") + '</p>';
+  }
+
+  function renderPanelError(selector, error) {
+    var target = $(selector);
+    if (!target || target.isMissing) return;
+    target.innerHTML = '<p class="danger">' + escapeHtml(error && error.message ? error.message : error || "Request failed.") + '</p>';
+  }
+
+  function renderLoading(selector, message) {
+    var target = $(selector);
+    if (!target || target.isMissing) return;
+    target.innerHTML = '<p class="muted">' + escapeHtml(message || "Loading...") + '</p>';
   }
 
   function scoreLabel(value) {
@@ -590,11 +663,11 @@
     var target = $("#estimateMetrics");
     if (!target || !estimate) return;
     var metrics = [
-      ["Low", "$" + (estimate.low || 0)],
-      ["High", "$" + (estimate.high || 0)],
-      ["Recommended", "$" + (estimate.recommended || 0)],
-      ["Internal Cost", "$" + (estimate.internalCost || 0)],
-      ["Expected Profit", "$" + (estimate.expectedProfit || 0)]
+      ["Low", money(estimate.low || 0)],
+      ["High", money(estimate.high || 0)],
+      ["Recommended", money(estimate.recommended || 0)],
+      ["Internal Cost", money(estimate.internalCost || 0)],
+      ["Expected Profit", money(estimate.expectedProfit || 0)]
     ];
     target.innerHTML = metrics.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
@@ -621,10 +694,10 @@
     target.innerHTML = metrics.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    $("#analyticsResult").textContent = JSON.stringify({
+    renderFriendlyPanel("#analyticsResult", {
       vendorPerformance: summary.vendorPerformance || [],
       marketingPerformance: summary.marketingPerformance || {}
-    }, null, 2);
+    }, "No analytics summary yet.");
   }
 
   function renderCompliance(summary) {
@@ -660,12 +733,10 @@
     target.innerHTML = metrics.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#socialLeadResult")) {
-      $("#socialLeadResult").textContent = JSON.stringify({
-        leads: social.leads || [],
-        drafts: social.drafts || []
-      }, null, 2);
-    }
+    renderFriendlyPanel("#socialLeadResult", {
+      leads: social.leads || [],
+      drafts: social.drafts || []
+    }, "No social lead activity yet.");
   }
 
   function renderActivityLogs(logs) {
@@ -691,9 +762,7 @@
     target.innerHTML = metrics.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#deploymentResult")) {
-      $("#deploymentResult").textContent = JSON.stringify(deployment, null, 2);
-    }
+    renderFriendlyPanel("#deploymentResult", deployment, "No deployment report yet.");
   }
 
   function renderBusinessDashboard(payload) {
@@ -703,21 +772,19 @@
     var widgets = dashboard.widgets || {};
     var notifications = widgets.notifications || [];
     var metrics = [
-      ["Revenue", "$" + (widgets.revenue || 0)],
+      ["Revenue", money(widgets.revenue || 0)],
       ["Leads", widgets.leads || 0],
       ["Projects", widgets.projects || 0],
       ["Open Estimates", widgets.openEstimates || 0],
       ["Pending Jobs", widgets.pendingJobs || 0],
-      ["Profit", "$" + (widgets.profit || 0)],
+      ["Profit", money(widgets.profit || 0)],
       ["Tasks", widgets.tasks || 0],
       ["Notifications", notifications.length || 0]
     ];
     target.innerHTML = metrics.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#businessResult")) {
-      $("#businessResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#businessResult", payload, "No business dashboard output yet.");
   }
 
   function renderDeveloperCenter(payload, writeOutput) {
@@ -781,9 +848,7 @@
     target.innerHTML = cards.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#titanResult")) {
-      $("#titanResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#titanResult", payload, "No Titan report yet.");
   }
 
   function renderBrain(payload) {
@@ -810,9 +875,7 @@
     target.innerHTML = cards.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#brainResult")) {
-      $("#brainResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#brainResult", payload, "No brain report yet.");
   }
 
   function renderRecommendationIntelligence(payload, focus) {
@@ -845,7 +908,7 @@
       if (focus === "sales") output = { salesOpportunities: sales };
       if (focus === "customer") output = { customerAttention: customers };
       if (focus === "priority") output = { aiPriorityQueue: data.aiPriorityQueue || recommendations, topRecommendation: top };
-      $("#recommendationIntelligenceResult").textContent = JSON.stringify(output, null, 2);
+      renderFriendlyPanel("#recommendationIntelligenceResult", output, "No recommendations yet.");
     }
   }
 
@@ -861,25 +924,23 @@
     var aiQueue = data.aiPriorityQueue || data.aiRecommendations || [];
     var cards = [
       ["Business Health", health.overallScore !== undefined ? health.overallScore : "ready"],
-      ["Revenue Today", "$" + escapeHtml(data.revenueToday || kpis.revenueToday || 0)],
-      ["Revenue Yesterday", "$" + escapeHtml(data.revenueYesterday || kpis.revenueYesterday || 0)],
-      ["Revenue This Week", "$" + escapeHtml(data.revenueThisWeek || kpis.revenueThisWeek || 0)],
-      ["Revenue This Month", "$" + escapeHtml(data.revenueThisMonth || kpis.revenueThisMonth || 0)],
+      ["Revenue Today", money(data.revenueToday || kpis.revenueToday || 0)],
+      ["Revenue Yesterday", money(data.revenueYesterday || kpis.revenueYesterday || 0)],
+      ["Revenue This Week", money(data.revenueThisWeek || kpis.revenueThisWeek || 0)],
+      ["Revenue This Month", money(data.revenueThisMonth || kpis.revenueThisMonth || 0)],
       ["Open Jobs", data.openJobs !== undefined ? data.openJobs : kpis.openJobs || 0],
       ["Open Estimates", data.openEstimates !== undefined ? data.openEstimates : kpis.openEstimates || 0],
       ["Conversion", (data.estimateConversionRate !== undefined ? data.estimateConversionRate : kpis.estimateConversionRate || 0) + "%"],
-      ["Average Job", "$" + escapeHtml(data.averageJobValue || kpis.averageJobValue || 0)],
+      ["Average Job", money(data.averageJobValue || kpis.averageJobValue || 0)],
       ["Risks", risks.length || 0],
       ["Opportunities", opportunities.length || 0],
       ["AI Queue", aiQueue.length || 0]
     ];
-    if (forecasts.revenueForecast) cards.push(["30-Day Forecast", "$" + escapeHtml(forecasts.revenueForecast.next30Days || 0)]);
+    if (forecasts.revenueForecast) cards.push(["30-Day Forecast", money(forecasts.revenueForecast.next30Days || 0)]);
     target.innerHTML = cards.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#executiveResult")) {
-      $("#executiveResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#executiveResult", payload, "No executive report yet.");
   }
 
   function renderSalesDashboard(payload) {
@@ -894,15 +955,15 @@
     var opportunities = data.revenueOpportunities || data;
     var cards = [
       ["Best Customer", overview.bestNextCustomer || "ready"],
-      ["Expected Revenue", "$" + escapeHtml(overview.expectedRevenue || kpis.revenuePipeline || 0)],
+      ["Expected Revenue", money(overview.expectedRevenue || kpis.revenuePipeline || 0)],
       ["Probability", overview.probability !== undefined ? overview.probability : "ready"],
       ["Priority", overview.priority || "ready"],
       ["Open Estimates", kpis.openEstimates || 0],
       ["Won Estimates", kpis.wonEstimates || 0],
       ["Lost Estimates", kpis.lostEstimates || 0],
       ["Conversion", (kpis.conversionRate || 0) + "%"],
-      ["Avg Deal", "$" + escapeHtml(kpis.averageDealSize || 0)],
-      ["Pipeline", "$" + escapeHtml(data.revenuePipeline || kpis.revenuePipeline || 0)],
+      ["Avg Deal", money(kpis.averageDealSize || 0)],
+      ["Pipeline", money(data.revenuePipeline || kpis.revenuePipeline || 0)],
       ["Today's Calls", calls.length || 0],
       ["Follow-ups", followups.length || 0],
       ["High Priority", highPriorityDeals.length || 0],
@@ -911,9 +972,7 @@
     target.innerHTML = cards.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#salesResult")) {
-      $("#salesResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#salesResult", payload, "No sales dashboard output yet.");
   }
 
   function renderOperationsDashboard(payload) {
@@ -952,9 +1011,7 @@
     renderList("#operationsCustomerWaiting", (data.customerWaiting || []).slice(0, 5).map(function (item) {
       return { title: item.customerName, meta: item.service, detail: item.note, pill: item.priority || "waiting" };
     }), "No customer waiting issues.");
-    if ($("#operationsResult")) {
-      $("#operationsResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#operationsResult", payload, "No operations output yet.");
   }
 
   function renderFinanceDashboard(payload) {
@@ -991,9 +1048,7 @@
     renderList("#financeAlerts", (data.financialAlerts || data.alerts || []).map(function (alert) {
       return { title: alert, meta: "Finance", detail: "Owner review recommended.", pill: "alert" };
     }), "No critical financial alerts.");
-    if ($("#financeResult")) {
-      $("#financeResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#financeResult", payload, "No finance output yet.");
   }
 
   function renderCustomerSuccessDashboard(payload) {
@@ -1042,9 +1097,7 @@
     renderList("#customerReviewsNeeded", reviews.slice(0, 5).map(function (item) {
       return { title: item.customerName, meta: item.service, detail: item.recommendedAction, pill: "review" };
     }), "No review requests needed.");
-    if ($("#customerSuccessResult")) {
-      $("#customerSuccessResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#customerSuccessResult", payload, "No customer success output yet.");
   }
 
   function renderCustomerCrmDashboard(payload) {
@@ -1054,7 +1107,7 @@
       ["New This Month", data.newThisMonth || 0],
       ["Returning", data.returning || 0],
       ["Jobs", data.jobs || 0],
-      ["Revenue", money(data.revenuePlaceholder || 0)],
+      ["Revenue", money(data.revenuePlaceholder || data.revenue || data.lifetimeRevenue || 0)],
       ["Avg Response", data.averageResponseTimePlaceholder || "ready"]
     ]);
   }
@@ -1081,14 +1134,14 @@
     $all("[data-customer-profile]", target).forEach(function (button) {
       button.addEventListener("click", function () {
         loadCustomerProfile(button.dataset.customerProfile).catch(function (error) {
-          $("#customerCrmDetail").textContent = error.message;
+          renderPanelError("#customerCrmDetail", error);
         });
       });
     });
   }
 
   async function loadCustomerProfile(customerId) {
-    if ($("#customerCrmDetail")) $("#customerCrmDetail").textContent = "Loading customer profile...";
+    renderLoading("#customerCrmDetail", "Loading customer profile...");
     var profileResponse = await customerApi("customer.profile", { customerId: customerId });
     var profile = unwrap(profileResponse);
     fillCustomerForm(profile.customer);
@@ -1098,8 +1151,8 @@
 
   function renderCustomerProfile(profile) {
     var customer = profile.customer || {};
-    $("#customerCrmDetail").textContent = JSON.stringify(customer, null, 2);
-    $("#customerCrmSummary").textContent = JSON.stringify(profile.summary || {}, null, 2);
+    renderFriendlyPanel("#customerCrmDetail", customer, "Select a customer to see details.");
+    renderFriendlyPanel("#customerCrmSummary", profile.summary || {}, "No customer summary yet.");
     if ($("#customerNoteForm")) $("#customerNoteForm").elements.customerId.value = customer.id || "";
     renderList("#customerCrmTimeline", (profile.timeline || []).map(function (item) {
       return { title: item.title, meta: item.type, detail: item.description, pill: String(item.timestamp || "").slice(0, 10) };
@@ -1126,8 +1179,8 @@
     form.reset();
     form.elements.id.value = "";
     form.state.value = "CA";
-    $("#customerCrmDetail").textContent = "";
-    $("#customerCrmSummary").textContent = "";
+    renderFriendlyPanel("#customerCrmDetail", null, "Select a customer.");
+    renderFriendlyPanel("#customerCrmSummary", null, "No customer selected.");
     $("#customerCrmTimeline").innerHTML = '<p class="muted">Select a customer.</p>';
     $("#customerCrmNotes").innerHTML = '<p class="muted">Select a customer.</p>';
     if ($("#customerNoteForm")) $("#customerNoteForm").elements.customerId.value = "";
@@ -1149,7 +1202,7 @@
     renderList("#jobDispatchSchedule", (data.availableSlots || []).slice(0, 8).map(function (slot) {
       return { title: slot.label, meta: slot.startDate, detail: slot.endDate, pill: "available" };
     }), "No available slots.");
-    if ($("#jobDispatchAi")) $("#jobDispatchAi").textContent = JSON.stringify(data.aiDispatch || {}, null, 2);
+    renderFriendlyPanel("#jobDispatchAi", data.aiDispatch || {}, "No AI dispatch suggestion yet.");
     attachJobOpenButtons(data.jobs || []);
   }
 
@@ -1162,14 +1215,14 @@
     $all("[data-job-open]", target).forEach(function (button) {
       button.addEventListener("click", function () {
         loadJobDetails(button.dataset.jobOpen).catch(function (error) {
-          $("#jobDispatchDetails").textContent = error.message;
+          renderPanelError("#jobDispatchDetails", error);
         });
       });
     });
   }
 
   async function refreshJobDispatch() {
-    if ($("#jobDispatchList")) $("#jobDispatchList").innerHTML = '<p class="muted">Loading jobs...</p>';
+    renderLoading("#jobDispatchList", "Loading jobs...");
     renderJobDispatch(await jobApi("job.dashboard", {}));
   }
 
@@ -1177,8 +1230,8 @@
     var response = await jobApi("job.details", { jobId: jobId });
     var data = unwrap(response);
     fillJobForm(data.job);
-    $("#jobDispatchDetails").textContent = JSON.stringify(data.job, null, 2);
-    $("#jobDispatchAi").textContent = JSON.stringify(data.aiDispatch || {}, null, 2);
+    renderFriendlyPanel("#jobDispatchDetails", data.job, "No job details loaded.");
+    renderFriendlyPanel("#jobDispatchAi", data.aiDispatch || {}, "No AI dispatch suggestion yet.");
     renderList("#jobDispatchTimeline", (data.timeline || []).map(function (item) {
       return { title: item.title, meta: item.type, detail: item.description, pill: String(item.timestamp || "").slice(0, 10) };
     }), "No job timeline yet.");
@@ -1199,7 +1252,7 @@
     form.reset();
     form.elements.id.value = "";
     form.elements.city.value = "Los Angeles";
-    $("#jobDispatchDetails").textContent = "";
+    renderFriendlyPanel("#jobDispatchDetails", null, "Select a job.");
     $("#jobDispatchTimeline").innerHTML = '<p class="muted">Select a job.</p>';
   }
 
@@ -1224,7 +1277,7 @@
     renderList("#revenueRecommendationList", (data.aiRevenueRecommendations || []).map(function (item) {
       return { title: item.title, meta: item.customerName, detail: money(item.estimatedRevenue || 0), pill: item.priority || "review" };
     }), "No revenue recommendations yet.");
-    $("#estimateResult").textContent = JSON.stringify(data, null, 2);
+    renderFriendlyPanel("#estimateResult", data, "No revenue flow output yet.");
   }
 
   async function refreshRevenueFlow() {
@@ -1256,7 +1309,7 @@
     renderList("#assistantSummaryList", ((data.todaysSummary && data.todaysSummary.summary) || []).map(function (item) {
       return { title: item, meta: "today", detail: "", pill: "summary" };
     }), "No daily summary yet.");
-    if ($("#assistantHealth")) $("#assistantHealth").textContent = JSON.stringify(health, null, 2);
+    renderFriendlyPanel("#assistantHealth", health, "No business health summary yet.");
     renderList("#assistantRevenueSnapshot", [
       { title: "Revenue today", detail: money(revenue.revenueToday || 0), pill: "paid" },
       { title: "Revenue this month", detail: money(revenue.revenueThisMonth || 0), pill: "month" },
@@ -1283,12 +1336,12 @@
     var output = $("#assistantAnswer");
     var question = input ? input.value.trim() : "";
     if (!question) {
-      if (output) output.textContent = "Ask a question first.";
+      renderFriendlyPanel("#assistantAnswer", "Ask a question first.");
       return;
     }
-    if (output) output.textContent = "Thinking through current business data...";
+    renderLoading("#assistantAnswer", "Thinking through current business data...");
     var result = await assistantApi("assistant.ask", { question: question });
-    if (output) output.textContent = JSON.stringify(unwrap(result), null, 2);
+    renderFriendlyPanel("#assistantAnswer", unwrap(result), "No assistant answer yet.");
   }
 
   function renderMarketingGrowthDashboard(payload) {
@@ -1337,9 +1390,7 @@
     renderList("#marketingRecommendationList", recommendations.slice(0, 6).map(function (item) {
       return { title: item.title || item.name, meta: item.category || "Marketing", detail: item.description || item.recommendedAction || item.reasoning, pill: item.priority || "AI" };
     }), "No marketing recommendations yet.");
-    if ($("#marketingGrowthResult")) {
-      $("#marketingGrowthResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#marketingGrowthResult", payload, "No marketing growth output yet.");
   }
 
   function renderAnalyticsReportsDashboard(payload) {
@@ -1386,9 +1437,7 @@
     ].concat((monthly.focus || []).map(function (focus) {
       return { title: focus, meta: "Focus", detail: "Recommended monthly focus item.", pill: "monthly" };
     })) : [], "No monthly report yet.");
-    if ($("#analyticsReportsResult")) {
-      $("#analyticsReportsResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#analyticsReportsResult", payload, "No analytics report output yet.");
   }
 
   function renderDispatchAIDashboard(payload) {
@@ -1437,9 +1486,7 @@
     renderList("#dispatchAISuggestions", suggestions.slice(0, 8).map(function (item) {
       return { title: item.jobTitle || item.title, meta: item.technician || item.suggestedTechnician || item.service, detail: item.reason || item.action || item.recommendedAction, pill: item.confidence !== undefined ? Math.round(Number(item.confidence) * 100) + "%" : "AI" };
     }), "No AI dispatch suggestions yet.");
-    if ($("#dispatchAIResult")) {
-      $("#dispatchAIResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#dispatchAIResult", payload, "No dispatch AI output yet.");
   }
 
   function renderSaasDashboard(payload) {
@@ -1484,9 +1531,7 @@
       { title: "Permission coverage", meta: permissions.length + " permissions", detail: "Permissions prepare server-side role checks for SaaS.", pill: permissions.length ? "ready" : "review" },
       { title: "Supabase/PostgreSQL", meta: "not connected", detail: "Prepared for a future sprint; this sprint uses JSON only.", pill: "future" }
     ], "No tenant health data yet.");
-    if ($("#saasResult")) {
-      $("#saasResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#saasResult", payload, "No SaaS admin output yet.");
   }
 
   function renderBillingDashboard(payload) {
@@ -1534,9 +1579,7 @@
     renderList("#billingUpgradeRecommendations", recommendations.slice(0, 6).map(function (item) {
       return { title: item.title, meta: item.priority || "Review", detail: item.recommendedAction || item.reason, pill: "upgrade" };
     }), "No upgrade recommendations yet.");
-    if ($("#billingResult")) {
-      $("#billingResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#billingResult", payload, "No billing output yet.");
   }
 
   function renderIntegrationsDashboard(payload) {
@@ -1578,9 +1621,7 @@
     renderList("#integrationsDeveloperNotes", notes.map(function (note) {
       return { title: note, meta: "Developer note", detail: "Owner/developer review before production integrations.", pill: "note" };
     }), "No developer notes yet.");
-    if ($("#integrationsResult")) {
-      $("#integrationsResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#integrationsResult", payload, "No integrations output yet.");
   }
 
   function renderBetaCenter(view) {
@@ -1630,9 +1671,7 @@
     renderList("#betaReleaseChecklist", data.checklist.map(function (item) {
       return { title: item, meta: "Release Checklist", detail: "Required before first beta customer.", pill: "ready" };
     }), "No checklist items.");
-    if ($("#betaResult")) {
-      $("#betaResult").textContent = JSON.stringify({ view: view || "dashboard", data: data }, null, 2);
-    }
+    renderFriendlyPanel("#betaResult", { view: view || "dashboard", data: data }, "No beta output yet.");
   }
 
   function renderBetaDemoOperatingData() {
@@ -1672,7 +1711,7 @@
     renderList("#customerCrmList", data.demoCustomers.map(function (customer) {
       return { title: customer.name, meta: customer.city, detail: customer.serviceNeed, pill: customer.status };
     }), "No demo customers.");
-    $("#customerCrmDetail").textContent = JSON.stringify(data.demoCustomers[0], null, 2);
+    renderFriendlyPanel("#customerCrmDetail", data.demoCustomers[0], "Select a customer.");
     renderCards("#jobDispatchMetrics", [
       ["Open Jobs", summary.openJobs || 0],
       ["Today's Jobs", data.demoJobs.filter(function (job) { return /scheduled|assigned|progress|site|route/i.test(job.status); }).length],
@@ -1756,9 +1795,7 @@
     renderList("#releaseDeploymentStatus", data.deploymentChecklist.map(function (item) {
       return { title: item, meta: "Deployment Gate", detail: "Approval required before production action.", pill: "gate" };
     }), "No deployment status.");
-    if ($("#releaseResult")) {
-      $("#releaseResult").textContent = JSON.stringify({ view: view || "dashboard", data: data }, null, 2);
-    }
+    renderFriendlyPanel("#releaseResult", { view: view || "dashboard", data: data }, "No release output yet.");
   }
 
   function renderProjectControl(payload) {
@@ -1778,9 +1815,7 @@
     target.innerHTML = cards.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#projectControlResult")) {
-      $("#projectControlResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#projectControlResult", payload, "No project control output yet.");
   }
 
   function renderMemory(payload) {
@@ -1802,9 +1837,7 @@
     target.innerHTML = cards.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#memoryResult")) {
-      $("#memoryResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#memoryResult", payload, "No memory output yet.");
   }
 
   function renderContext(payload) {
@@ -1830,9 +1863,7 @@
     target.innerHTML = cards.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#contextResult")) {
-      $("#contextResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#contextResult", payload, "No context output yet.");
   }
 
   function renderDecision(payload) {
@@ -1855,9 +1886,7 @@
     target.innerHTML = cards.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    if ($("#decisionResult")) {
-      $("#decisionResult").textContent = JSON.stringify(payload, null, 2);
-    }
+    renderFriendlyPanel("#decisionResult", payload, "No decision output yet.");
   }
 
   async function refreshDeveloperCenter(action, writeOutput) {
@@ -2072,7 +2101,7 @@
     if ($("#askOperationsAssistant")) {
       $("#askOperationsAssistant").addEventListener("click", function () {
         askOperationsAssistant().catch(function (error) {
-          $("#assistantAnswer").textContent = error.message;
+          renderPanelError("#assistantAnswer", error);
         });
       });
     }
@@ -2082,7 +2111,7 @@
         if (event.key === "Enter") {
           event.preventDefault();
           askOperationsAssistant().catch(function (error) {
-            $("#assistantAnswer").textContent = error.message;
+            renderPanelError("#assistantAnswer", error);
           });
         }
       });
@@ -2091,7 +2120,7 @@
     if ($("#refreshAssistantDashboard")) {
       $("#refreshAssistantDashboard").addEventListener("click", function () {
         refreshAssistantDashboard().catch(function (error) {
-          $("#assistantAnswer").textContent = error.message;
+          renderPanelError("#assistantAnswer", error);
         });
       });
     }
@@ -2122,7 +2151,7 @@
     if ($("#searchCustomers")) {
       $("#searchCustomers").addEventListener("click", function () {
         refreshCustomerCrm().catch(function (error) {
-          $("#customerCrmDetail").textContent = error.message;
+          renderPanelError("#customerCrmDetail", error);
         });
       });
     }
@@ -2208,9 +2237,9 @@
     if ($("#suggestJobDispatch")) {
       $("#suggestJobDispatch").addEventListener("click", async function () {
         try {
-          $("#jobDispatchAi").textContent = JSON.stringify(unwrap(await jobApi("job.aiDispatch", {})), null, 2);
+          renderFriendlyPanel("#jobDispatchAi", unwrap(await jobApi("job.aiDispatch", {})), "No AI dispatch suggestion yet.");
         } catch (error) {
-          $("#jobDispatchAi").textContent = error.message;
+          renderPanelError("#jobDispatchAi", error);
         }
       });
     }
@@ -2256,7 +2285,7 @@
           var estimate = unwrap(result);
           form.elements.id.value = estimate.id;
           $("#revenueEstimateStatus").textContent = "Estimate saved.";
-          $("#estimateResult").textContent = JSON.stringify(estimate, null, 2);
+          renderFriendlyPanel("#estimateResult", estimate, "No estimate output yet.");
           await refreshRevenueFlow();
         } catch (error) {
           $("#revenueEstimateStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
@@ -2279,7 +2308,7 @@
           try {
             var result = await revenueApi(item[1], { estimateId: estimateId });
             $("#revenueEstimateStatus").textContent = "Estimate updated.";
-            $("#estimateResult").textContent = JSON.stringify(result, null, 2);
+            renderFriendlyPanel("#estimateResult", result, "No estimate output yet.");
             await refreshRevenueFlow();
             await refreshJobDispatch().catch(function () {});
           } catch (error) {
@@ -2337,7 +2366,7 @@
         try {
           var result = await revenueApi("payment.record", formData(event.currentTarget));
           $("#revenuePaymentStatus").textContent = "Payment status recorded.";
-          $("#customerFinancialResult").textContent = JSON.stringify(result, null, 2);
+          renderFriendlyPanel("#customerFinancialResult", result, "No payment output yet.");
           await refreshRevenueFlow();
         } catch (error) {
           $("#revenuePaymentStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
@@ -2349,9 +2378,9 @@
       $("#loadCustomerFinancials").addEventListener("click", async function () {
         try {
           var query = $("#customerFinancialSearch").value.trim();
-          $("#customerFinancialResult").textContent = JSON.stringify(await revenueApi("customer.financials", { customerName: query, customerId: query }), null, 2);
+          renderFriendlyPanel("#customerFinancialResult", await revenueApi("customer.financials", { customerName: query, customerId: query }), "No customer financials found.");
         } catch (error) {
-          $("#customerFinancialResult").textContent = error.message;
+          renderPanelError("#customerFinancialResult", error);
         }
       });
     }
@@ -2378,23 +2407,23 @@
           }
           status.textContent = "Saved.";
           if (form.dataset.output && $("#" + form.dataset.output)) {
-            $("#" + form.dataset.output).textContent = JSON.stringify(result, null, 2);
+            renderFriendlyPanel("#" + form.dataset.output, result, "No output yet.");
           }
-          if (action === "lead") $("#leadResult").textContent = JSON.stringify(result, null, 2);
+          if (action === "lead") renderFriendlyPanel("#leadResult", result, "No lead output yet.");
           if (action === "estimate") {
             state.lastEstimateId = result.estimate.id;
             state.lastEstimateEmail = form.email.value || "";
             renderEstimate(result.estimate);
-            $("#estimateResult").textContent = JSON.stringify(result, null, 2);
+            renderFriendlyPanel("#estimateResult", result, "No estimate output yet.");
           }
-          if (action === "quoteRequest") $("#quoteResult").textContent = JSON.stringify(result, null, 2);
-          if (action === "vendorMatch") $("#vendorMatchResult").textContent = JSON.stringify(result, null, 2);
-          if (action === "recommendation") $("#recommendationResult").textContent = JSON.stringify(result, null, 2);
-          if (action === "commission") $("#commissionResult").textContent = JSON.stringify(result, null, 2);
-          if (action === "marketing") $("#marketingResult").textContent = JSON.stringify(result, null, 2);
-          if (action === "smm") $("#smmResult").textContent = JSON.stringify(result, null, 2);
-          if (action === "seo") $("#seoResult").textContent = JSON.stringify(result, null, 2);
-          if (action === "project") $("#projectResult").textContent = JSON.stringify(result, null, 2);
+          if (action === "quoteRequest") renderFriendlyPanel("#quoteResult", result, "No quote output yet.");
+          if (action === "vendorMatch") renderFriendlyPanel("#vendorMatchResult", result, "No vendor match output yet.");
+          if (action === "recommendation") renderFriendlyPanel("#recommendationResult", result, "No recommendation output yet.");
+          if (action === "commission") renderFriendlyPanel("#commissionResult", result, "No commission output yet.");
+          if (action === "marketing") renderFriendlyPanel("#marketingResult", result, "No marketing output yet.");
+          if (action === "smm") renderFriendlyPanel("#smmResult", result, "No SMM output yet.");
+          if (action === "seo") renderFriendlyPanel("#seoResult", result, "No SEO output yet.");
+          if (action === "project") renderFriendlyPanel("#projectResult", result, "No project output yet.");
           if (action.indexOf("developer") === 0) renderDeveloperCenter(result);
           if (action === "socialFinder" || action === "socialDraft") await refreshSocialLeads();
           await refresh();
@@ -2422,7 +2451,7 @@
         email: state.lastEstimateEmail,
         approved: true
       });
-      $("#estimateResult").textContent = JSON.stringify(result, null, 2);
+      renderFriendlyPanel("#estimateResult", result, "No email estimate output yet.");
     });
 
     $("#adminSecret").addEventListener("change", refresh);
@@ -2432,10 +2461,10 @@
       button.disabled = true;
       try {
         var result = await routeApi("/api/outreach", "pause", {});
-        $("#complianceResult").textContent = JSON.stringify(result, null, 2);
+        renderFriendlyPanel("#complianceResult", result, "No compliance output yet.");
         await refreshCompliance();
       } catch (error) {
-        $("#complianceResult").textContent = error.message;
+        renderPanelError("#complianceResult", error);
       } finally {
         button.disabled = false;
       }
@@ -2447,10 +2476,10 @@
         button.disabled = true;
         try {
           var result = await routeApi("/api/social-leads", "pause", {});
-          $("#socialLeadResult").textContent = JSON.stringify(result, null, 2);
+          renderFriendlyPanel("#socialLeadResult", result, "No social lead output yet.");
           await refreshSocialLeads();
         } catch (error) {
-          $("#socialLeadResult").textContent = error.message;
+          renderPanelError("#socialLeadResult", error);
         } finally {
           button.disabled = false;
         }
@@ -2461,9 +2490,9 @@
       $("#refreshSocialLeads").addEventListener("click", async function () {
         try {
           var result = await refreshSocialLeads();
-          $("#socialLeadResult").textContent = JSON.stringify(result, null, 2);
+          renderFriendlyPanel("#socialLeadResult", result, "No social lead output yet.");
         } catch (error) {
-          $("#socialLeadResult").textContent = error.message;
+          renderPanelError("#socialLeadResult", error);
         }
       });
     }
@@ -2535,7 +2564,7 @@
         try {
           renderBusinessDashboard(await businessApi("dashboard", {}));
         } catch (error) {
-          $("#businessResult").textContent = error.message;
+          renderPanelError("#businessResult", error);
         } finally {
           button.disabled = false;
         }
@@ -2571,7 +2600,7 @@
           try {
             renderExecutiveDashboard(await executiveApi(action, {}));
           } catch (error) {
-            $("#executiveResult").textContent = error.message;
+            renderPanelError("#executiveResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2596,7 +2625,7 @@
           try {
             renderSalesDashboard(await salesApi(action, {}));
           } catch (error) {
-            $("#salesResult").textContent = error.message;
+            renderPanelError("#salesResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2623,7 +2652,7 @@
           try {
             renderOperationsDashboard(await operationsApi(action, {}));
           } catch (error) {
-            $("#operationsResult").textContent = error.message;
+            renderPanelError("#operationsResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2650,7 +2679,7 @@
           try {
             renderFinanceDashboard(await financeApi(action, {}));
           } catch (error) {
-            $("#financeResult").textContent = error.message;
+            renderPanelError("#financeResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2677,7 +2706,7 @@
           try {
             renderCustomerSuccessDashboard(await customerSuccessApi(action, {}));
           } catch (error) {
-            $("#customerSuccessResult").textContent = error.message;
+            renderPanelError("#customerSuccessResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2705,7 +2734,7 @@
           try {
             renderMarketingGrowthDashboard(await marketingGrowthApi(action, {}));
           } catch (error) {
-            $("#marketingGrowthResult").textContent = error.message;
+            renderPanelError("#marketingGrowthResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2731,7 +2760,7 @@
           try {
             renderAnalyticsReportsDashboard(await analyticsReportsApi(action, {}));
           } catch (error) {
-            $("#analyticsReportsResult").textContent = error.message;
+            renderPanelError("#analyticsReportsResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2758,7 +2787,7 @@
           try {
             renderDispatchAIDashboard(await dispatchAIApi(action, {}));
           } catch (error) {
-            $("#dispatchAIResult").textContent = error.message;
+            renderPanelError("#dispatchAIResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2782,7 +2811,7 @@
           try {
             renderSaasDashboard(await saasApi(action, {}));
           } catch (error) {
-            $("#saasResult").textContent = error.message;
+            renderPanelError("#saasResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2807,7 +2836,7 @@
           try {
             renderBillingDashboard(await billingApi(action, {}));
           } catch (error) {
-            $("#billingResult").textContent = error.message;
+            renderPanelError("#billingResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2831,7 +2860,7 @@
           try {
             renderIntegrationsDashboard(await integrationsApi(action, {}));
           } catch (error) {
-            $("#integrationsResult").textContent = error.message;
+            renderPanelError("#integrationsResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2890,7 +2919,7 @@
           try {
             renderBrain(await brainApi(action, {}));
           } catch (error) {
-            $("#brainResult").textContent = error.message;
+            renderPanelError("#brainResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2917,7 +2946,7 @@
           try {
             renderRecommendationIntelligence(await recommendationIntelligenceApi(action, payload), focus);
           } catch (error) {
-            $("#recommendationIntelligenceResult").textContent = error.message;
+            renderPanelError("#recommendationIntelligenceResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2941,7 +2970,7 @@
           try {
             renderContext(await contextApi(action, {}));
           } catch (error) {
-            $("#contextResult").textContent = error.message;
+            renderPanelError("#contextResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2966,7 +2995,7 @@
           try {
             renderDecision(await decisionApi(action, payload));
           } catch (error) {
-            $("#decisionResult").textContent = error.message;
+            renderPanelError("#decisionResult", error);
           } finally {
             button.disabled = false;
           }
@@ -2989,7 +3018,7 @@
           try {
             renderMemory(await memoryApi(action, {}));
           } catch (error) {
-            $("#memoryResult").textContent = error.message;
+            renderPanelError("#memoryResult", error);
           } finally {
             button.disabled = false;
           }
@@ -3004,7 +3033,7 @@
         try {
           renderTitan(await titanApi("titanStatus", {}));
         } catch (error) {
-          $("#titanResult").textContent = error.message;
+          renderPanelError("#titanResult", error);
         } finally {
           button.disabled = false;
         }
@@ -3018,7 +3047,7 @@
         try {
           renderTitan(await titanApi("executiveBoard", {}));
         } catch (error) {
-          $("#titanResult").textContent = error.message;
+          renderPanelError("#titanResult", error);
         } finally {
           button.disabled = false;
         }
@@ -3032,7 +3061,7 @@
         try {
           renderTitan(await titanApi("qualityGates", {}));
         } catch (error) {
-          $("#titanResult").textContent = error.message;
+          renderPanelError("#titanResult", error);
         } finally {
           button.disabled = false;
         }
@@ -3057,7 +3086,7 @@
           try {
             renderProjectControl(await titanApi(action, {}));
           } catch (error) {
-            $("#projectControlResult").textContent = error.message;
+            renderPanelError("#projectControlResult", error);
           } finally {
             button.disabled = false;
           }
@@ -3072,9 +3101,9 @@
         try {
           var result = await businessApi("reports", {});
           renderBusinessDashboard(result);
-          $("#businessResult").textContent = JSON.stringify(result, null, 2);
+          renderFriendlyPanel("#businessResult", result, "No business report output yet.");
         } catch (error) {
-          $("#businessResult").textContent = error.message;
+          renderPanelError("#businessResult", error);
         } finally {
           button.disabled = false;
         }
@@ -3084,9 +3113,9 @@
     $("#refreshCompliance").addEventListener("click", async function () {
       try {
         var result = await refreshCompliance();
-        $("#complianceResult").textContent = JSON.stringify(result, null, 2);
+        renderFriendlyPanel("#complianceResult", result, "No compliance output yet.");
       } catch (error) {
-        $("#complianceResult").textContent = error.message;
+        renderPanelError("#complianceResult", error);
       }
     });
   }
