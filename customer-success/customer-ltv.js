@@ -16,13 +16,14 @@ function readCustomerData(input = {}) {
 function normalize(data = {}, forcedDemo = false) {
   const customers = arr(data.customers);
   const projects = arr(data.projects);
+  const jobs = arr(data.jobs);
   const estimates = arr(data.estimates);
   const invoices = arr(data.invoices);
   const leads = arr(data.leads);
   const tasks = arr(data.tasks);
   const hasData = customers.length || projects.length || estimates.length || invoices.length || leads.length;
   const demoMode = forcedDemo || !hasData;
-  const source = demoMode ? demoData() : { customers, projects, estimates, invoices, leads, tasks };
+  const source = demoMode ? demoData() : { customers, projects: projects.concat(jobs), estimates, invoices, leads, tasks };
   return { ...source, demoMode };
 }
 
@@ -56,12 +57,14 @@ function buildProfile(customerName, data) {
   const customer = data.customers.find((item) => nameOf(item) === customerName) || {};
   const projects = data.projects.filter((item) => nameOf(item) === customerName);
   const estimates = data.estimates.filter((item) => nameOf(item) === customerName);
-  const invoices = data.invoices.filter((item) => nameOf(item) === customerName);
+  const invoices = data.invoices.filter((item) => nameOf(item) === customerName && isBillableInvoice(item));
   const leads = data.leads.filter((item) => nameOf(item) === customerName);
   const tasks = data.tasks.filter((item) => nameOf(item) === customerName);
   const projectValue = projects.reduce((sum, item) => sum + money(item.value || item.projectValue || item.revenue), 0);
-  const paidInvoiceValue = invoices.filter((item) => /paid|complete|completed/i.test(String(item.status || ""))).reduce((sum, item) => sum + money(item.amount || item.total), 0);
-  const approvedEstimateValue = estimates.filter((item) => /won|approved|accepted/i.test(String(item.status || ""))).reduce((sum, item) => sum + money(item.recommendedPrice || item.recommended || item.total), 0);
+  const paidInvoiceValue = invoices.filter((item) => /paid|complete|completed/i.test(String(item.paymentStatus || item.status || ""))).reduce((sum, item) => sum + money(item.amount || item.total), 0);
+  const approvedEstimateValue = estimates
+    .filter((item) => /won|accepted/i.test(String(item.status || "")))
+    .reduce((sum, item) => sum + money(item.recommendedPrice || item.recommended || item.total), 0);
   const completedJobs = projects.filter((item) => /complete|completed|done/i.test(String(item.status || ""))).length;
   const lifetimeValue = projectValue + paidInvoiceValue + approvedEstimateValue;
   return {
@@ -73,7 +76,7 @@ function buildProfile(customerName, data) {
     notes: [customer.notes, projects.map((item) => item.notes).filter(Boolean).join(" "), tasks.map((item) => item.title || item.notes).filter(Boolean).join(" ")].filter(Boolean).join(" "),
     lifetimeValue,
     completedJobs,
-    paidInvoices: invoices.filter((item) => /paid|complete|completed/i.test(String(item.status || ""))).length,
+    paidInvoices: invoices.filter((item) => /paid|complete|completed/i.test(String(item.paymentStatus || item.status || ""))).length,
     openEstimates: estimates.filter((item) => !/won|lost|approved|accepted|rejected|cancel/i.test(String(item.status || ""))).length,
     openTasks: tasks.filter((item) => !/complete|completed|done/i.test(String(item.status || ""))).length,
     projects,
@@ -86,7 +89,7 @@ function buildProfile(customerName, data) {
 }
 
 function nameOf(item = {}) {
-  return item.customerName || item.name || item.businessName || item.leadName || "";
+  return item.customerName || item.company || item.fullName || item.name || item.businessName || item.leadName || "";
 }
 
 function money(value) {
@@ -96,6 +99,11 @@ function money(value) {
 
 function arr(value) {
   return Array.isArray(value) ? value : [];
+}
+
+function isBillableInvoice(invoice = {}) {
+  if (invoice.placeholder || invoice.paymentStatus === "not_applicable" || invoice.status === "placeholder") return false;
+  return money(invoice.amount || invoice.total) > 0;
 }
 
 function demoData() {

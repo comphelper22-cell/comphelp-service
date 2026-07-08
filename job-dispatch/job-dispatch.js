@@ -306,7 +306,19 @@ function nextJobNumber(data) {
 }
 
 function invoicePlaceholder(job) {
-  return { id: id("invoice"), jobId: job.id, customerId: job.customerId, customerName: job.customerName, status: "draft", amount: 0, total: 0, notes: "Invoice placeholder generated from completed job.", createdAt: now() };
+  return {
+    id: id("invoice"),
+    jobId: job.id,
+    customerId: job.customerId,
+    customerName: job.customerName,
+    status: "placeholder",
+    paymentStatus: "not_applicable",
+    amount: 0,
+    total: 0,
+    placeholder: true,
+    notes: "Completion placeholder. Create a revenue invoice for customer billing.",
+    createdAt: now()
+  };
 }
 
 function event(jobId, title, type, description, timestamp) {

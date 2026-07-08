@@ -16,6 +16,7 @@ function readFinanceData(input = {}) {
 
 function normalize(data = {}, forcedDemo = false) {
   const projects = arr(data.projects);
+  const jobs = arr(data.jobs);
   const estimates = arr(data.estimates);
   const invoices = arr(data.invoices);
   const expenses = arr(data.expenses);
@@ -23,7 +24,7 @@ function normalize(data = {}, forcedDemo = false) {
   const hasFinanceData = projects.length || estimates.length || invoices.length || expenses.length;
   const demoMode = forcedDemo || !hasFinanceData;
   return {
-    projects: demoMode ? demoProjects() : projects,
+    projects: demoMode ? demoProjects() : projects.concat(jobs),
     estimates: demoMode ? demoEstimates() : estimates,
     invoices: demoMode ? demoInvoices() : invoices,
     expenses: demoMode ? demoExpenses() : expenses,
@@ -65,22 +66,21 @@ function calculateKpis(input = {}) {
 }
 
 function revenueItems(data) {
-  const paidInvoices = data.invoices.filter((invoice) => isPaid(invoice.status)).map((invoice) => amountItem(invoice, invoice.paidAt || invoice.date));
-  const completedProjects = data.projects.filter((project) => /complete|completed|paid|closed/i.test(String(project.status || ""))).map((project) => amountItem(project, project.completionDate || project.date));
-  const wonEstimates = data.estimates.filter((estimate) => /won|approved|accepted|paid/i.test(String(estimate.status || ""))).map((estimate) => amountItem(estimate, estimate.date || estimate.createdAt));
-  const all = [...paidInvoices, ...completedProjects, ...wonEstimates];
+  const paidInvoices = data.invoices.filter((invoice) => isBillableInvoice(invoice) && isPaid(invoice.paymentStatus || invoice.status)).map((invoice) => amountItem(invoice, invoice.paidAt || invoice.updatedAt || invoice.date));
+  const all = paidInvoices;
   return {
     all,
     today: all.filter((item) => withinDays(item.date, 1)),
     week: all.filter((item) => withinDays(item.date, 7)),
-    month: all.filter((item) => withinDays(item.date, 31))
+    month: all.filter((item) => withinMonth(item.date))
   };
 }
 
 function invoiceKpis(invoices) {
-  const paid = invoices.filter((invoice) => isPaid(invoice.status));
-  const overdue = invoices.filter((invoice) => /overdue|late/i.test(String(invoice.status || "")) || isPastDue(invoice.dueDate));
-  const outstanding = invoices.filter((invoice) => !isPaid(invoice.status));
+  const billable = invoices.filter(isBillableInvoice);
+  const paid = billable.filter((invoice) => isPaid(invoice.paymentStatus || invoice.status));
+  const overdue = billable.filter((invoice) => /overdue|late/i.test(String(invoice.paymentStatus || invoice.status || "")) || isPastDue(invoice.dueDate));
+  const outstanding = billable.filter((invoice) => !isPaid(invoice.paymentStatus || invoice.status));
   return {
     outstandingInvoices: outstanding.length,
     outstandingValue: sum(outstanding.map((invoice) => money(invoice.amount || invoice.total || invoice.balance))),
@@ -143,9 +143,18 @@ function trend(week, month) {
 }
 
 function withinDays(value, days) {
-  const date = new Date(value || Date.now());
-  if (!Number.isFinite(date.getTime())) return true;
+  if (!value) return false;
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return false;
   return Date.now() - date.getTime() <= days * 86400000;
+}
+
+function withinMonth(value) {
+  if (!value) return false;
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return false;
+  const now = new Date();
+  return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
 }
 
 function isPastDue(value) {
@@ -156,6 +165,11 @@ function isPastDue(value) {
 
 function isPaid(status) {
   return /paid|complete|completed/i.test(String(status || ""));
+}
+
+function isBillableInvoice(invoice = {}) {
+  if (invoice.placeholder || invoice.paymentStatus === "not_applicable" || invoice.status === "placeholder") return false;
+  return money(invoice.amount || invoice.total) > 0;
 }
 
 function money(value) {

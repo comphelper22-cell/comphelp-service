@@ -194,9 +194,9 @@ function createCustomerCrm(options = {}) {
     arr(data.projects).concat(arr(data.jobs)).filter((item) => matchCustomer(item, names)).forEach((job) => {
       items.push(timelineItem(customerId, /complete/i.test(String(job.status || "")) ? "Job Completed" : "Job Created", "job", job.title || job.service || "Job activity", job.completionDate || job.completed_at || job.createdAt || job.date));
     });
-    arr(data.invoices).filter((item) => matchCustomer(item, names)).forEach((invoice) => {
+    arr(data.invoices).filter((item) => matchCustomer(item, names) && isBillableInvoice(item)).forEach((invoice) => {
       items.push(timelineItem(customerId, "Invoice Created", "invoice", invoice.invoiceNumber || invoice.status || "Invoice activity", invoice.createdAt || invoice.date));
-      if (/paid/i.test(String(invoice.status || ""))) items.push(timelineItem(customerId, "Payment Received", "payment", `Payment ${money(invoice.amount || invoice.total)}`, invoice.paidAt || invoice.updatedAt || invoice.date));
+      if (/paid/i.test(String(invoice.paymentStatus || invoice.status || ""))) items.push(timelineItem(customerId, "Payment Received", "payment", `Payment ${money(invoice.amount || invoice.total)}`, invoice.paidAt || invoice.updatedAt || invoice.date));
     });
     arr(data.customerNotes).filter((note) => note.customerId === customerId && !note.deleted_at).forEach((note) => {
       items.push(timelineItem(customerId, note.internal ? "Internal Note" : "Customer Note", "note", note.body, note.updatedAt || note.createdAt));
@@ -269,7 +269,7 @@ function createCustomerCrm(options = {}) {
     if (!customer) return fail("customer_not_found");
     const names = customerNames(customer);
     const openJobs = arr(data.projects).concat(arr(data.jobs)).filter((item) => matchCustomer(item, names) && !/complete|cancel|closed/i.test(String(item.status || "")));
-    const invoices = arr(data.invoices).filter((item) => matchCustomer(item, names));
+    const invoices = arr(data.invoices).filter((item) => matchCustomer(item, names) && isBillableInvoice(item));
     const openInvoices = invoices.filter((invoice) => !/paid|void/i.test(String(invoice.status || "")));
     const notesForCustomer = arr(data.customerNotes).filter((note) => note.customerId === customerId && !note.deleted_at);
     const lastContact = [customer.updatedAt, ...notesForCustomer.map((note) => note.updatedAt || note.createdAt)].filter(Boolean).sort().pop() || customer.createdAt;
@@ -328,6 +328,11 @@ function customerNames(customer) {
 function matchCustomer(item, names) {
   const values = [item.customerId, item.customer_id, item.customerName, item.name, item.company].filter(Boolean).map((value) => String(value).toLowerCase());
   return values.some((value) => names.includes(value));
+}
+
+function isBillableInvoice(invoice = {}) {
+  if (invoice.placeholder || invoice.paymentStatus === "not_applicable" || invoice.status === "placeholder") return false;
+  return Number(invoice.total || invoice.amount || 0) > 0;
 }
 
 function invoiceTotal(data) {

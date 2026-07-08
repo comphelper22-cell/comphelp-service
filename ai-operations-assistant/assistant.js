@@ -125,7 +125,7 @@ function createAiOperationsAssistant(options = {}) {
     const activeCustomers = customers.filter((customer) => customer.status !== "archived");
     const newCustomersThisWeek = customers.filter((customer) => withinDays(customer.createdAt || customer.created_at, 7));
     const inactiveCustomers = customers.filter((customer) => !withinDays(lastCustomerTouch(data, customer), 14));
-    const overdueInvoices = data.invoices.filter((invoice) => /overdue/i.test(String(invoice.paymentStatus || invoice.status || "")));
+    const overdueInvoices = data.invoices.filter((invoice) => isBillableInvoice(invoice) && /overdue/i.test(String(invoice.paymentStatus || invoice.status || "")));
     const customersWithOverdueInvoices = customers.filter((customer) => overdueInvoices.some((invoice) => sameCustomer(invoice, customer)));
     const openJobs = activeJobs(data);
     const customersWithActiveJobs = customers.filter((customer) => openJobs.some((job) => sameCustomer(job, customer)));
@@ -161,7 +161,7 @@ function createAiOperationsAssistant(options = {}) {
   }
 
   function revenueInsights(data = read()) {
-    const invoices = data.invoices;
+    const invoices = data.invoices.filter(isBillableInvoice);
     const paidInvoices = invoices.filter((invoice) => /paid/i.test(String(invoice.paymentStatus || invoice.status || "")));
     const outstandingInvoices = invoices.filter((invoice) => !/paid|refunded/i.test(String(invoice.paymentStatus || invoice.status || "")));
     const overdueInvoices = invoices.filter((invoice) => /overdue/i.test(String(invoice.paymentStatus || invoice.status || "")));
@@ -225,11 +225,20 @@ function answerIntent(data, intent, question) {
   const jobs = jobInsightsFromData(data);
   const revenue = revenueInsightsFromData(data);
   const recs = createAiOperationsAssistant({ file: "__unused__" }).recommendations(data).data;
+  const namedCustomer = findCustomerForQuestion(data, question);
+  if (namedCustomer) {
+    if (intent.name === "customer_summary") return customerSummaryAnswer(data, namedCustomer);
+    if (intent.name === "completed_work") return completedWorkAnswer(data, namedCustomer);
+    if (intent.name === "invoice_history") return invoiceHistoryAnswer(data, namedCustomer);
+    if (intent.name === "lifetime_value") return lifetimeValueAnswer(data, namedCustomer);
+    if (intent.name === "next_follow_up") return nextFollowUpAnswer(data, namedCustomer);
+    if (intent.name === "owner_next") return ownerNextAnswer(data, namedCustomer);
+  }
   if (intent.name === "todays_jobs") return answer("Today's jobs", jobs.todaysJobs, { count: jobs.todaysJobs.length });
   if (intent.name === "owed_money") return answer("Customers with outstanding invoices", revenue.outstandingInvoices, { outstandingBalance: revenue.outstandingBalance });
   if (intent.name === "revenue_month") return answer(`Revenue this month is ${currency(revenue.revenueThisMonth)}.`, revenue.paidInvoices, { revenueThisMonth: revenue.revenueThisMonth });
   if (intent.name === "revenue_today") return answer(`Revenue today is ${currency(revenue.revenueToday)}.`, revenue.paidInvoices, { revenueToday: revenue.revenueToday });
-  if (intent.name === "today_priorities") return { answer: "Here are the highest priority actions for today.", items: recs.slice(0, 5), recommendations: recs.slice(0, 5) };
+  if (intent.name === "today_priorities" || intent.name === "owner_next") return { answer: "Here are the highest priority actions for today.", items: recs.slice(0, 5), recommendations: recs.slice(0, 5) };
   if (intent.name === "behind_schedule") return answer("Jobs needing schedule attention", jobs.schedulingConflicts.concat(jobs.waitingPartsJobs), { conflicts: jobs.schedulingConflicts.length });
   if (intent.name === "overloaded_technicians") return answer("Technician workload review", jobs.overloadedTechnicians, { workload: jobs.technicianWorkload });
   if (intent.name === "active_customers") return answer("Active customers", customer.activeCustomers, { count: customer.activeCustomers.length });
@@ -256,6 +265,12 @@ function answerIntent(data, intent, question) {
 function parseIntent(question) {
   const q = String(question || "").toLowerCase();
   const tests = [
+    ["customer_summary", /summarize|customer summary|account summary/],
+    ["completed_work", /completed work|show completed work|work completed|what was completed/],
+    ["invoice_history", /invoice history|show invoice|invoices for|billing history/],
+    ["lifetime_value", /lifetime value|ltv|customer value/],
+    ["next_follow_up", /next follow.?up|recommend.*follow|follow.?up recommendation/],
+    ["owner_next", /owner.*next|what should the owner do next|owner do next/],
     ["todays_jobs", /today'?s jobs|show.*jobs.*today|jobs today/],
     ["owed_money", /owe|owes|outstanding|unpaid invoice|money/],
     ["revenue_month", /made.*month|revenue.*month|this month/],
@@ -352,7 +367,7 @@ function mostLoaded(workload) {
 
 function topPayingCustomers(data) {
   const totals = {};
-  data.invoices.filter((invoice) => /paid/i.test(String(invoice.paymentStatus || invoice.status || ""))).forEach((invoice) => {
+  data.invoices.filter((invoice) => isBillableInvoice(invoice) && /paid/i.test(String(invoice.paymentStatus || invoice.status || ""))).forEach((invoice) => {
     const name = invoice.customerName || invoice.customerId || "Unknown Customer";
     totals[name] = (totals[name] || 0) + Number(invoice.total || invoice.amount || 0);
   });
@@ -382,6 +397,80 @@ function sameCustomer(left, right) {
   const leftValues = [left.customerId, left.customerName, left.name, left.fullName, left.company].filter(Boolean).map((value) => String(value).toLowerCase());
   const rightValues = [right.id, right.customerId, right.customerName, right.name, right.fullName, right.company].filter(Boolean).map((value) => String(value).toLowerCase());
   return leftValues.some((value) => rightValues.includes(value));
+}
+
+function customerAliases(customer) {
+  return [customer.id, customer.customerId, customer.customerName, customer.name, customer.fullName, customer.company]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase());
+}
+
+function findCustomerForQuestion(data, question) {
+  const q = String(question || "").toLowerCase();
+  return data.customers.find((customer) => customerAliases(customer).some((alias) => alias && q.includes(alias)));
+}
+
+function recordsForCustomer(records, customer) {
+  const aliases = customerAliases(customer);
+  return (records || []).filter((record) => customerAliases(record).some((alias) => aliases.includes(alias)));
+}
+
+function customerSummaryAnswer(data, customer) {
+  const jobs = recordsForCustomer(data.jobs, customer);
+  const estimates = recordsForCustomer(data.estimates, customer);
+  const invoices = recordsForCustomer(data.invoices, customer).filter(isBillableInvoice);
+  const paidInvoices = invoices.filter((invoice) => /paid/i.test(String(invoice.paymentStatus || invoice.status || "")));
+  const completedJobs = jobs.filter((job) => /completed/i.test(String(job.status || "")));
+  const lifetimeValue = sumInvoices(paidInvoices);
+  return answer(
+    `${customer.company || customer.fullName || customer.name} is a commercial Los Angeles customer with ${completedJobs.length} completed job(s), ${invoices.length} billable invoice(s), and ${currency(lifetimeValue)} lifetime value.`,
+    [{ title: customer.company || customer.fullName || customer.name, service: (estimates[0] && estimates[0].service) || (jobs[0] && jobs[0].service), status: customer.status, lifetimeValue }],
+    { completedJobs: completedJobs.length, invoices: invoices.length, lifetimeValue }
+  );
+}
+
+function completedWorkAnswer(data, customer) {
+  const jobs = recordsForCustomer(data.jobs, customer).filter((job) => /completed/i.test(String(job.status || "")));
+  return answer(`Completed work for ${customer.company || customer.fullName || customer.name}.`, jobs, { completedJobs: jobs.length });
+}
+
+function invoiceHistoryAnswer(data, customer) {
+  const invoices = recordsForCustomer(data.invoices, customer).filter(isBillableInvoice);
+  return answer(`Invoice history for ${customer.company || customer.fullName || customer.name}.`, invoices, {
+    invoices: invoices.length,
+    paidInvoices: invoices.filter((invoice) => /paid/i.test(String(invoice.paymentStatus || invoice.status || ""))).length,
+    outstandingBalance: invoices.filter((invoice) => !/paid|refunded/i.test(String(invoice.paymentStatus || invoice.status || ""))).reduce((sum, invoice) => sum + Number(invoice.outstandingBalance || invoice.total || 0), 0)
+  });
+}
+
+function lifetimeValueAnswer(data, customer) {
+  const paidInvoices = recordsForCustomer(data.invoices, customer).filter((invoice) => isBillableInvoice(invoice) && /paid/i.test(String(invoice.paymentStatus || invoice.status || "")));
+  const lifetimeValue = sumInvoices(paidInvoices);
+  return answer(`${customer.company || customer.fullName || customer.name} lifetime value is ${currency(lifetimeValue)}.`, paidInvoices, { lifetimeValue });
+}
+
+function nextFollowUpAnswer(data, customer) {
+  const completedJobs = recordsForCustomer(data.jobs, customer).filter((job) => /completed/i.test(String(job.status || "")));
+  const paidInvoices = recordsForCustomer(data.invoices, customer).filter((invoice) => isBillableInvoice(invoice) && /paid/i.test(String(invoice.paymentStatus || invoice.status || "")));
+  const recommendation = completedJobs.length && paidInvoices.length
+    ? "Send a thank-you message, request a review, and schedule a 30-day camera and WiFi health check."
+    : "Confirm project status and make sure billing is complete before asking for a review.";
+  return answer(`Recommended next follow-up: ${recommendation}`, [{ customerName: customer.company || customer.fullName || customer.name, recommendedAction: recommendation }], { completedJobs: completedJobs.length, paidInvoices: paidInvoices.length });
+}
+
+function ownerNextAnswer(data, customer) {
+  const followUp = nextFollowUpAnswer(data, customer);
+  return {
+    answer: `Owner next action for ${customer.company || customer.fullName || customer.name}: ${followUp.items[0].recommendedAction}`,
+    items: followUp.items,
+    metrics: followUp.metrics,
+    recommendations: followUp.items
+  };
+}
+
+function isBillableInvoice(invoice = {}) {
+  if (invoice.placeholder || invoice.paymentStatus === "not_applicable" || invoice.status === "placeholder") return false;
+  return Number(invoice.total || invoice.amount || 0) > 0;
 }
 
 function lastCustomerTouch(data, customer) {

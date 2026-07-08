@@ -101,7 +101,11 @@ function createRevenueFlow(options = {}) {
 
   function markInvoice(invoiceId, status, patch = {}) {
     const paymentStatus = status === "paid" ? "paid" : status === "overdue" ? "overdue" : undefined;
-    return updateInvoice(invoiceId, { ...patch, status, paymentStatus: paymentStatus || patch.paymentStatus });
+    const invoice = read().invoices.find((item) => item.id === invoiceId) || {};
+    const paidPatch = status === "paid"
+      ? { paidAmount: patch.paidAmount ?? invoice.total ?? invoice.amount ?? 0, paidAt: patch.paidAt || now() }
+      : {};
+    return updateInvoice(invoiceId, { ...patch, ...paidPatch, status, paymentStatus: paymentStatus || patch.paymentStatus });
   }
 
   function recordPayment(input = {}) {
@@ -139,7 +143,7 @@ function createRevenueFlow(options = {}) {
 
   function dashboard() {
     const data = read();
-    const invoices = data.invoices || [];
+    const invoices = (data.invoices || []).filter(isBillableInvoice);
     const estimates = data.estimates || [];
     const paid = invoices.filter((invoice) => invoice.paymentStatus === "paid" || invoice.status === "paid");
     const outstanding = invoices.filter((invoice) => !["paid", "refunded"].includes(invoice.paymentStatus || invoice.status));
@@ -170,10 +174,13 @@ function createRevenueFlow(options = {}) {
     const customer = findCustomer(data, customerIdOrName, customerIdOrName) || {};
     const names = [customer.id, customer.fullName, customer.name, customer.company, customerIdOrName].filter(Boolean).map((value) => String(value).toLowerCase());
     const estimates = data.estimates.filter((estimate) => matchEntity(estimate, names));
-    const invoices = data.invoices.filter((invoice) => matchEntity(invoice, names));
+    const invoices = data.invoices.filter((invoice) => matchEntity(invoice, names) && isBillableInvoice(invoice));
     const payments = data.payments.filter((payment) => matchEntity(payment, names) || invoices.some((invoice) => invoice.id === payment.invoiceId));
     const outstandingBalance = invoices.filter((invoice) => !["paid", "refunded"].includes(invoice.paymentStatus || invoice.status)).reduce((sum, invoice) => sum + Number(invoice.outstandingBalance ?? invoice.total ?? 0), 0);
-    const lifetimeRevenue = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+    const paidInvoiceRevenue = invoices
+      .filter((invoice) => /paid/i.test(String(invoice.paymentStatus || invoice.status || "")) && !payments.some((payment) => payment.invoiceId === invoice.id))
+      .reduce((sum, invoice) => sum + Number(invoice.total || invoice.amount || 0), 0);
+    const lifetimeRevenue = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0) + paidInvoiceRevenue;
     return ok({ customer, estimates, invoices, payments, outstandingBalance, lifetimeRevenue });
   }
 
@@ -246,6 +253,7 @@ function normalizeInvoice(input = {}, data = {}, existing = {}) {
     paidAmount,
     outstandingBalance: Math.max(0, lineItems.total - paidAmount),
     dueDate: input.dueDate || existing.dueDate || "",
+    paidAt: input.paidAt || existing.paidAt || "",
     notes: clean(input.notes || existing.notes, 1500),
     createdAt: existing.createdAt || timestamp,
     updatedAt: timestamp
@@ -277,8 +285,9 @@ function calculateLineItems(input = {}, existing = null) {
 
 function recommendations(data) {
   const recs = [];
-  const unpaid = data.invoices.find((invoice) => ["unpaid", "partial"].includes(invoice.paymentStatus));
-  const overdue = data.invoices.find((invoice) => invoice.paymentStatus === "overdue" || invoice.status === "overdue");
+  const invoices = data.invoices.filter(isBillableInvoice);
+  const unpaid = invoices.find((invoice) => ["unpaid", "partial"].includes(invoice.paymentStatus));
+  const overdue = invoices.find((invoice) => invoice.paymentStatus === "overdue" || invoice.status === "overdue");
   const approved = data.estimates.find((estimate) => estimate.status === "approved");
   if (unpaid) recs.push({ title: "Follow up unpaid invoice", customerName: unpaid.customerName, estimatedRevenue: unpaid.outstandingBalance || unpaid.total, priority: "HIGH" });
   if (approved) recs.push({ title: "Call customer with approved estimate", customerName: approved.customerName, estimatedRevenue: approved.total, priority: "HIGH" });
@@ -313,6 +322,11 @@ function findCustomer(data, customerId, customerName) {
 
 function matchEntity(entity, names) {
   return [entity.customerId, entity.customerName, entity.name, entity.company].filter(Boolean).some((value) => names.includes(String(value).toLowerCase()));
+}
+
+function isBillableInvoice(invoice = {}) {
+  if (invoice.placeholder || invoice.paymentStatus === "not_applicable" || invoice.status === "placeholder") return false;
+  return Number(invoice.total || invoice.amount || 0) > 0;
 }
 
 function normalizePaymentStatus(value) {
