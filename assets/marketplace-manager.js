@@ -1361,9 +1361,19 @@
     var email = data.emailCampaigns || data;
     var recommendations = data.aiMarketingRecommendations || data.recommendations || [];
     var opportunities = data.growthOpportunities || recommendations || [];
+    var aiMarketing = data.aiMarketingManager || data;
+    var topLeads = aiMarketing.topLeadsToday || data.topLeadsToday || [];
+    var neighborhoods = aiMarketing.bestNeighborhoods || data.bestNeighborhoods || [];
+    var industries = aiMarketing.bestIndustries || data.bestIndustries || [];
+    var alerts = aiMarketing.competitorAlerts || data.competitorAlerts || [];
+    var campaign = aiMarketing.recommendedCampaign || data.recommendedCampaign || {};
+    var followups = aiMarketing.followUpQueue || data.followUpQueue || [];
+    var opportunityScore = aiMarketing.marketOpportunityScore || data.marketOpportunityScore || 0;
     var cards = [
       ["Leads Today", data.leadsToday || data.totalLeads || 0],
       ["Top Source", topSource],
+      ["Market Opportunity", opportunityScore ? opportunityScore + "/100" : "review"],
+      ["Top Leads", topLeads.length || 0],
       ["Campaign Leads", campaignData.totalLeads || 0],
       ["Marketing ROI", (roi.roiPercent !== undefined ? roi.roiPercent + "%" : "ready")],
       ["Cost / Lead", roi.costPerLead !== undefined ? money(roi.costPerLead) : money(0)],
@@ -1372,6 +1382,7 @@
       ["Social Reach", social.totalReach || 0],
       ["Email Campaigns", email.draftCampaigns || (email.campaigns ? email.campaigns.length : 0)],
       ["Growth Ideas", opportunities.length || 0],
+      ["Competitor Alerts", alerts.length || 0],
       ["AI Recommendations", recommendations.length || 0],
       ["Mode", data.demoMode ? "demo" : "live"]
     ];
@@ -1390,6 +1401,37 @@
     renderList("#marketingRecommendationList", recommendations.slice(0, 6).map(function (item) {
       return { title: item.title || item.name, meta: item.category || "Marketing", detail: item.description || item.recommendedAction || item.reasoning, pill: item.priority || "AI" };
     }), "No marketing recommendations yet.");
+    renderList("#marketingTopLeads", topLeads.slice(0, 8).map(function (lead) {
+      return {
+        title: lead.businessName || lead.name || "Lead",
+        meta: [lead.city, lead.businessType].filter(Boolean).join(" | "),
+        detail: lead.possibleServiceNeed || lead.reason || "Review lead before outreach.",
+        pill: lead.score ? lead.score + "/100" : "review"
+      };
+    }), "No lead intelligence yet.");
+    renderList("#marketingNeighborhoods", neighborhoods.slice(0, 6).map(function (item) {
+      return { title: item.title, meta: item.count + " leads", detail: "Average opportunity score: " + item.averageScore + "/100", pill: "area" };
+    }), "No neighborhood signals yet.");
+    renderList("#marketingIndustries", industries.slice(0, 6).map(function (item) {
+      return { title: item.title, meta: item.count + " leads", detail: "Average opportunity score: " + item.averageScore + "/100", pill: "industry" };
+    }), "No industry signals yet.");
+    renderList("#marketingCompetitorAlerts", alerts.slice(0, 6).map(function (alert) {
+      return {
+        title: alert.service || alert.type,
+        meta: alert.city || "Market watch",
+        detail: alert.signal || alert.opportunity,
+        pill: alert.demandScore ? alert.demandScore + "/100" : "watch"
+      };
+    }), "No competitor alerts yet.");
+    renderFriendlyPanel("#marketingRecommendedCampaign", campaign, "No recommended campaign yet.");
+    renderList("#marketingFollowupQueue", followups.slice(0, 6).map(function (lead) {
+      return {
+        title: lead.businessName || lead.name || "Lead",
+        meta: lead.status || "needs_review",
+        detail: "Owner approval required before outreach. " + (lead.reason || ""),
+        pill: lead.probabilityToClose || "review"
+      };
+    }), "No follow-up queue yet.");
     renderFriendlyPanel("#marketingGrowthResult", payload, "No marketing growth output yet.");
   }
 
@@ -2723,7 +2765,11 @@
       ["#showMarketingSocial", "marketing.social"],
       ["#showMarketingEmail", "marketing.email"],
       ["#showMarketingRoi", "marketing.roi"],
-      ["#showMarketingRecommendations", "marketing.recommendations"]
+      ["#showMarketingRecommendations", "marketing.recommendations"],
+      ["#showLeadIntelligence", "marketing.leadIntelligence"],
+      ["#showMarketWatcher", "marketing.marketWatcher"],
+      ["#showMarketingStrategy", "marketing.strategy"],
+      ["#showOutreachPolicy", "marketing.outreachPolicy"]
     ].forEach(function (item) {
       var selector = item[0];
       var action = item[1];

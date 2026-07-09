@@ -1,6 +1,18 @@
 const { DATA_FILE, JsonStore, id, now, writeJson } = require("../database/json-store");
 
-const CUSTOMER_STATUSES = ["new", "active", "returning", "commercial", "residential", "archived"];
+const CUSTOMER_STATUSES = [
+  "new",
+  "active",
+  "returning",
+  "commercial",
+  "residential",
+  "prospect",
+  "lead",
+  "warm_lead",
+  "cold_lead",
+  "follow_up_required",
+  "archived"
+];
 const SEARCH_FIELDS = ["fullName", "name", "company", "phone", "email", "address", "city", "state", "zip", "status", "leadSource", "assignedSales", "assignedTechnician", "notes"];
 
 function createCustomerCrm(options = {}) {

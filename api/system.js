@@ -209,6 +209,12 @@ function runMarketingGrowthAction(action, payload = {}) {
   if (action === "marketing.email") return marketingGrowthEngine.email(payload);
   if (action === "marketing.roi") return marketingGrowthEngine.roi(payload);
   if (action === "marketing.recommendations") return marketingGrowthEngine.recommendations(payload);
+  if (action === "marketing.leadIntelligence") return marketingGrowthEngine.leadIntelligence(payload);
+  if (action === "marketing.marketWatcher") return marketingGrowthEngine.marketWatcher(payload);
+  if (action === "marketing.scoreLead") return marketingGrowthEngine.scoreLead(payload.lead || payload);
+  if (action === "marketing.strategy") return marketingGrowthEngine.strategy(payload);
+  if (action === "marketing.saveLeadToCrm") return marketingGrowthEngine.saveLeadToCrm(payload);
+  if (action === "marketing.outreachPolicy") return marketingGrowthEngine.outreachPolicy(payload);
   if (action === "marketing.agent") return { ok: true, data: marketingManagerAgent.run(payload) };
   return { ok: false, error: "unknown_marketing_growth_action" };
 }
@@ -429,7 +435,24 @@ module.exports = async function handler(req, res) {
           operationsActions: ["operations.status", "operations.dashboard", "operations.jobs", "operations.technicians", "operations.dispatchSuggestions", "operations.scheduleHealth", "operations.priorities", "operations.customerTimeline", "operations.inventoryNeeds"],
           financeActions: ["finance.status", "finance.dashboard", "finance.revenue", "finance.invoices", "finance.cashflow", "finance.expenses", "finance.profit", "finance.forecast", "finance.health", "finance.kpis"],
           customerSuccessActions: ["customerSuccess.status", "customerSuccess.dashboard", "customerSuccess.health", "customerSuccess.timeline", "customerSuccess.ltv", "customerSuccess.risks", "customerSuccess.vip", "customerSuccess.lost", "customerSuccess.recommendations"],
-          marketingActions: ["marketing.status", "marketing.dashboard", "marketing.leads", "marketing.campaigns", "marketing.localSeo", "marketing.reviews", "marketing.social", "marketing.email", "marketing.roi", "marketing.recommendations"],
+          marketingActions: [
+            "marketing.status",
+            "marketing.dashboard",
+            "marketing.leads",
+            "marketing.campaigns",
+            "marketing.localSeo",
+            "marketing.reviews",
+            "marketing.social",
+            "marketing.email",
+            "marketing.roi",
+            "marketing.recommendations",
+            "marketing.leadIntelligence",
+            "marketing.marketWatcher",
+            "marketing.scoreLead",
+            "marketing.strategy",
+            "marketing.saveLeadToCrm",
+            "marketing.outreachPolicy"
+          ],
           analyticsActions: ["analytics.status", "analytics.dashboard", "analytics.kpis", "analytics.trends", "analytics.reports", "analytics.scorecard", "analytics.export", "analytics.insights"],
           dispatchAIActions: ["dispatchAI.status", "dispatchAI.dashboard", "dispatchAI.schedule", "dispatchAI.optimize", "dispatchAI.technicians", "dispatchAI.routes", "dispatchAI.eta", "dispatchAI.capacity", "dispatchAI.emergency"],
           saasActions: ["saas.status", "saas.organizations", "saas.teams", "saas.permissions", "saas.settings", "saas.dashboard"],
