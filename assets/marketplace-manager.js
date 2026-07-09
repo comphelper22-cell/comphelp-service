@@ -1350,14 +1350,16 @@
     console.debug("[marketing-tabs] " + message, detail || "");
   }
 
-  function setMarketingActiveTab(button) {
+  function setActiveMarketingTab(button) {
     var section = document.querySelector('[data-view="marketingGrowthCenter"]');
     if (!section || !button) return;
     section.querySelectorAll("[data-marketing-action]").forEach(function (item) {
       item.classList.remove("primary");
+      item.classList.remove("is-active");
       item.setAttribute("aria-pressed", "false");
     });
     button.classList.add("primary");
+    button.classList.add("is-active");
     button.setAttribute("aria-pressed", "true");
   }
 
@@ -1399,7 +1401,7 @@
     var targetId = button.getAttribute("data-marketing-target") || "marketingGrowthResult";
     var targetSelector = "#" + targetId;
     button.disabled = true;
-    setMarketingActiveTab(button);
+    setActiveMarketingTab(button);
     renderLoading(targetSelector, "Loading " + marketingActionTitle(action) + "...");
     marketingDebug("click", { action: action, target: targetId });
     try {
@@ -1429,7 +1431,7 @@
       handleMarketingTab(button);
     });
     var active = section.querySelector("[data-marketing-action].primary") || section.querySelector("[data-marketing-action]");
-    if (active) setMarketingActiveTab(active);
+    if (active) setActiveMarketingTab(active);
     marketingDebug("attached", section.querySelectorAll("[data-marketing-action]").length + " tabs");
   }
 
