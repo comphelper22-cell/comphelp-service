@@ -1344,6 +1344,12 @@
     renderFriendlyPanel("#assistantAnswer", unwrap(result), "No assistant answer yet.");
   }
 
+  function marketingDebug(message, detail) {
+    var isLocal = /^(file:|https?:\/\/(localhost|127\.0\.0\.1))/i.test(window.location.href);
+    if (!isLocal || !window.console || !console.debug) return;
+    console.debug("[marketing-tabs] " + message, detail || "");
+  }
+
   function setMarketingActiveTab(button) {
     var section = document.querySelector('[data-view="marketingGrowthCenter"]');
     if (!section || !button) return;
@@ -1374,7 +1380,8 @@
   }
 
   function renderMarketingOutput(payload, action) {
-    var target = $("#marketingGrowthResult");
+    var targetId = "marketingGrowthResult";
+    var target = $("#" + targetId);
     if (!target || target.isMissing) return;
     var data = payload && payload.data !== undefined ? payload.data : payload;
     var title = marketingActionTitle(action);
@@ -1384,6 +1391,46 @@
     }
     target.innerHTML = '<p class="muted">' + escapeHtml(title) + '</p>';
     renderFriendlyPanel("#marketingGrowthResult", data, "No demo data available for this section yet.");
+  }
+
+  async function handleMarketingTab(button) {
+    if (!button || button.disabled) return;
+    var action = button.getAttribute("data-marketing-action") || "marketing.dashboard";
+    var targetId = button.getAttribute("data-marketing-target") || "marketingGrowthResult";
+    var targetSelector = "#" + targetId;
+    button.disabled = true;
+    setMarketingActiveTab(button);
+    renderLoading(targetSelector, "Loading " + marketingActionTitle(action) + "...");
+    marketingDebug("click", { action: action, target: targetId });
+    try {
+      var dashboard = await marketingGrowthApi("marketing.dashboard", {});
+      renderMarketingGrowthDashboard(dashboard);
+      if (action === "marketing.dashboard") {
+        renderMarketingOutput(dashboard, action);
+      } else {
+        renderMarketingOutput(await marketingGrowthApi(action, {}), action);
+      }
+    } catch (error) {
+      renderPanelError(targetSelector, error);
+      marketingDebug("error", error && error.message ? error.message : error);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function attachMarketingGrowthTabs() {
+    var section = document.querySelector('[data-view="marketingGrowthCenter"]');
+    if (!section || section.dataset.marketingTabsAttached === "true") return;
+    section.dataset.marketingTabsAttached = "true";
+    section.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-marketing-action]") : null;
+      if (!button || !section.contains(button)) return;
+      event.preventDefault();
+      handleMarketingTab(button);
+    });
+    var active = section.querySelector("[data-marketing-action].primary") || section.querySelector("[data-marketing-action]");
+    if (active) setMarketingActiveTab(active);
+    marketingDebug("attached", section.querySelectorAll("[data-marketing-action]").length + " tabs");
   }
 
   function renderMarketingGrowthDashboard(payload) {
@@ -1474,7 +1521,6 @@
         pill: lead.probabilityToClose || "review"
       };
     }), "No follow-up queue yet.");
-    renderMarketingOutput(payload, "marketing.dashboard");
   }
 
   function renderAnalyticsReportsDashboard(payload) {
@@ -2798,30 +2844,6 @@
       }
     });
 
-    document.querySelectorAll('[data-view="marketingGrowthCenter"] [data-marketing-action]').forEach(function (button) {
-      button.addEventListener("click", async function () {
-        var action = button.getAttribute("data-marketing-action") || "marketing.dashboard";
-        button.disabled = true;
-        setMarketingActiveTab(button);
-        renderLoading("#marketingGrowthResult", "Loading " + marketingActionTitle(action) + "...");
-        try {
-          var dashboard = action === "marketing.dashboard"
-            ? await marketingGrowthApi("marketing.dashboard", {})
-            : await marketingGrowthApi("marketing.dashboard", {});
-          renderMarketingGrowthDashboard(dashboard);
-          if (action === "marketing.dashboard") {
-            renderMarketingOutput(dashboard, action);
-          } else {
-            renderMarketingOutput(await marketingGrowthApi(action, {}), action);
-          }
-        } catch (error) {
-          renderPanelError("#marketingGrowthResult", error);
-        } finally {
-          button.disabled = false;
-        }
-      });
-    });
-
     [
       ["#refreshAnalyticsReports", "analytics.dashboard"],
       ["#showAnalyticsKpis", "analytics.kpis"],
@@ -3201,6 +3223,7 @@
   }
 
   attachNavigation();
+  attachMarketingGrowthTabs();
   attachForms();
   var savedSecret = localStorage.getItem("marketplaceSecret");
   var savedRole = localStorage.getItem("marketplaceRole");

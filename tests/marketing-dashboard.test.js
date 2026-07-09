@@ -32,7 +32,10 @@ actions.forEach((action) => {
 
 assert.ok(manager.includes("setMarketingActiveTab"), "Marketing tab active state handler should exist.");
 assert.ok(manager.includes("renderMarketingOutput"), "Marketing output renderer should exist.");
+assert.ok(manager.includes("attachMarketingGrowthTabs"), "Marketing tabs should have an isolated initializer.");
+assert.ok(manager.includes("section.addEventListener(\"click\""), "Marketing tabs should use delegated click handling.");
 assert.ok(manager.includes("[data-marketing-action]"), "Marketing handler should bind by data action.");
+assert.ok(manager.indexOf("attachMarketingGrowthTabs();") < manager.indexOf("attachForms();"), "Marketing tabs should bind before the broad form setup.");
 
 const dashboard = marketingEngine.dashboard({});
 assert.strictEqual(dashboard.ok, true);
