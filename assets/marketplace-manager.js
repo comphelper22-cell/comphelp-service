@@ -1344,6 +1344,48 @@
     renderFriendlyPanel("#assistantAnswer", unwrap(result), "No assistant answer yet.");
   }
 
+  function setMarketingActiveTab(button) {
+    var section = document.querySelector('[data-view="marketingGrowthCenter"]');
+    if (!section || !button) return;
+    section.querySelectorAll("[data-marketing-action]").forEach(function (item) {
+      item.classList.remove("primary");
+      item.setAttribute("aria-pressed", "false");
+    });
+    button.classList.add("primary");
+    button.setAttribute("aria-pressed", "true");
+  }
+
+  function marketingActionTitle(action) {
+    return {
+      "marketing.dashboard": "Growth Dashboard",
+      "marketing.leads": "Lead Sources",
+      "marketing.campaigns": "Campaigns",
+      "marketing.localSeo": "Local SEO",
+      "marketing.reviews": "Reviews",
+      "marketing.social": "Social",
+      "marketing.email": "Email",
+      "marketing.roi": "ROI",
+      "marketing.recommendations": "Recommendations",
+      "marketing.leadIntelligence": "Lead Intelligence",
+      "marketing.marketWatcher": "Market Watcher",
+      "marketing.strategy": "Strategy",
+      "marketing.outreachPolicy": "Outreach Policy"
+    }[action] || "Marketing Output";
+  }
+
+  function renderMarketingOutput(payload, action) {
+    var target = $("#marketingGrowthResult");
+    if (!target || target.isMissing) return;
+    var data = payload && payload.data !== undefined ? payload.data : payload;
+    var title = marketingActionTitle(action);
+    if (!data || (typeof data === "object" && !Array.isArray(data) && !Object.keys(data).length)) {
+      target.innerHTML = '<p class="muted">No demo data available for this section yet.</p>';
+      return;
+    }
+    target.innerHTML = '<p class="muted">' + escapeHtml(title) + '</p>';
+    renderFriendlyPanel("#marketingGrowthResult", data, "No demo data available for this section yet.");
+  }
+
   function renderMarketingGrowthDashboard(payload) {
     var target = $("#marketingGrowthMetrics");
     if (!target || !payload) return;
@@ -1351,7 +1393,7 @@
     var leadSources = data.leadSources || data.bySource || {};
     var topSource = data.topLeadSource || Object.keys(leadSources).sort(function (a, b) {
       return Number(leadSources[b] || 0) - Number(leadSources[a] || 0);
-    })[0] || "none";
+    })[0] || "Not available yet";
     var campaignData = data.campaignPerformance || data;
     var campaigns = campaignData.campaigns || data.campaigns || [];
     var roi = data.marketingRoi || data;
@@ -1376,7 +1418,7 @@
       ["Top Leads", topLeads.length || 0],
       ["Campaign Leads", campaignData.totalLeads || 0],
       ["Marketing ROI", (roi.roiPercent !== undefined ? roi.roiPercent + "%" : "ready")],
-      ["Cost / Lead", roi.costPerLead !== undefined ? money(roi.costPerLead) : money(0)],
+      ["Cost / Lead", roi.costPerLead !== undefined ? money(roi.costPerLead) : "Not available yet"],
       ["Local SEO Health", localSeo.localSeoHealth || localSeo.status || "ready"],
       ["Reviews", reviews.totalReviews || 0],
       ["Social Reach", social.totalReach || 0],
@@ -1423,7 +1465,7 @@
         pill: alert.demandScore ? alert.demandScore + "/100" : "watch"
       };
     }), "No competitor alerts yet.");
-    renderFriendlyPanel("#marketingRecommendedCampaign", campaign, "No recommended campaign yet.");
+    renderFriendlyPanel("#marketingRecommendedCampaign", campaign, "No demo data available for this section yet.");
     renderList("#marketingFollowupQueue", followups.slice(0, 6).map(function (lead) {
       return {
         title: lead.businessName || lead.name || "Lead",
@@ -1432,7 +1474,7 @@
         pill: lead.probabilityToClose || "review"
       };
     }), "No follow-up queue yet.");
-    renderFriendlyPanel("#marketingGrowthResult", payload, "No marketing growth output yet.");
+    renderMarketingOutput(payload, "marketing.dashboard");
   }
 
   function renderAnalyticsReportsDashboard(payload) {
@@ -2756,36 +2798,28 @@
       }
     });
 
-    [
-      ["#refreshMarketingGrowthDashboard", "marketing.dashboard"],
-      ["#showMarketingLeads", "marketing.leads"],
-      ["#showMarketingCampaigns", "marketing.campaigns"],
-      ["#showMarketingLocalSeo", "marketing.localSeo"],
-      ["#showMarketingReviews", "marketing.reviews"],
-      ["#showMarketingSocial", "marketing.social"],
-      ["#showMarketingEmail", "marketing.email"],
-      ["#showMarketingRoi", "marketing.roi"],
-      ["#showMarketingRecommendations", "marketing.recommendations"],
-      ["#showLeadIntelligence", "marketing.leadIntelligence"],
-      ["#showMarketWatcher", "marketing.marketWatcher"],
-      ["#showMarketingStrategy", "marketing.strategy"],
-      ["#showOutreachPolicy", "marketing.outreachPolicy"]
-    ].forEach(function (item) {
-      var selector = item[0];
-      var action = item[1];
-      if ($(selector)) {
-        $(selector).addEventListener("click", async function () {
-          var button = $(selector);
-          button.disabled = true;
-          try {
-            renderMarketingGrowthDashboard(await marketingGrowthApi(action, {}));
-          } catch (error) {
-            renderPanelError("#marketingGrowthResult", error);
-          } finally {
-            button.disabled = false;
+    document.querySelectorAll('[data-view="marketingGrowthCenter"] [data-marketing-action]').forEach(function (button) {
+      button.addEventListener("click", async function () {
+        var action = button.getAttribute("data-marketing-action") || "marketing.dashboard";
+        button.disabled = true;
+        setMarketingActiveTab(button);
+        renderLoading("#marketingGrowthResult", "Loading " + marketingActionTitle(action) + "...");
+        try {
+          var dashboard = action === "marketing.dashboard"
+            ? await marketingGrowthApi("marketing.dashboard", {})
+            : await marketingGrowthApi("marketing.dashboard", {});
+          renderMarketingGrowthDashboard(dashboard);
+          if (action === "marketing.dashboard") {
+            renderMarketingOutput(dashboard, action);
+          } else {
+            renderMarketingOutput(await marketingGrowthApi(action, {}), action);
           }
-        });
-      }
+        } catch (error) {
+          renderPanelError("#marketingGrowthResult", error);
+        } finally {
+          button.disabled = false;
+        }
+      });
     });
 
     [

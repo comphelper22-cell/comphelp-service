@@ -9,6 +9,7 @@ assert.ok(Array.isArray(result.data.topLeadsToday));
 assert.ok(result.data.topLeadsToday.length > 0);
 assert.ok(result.data.topLeadsToday.every((lead) => lead.approvalRequired === true));
 assert.ok(result.data.topLeadsToday.every((lead) => lead.outreachApproved === false));
+assert.ok(result.data.topLeadsToday.every((lead) => lead.outreachPolicy.canSendAutomatically === false));
 assert.ok(result.data.marketOpportunityScore > 0);
 
 console.log(JSON.stringify({
@@ -16,4 +17,3 @@ console.log(JSON.stringify({
   leads: result.data.topLeadsToday.length,
   marketOpportunityScore: result.data.marketOpportunityScore
 }, null, 2));
-
