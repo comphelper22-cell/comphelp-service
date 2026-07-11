@@ -1,5 +1,12 @@
 # Technical Debt
 
+## Production Storage
+
+- Production serverless file writes are disabled and fall back to temporary in-memory storage when no database is configured.
+- Memory fallback prevents crashes but is not durable across Vercel cold starts, redeploys, or instance rotation.
+- Supabase persistence is still required for production CRM, dispatch, workflow history, revenue, AI memory, and audit logs.
+- Marketplace project upload metadata can use memory fallback, but uploaded media and gallery persistence still need approved durable storage.
+
 ## Beta Sprint 2 Demo Data
 
 - Demo data is synthetic and static after deployment; a later beta should add a safe reseed command or date-shifting demo mode.

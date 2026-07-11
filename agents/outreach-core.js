@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const safeStorage = require("../storage/safe-storage");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -29,17 +30,12 @@ function id(prefix) {
 }
 
 function readJson(file, fallback = { version: 1, items: [] }) {
-  try {
-    return JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
-  } catch (_) {
-    return fallback;
-  }
+  return safeStorage.readJson(file, fallback);
 }
 
 function writeJson(file, data) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
   data.updatedAt = new Date().toISOString();
-  fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n", "utf8");
+  safeStorage.writeJson(file, data);
   return data;
 }
 

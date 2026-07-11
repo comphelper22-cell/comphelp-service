@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const safeStorage = require("../storage/safe-storage");
 
 const ROOT = path.resolve(__dirname, "..");
 const MARKETPLACE_FILE = path.join(ROOT, "data", "marketplace.json");
@@ -18,8 +19,7 @@ function readMarketplace() {
 }
 
 function log(action, payload) {
-  fs.mkdirSync(LOG_DIR, { recursive: true });
-  fs.appendFileSync(path.join(LOG_DIR, "agents.jsonl"), `${JSON.stringify({ timestamp: new Date().toISOString(), agent: "estimate-agent", action, payload })}\n`);
+  safeStorage.appendLine(path.join(LOG_DIR, "agents.jsonl"), `${JSON.stringify({ timestamp: new Date().toISOString(), agent: "estimate-agent", action, payload })}\n`);
 }
 
 function estimate(input = {}) {

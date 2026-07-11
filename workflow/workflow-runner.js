@@ -29,7 +29,10 @@ function run(builtWorkflow = {}) {
     executedAt: new Date().toISOString()
   };
   events.emit("workflow_execution", `Workflow ${workflow.workflowId} ${status}.`, { executionId: execution.executionId, event: workflow.event });
-  history.record(execution);
+  const recorded = history.record(execution);
+  if (recorded.warnings && recorded.warnings.length) {
+    execution.warnings = execution.warnings.concat(recorded.warnings);
+  }
   return { ok: errors.length === 0, data: execution };
 }
 

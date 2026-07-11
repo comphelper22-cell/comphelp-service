@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const safeStorage = require("../storage/safe-storage");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_FILE = path.join(ROOT, "data", "social-leads.json");
@@ -18,17 +19,12 @@ function id(prefix) {
 }
 
 function readJson(file, fallback) {
-  try {
-    return JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
-  } catch (_) {
-    return fallback;
-  }
+  return safeStorage.readJson(file, fallback);
 }
 
 function writeJson(file, data) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
   data.updatedAt = new Date().toISOString();
-  fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n", "utf8");
+  safeStorage.writeJson(file, data);
   return data;
 }
 

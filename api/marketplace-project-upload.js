@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const safeStorage = require("../storage/safe-storage");
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
 const MAX_FILES = 12;
@@ -23,16 +24,11 @@ function slugify(value) {
 }
 
 function readJson(file, fallback) {
-  try {
-    return JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
-  } catch (_) {
-    return fallback;
-  }
+  return safeStorage.readJson(file, fallback);
 }
 
 function writeJson(file, data) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n", "utf8");
+  return safeStorage.writeJson(file, data);
 }
 
 async function githubRequest(pathname, options = {}) {

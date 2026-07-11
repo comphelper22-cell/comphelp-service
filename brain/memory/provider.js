@@ -1,8 +1,9 @@
-const fs = require("fs");
 const path = require("path");
+const safeStorage = require("../../storage/safe-storage");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const MEMORY_FILE = path.join(ROOT, "data", "brain-memory.json");
+const DEFAULT_MEMORY = { version: 1, memories: {} };
 
 function now() {
   return new Date().toISOString();
@@ -13,24 +14,15 @@ function createId(scope) {
 }
 
 function ensureStore() {
-  fs.mkdirSync(path.dirname(MEMORY_FILE), { recursive: true });
-  if (!fs.existsSync(MEMORY_FILE)) {
-    fs.writeFileSync(MEMORY_FILE, JSON.stringify({ version: 1, memories: {} }, null, 2) + "\n", "utf8");
-  }
+  return safeStorage.ensureJsonFile(MEMORY_FILE, DEFAULT_MEMORY);
 }
 
 function readStore() {
-  ensureStore();
-  try {
-    return JSON.parse(fs.readFileSync(MEMORY_FILE, "utf8").replace(/^\uFEFF/, ""));
-  } catch (_) {
-    return { version: 1, memories: {} };
-  }
+  return safeStorage.readJson(MEMORY_FILE, DEFAULT_MEMORY);
 }
 
 function writeStore(store) {
-  ensureStore();
-  fs.writeFileSync(MEMORY_FILE, JSON.stringify({ ...store, updatedAt: now() }, null, 2) + "\n", "utf8");
+  return safeStorage.writeJson(MEMORY_FILE, { ...store, updatedAt: now() });
 }
 
 function ok(data) {

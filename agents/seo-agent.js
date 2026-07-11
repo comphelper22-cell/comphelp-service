@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const safeStorage = require("../storage/safe-storage");
 
 const ROOT = path.resolve(__dirname, "..");
 const LOG_DIR = path.join(ROOT, "logs");
@@ -13,8 +14,7 @@ function slugify(value) {
 }
 
 function log(action, payload) {
-  fs.mkdirSync(LOG_DIR, { recursive: true });
-  fs.appendFileSync(path.join(LOG_DIR, "agents.jsonl"), `${JSON.stringify({ timestamp: new Date().toISOString(), agent: "seo-agent", action, payload })}\n`);
+  safeStorage.appendLine(path.join(LOG_DIR, "agents.jsonl"), `${JSON.stringify({ timestamp: new Date().toISOString(), agent: "seo-agent", action, payload })}\n`);
 }
 
 function seoPlan(input = {}) {

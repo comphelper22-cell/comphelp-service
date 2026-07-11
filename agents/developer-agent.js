@@ -3,6 +3,7 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 const { database, databaseStatus: writeDatabaseStatus, supabaseConfigured } = require("../database");
 const { platformStatus: writePlatformStatus } = require("./platform-agent");
+const safeStorage = require("../storage/safe-storage");
 
 const ROOT = path.resolve(__dirname, "..");
 const LOG_DIR = path.join(ROOT, "logs");
@@ -18,9 +19,8 @@ function rel(file) {
 }
 
 function writeReport(name, data) {
-  fs.mkdirSync(LOG_DIR, { recursive: true });
   const report = { generatedAt: now(), ...data };
-  fs.writeFileSync(path.join(LOG_DIR, name), JSON.stringify(report, null, 2) + "\n", "utf8");
+  safeStorage.writeJson(path.join(LOG_DIR, name), report);
   return report;
 }
 

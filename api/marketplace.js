@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const safeStorage = require("../storage/safe-storage");
 
 const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
 const GALLERY_FILE = path.join(process.cwd(), "data", "gallery.json");
@@ -194,14 +195,13 @@ function readJsonLines(file, limit = 20) {
 }
 
 function writeJson(file, data) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n", "utf8");
+  return safeStorage.writeJson(file, data);
 }
 
 function tryWriteJson(file, data) {
   try {
-    writeJson(file, data);
-    return { ok: true };
+    const written = writeJson(file, data);
+    return { ok: true, warnings: written.warnings || [] };
   } catch (error) {
     logError(`writeJson:${path.basename(file)}`, error);
     return { ok: false, warning: "Database not connected and local JSON could not be written in this environment." };

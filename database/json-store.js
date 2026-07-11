@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { response } = require("./client");
+const safeStorage = require("../storage/safe-storage");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_FILE = path.join(ROOT, "data", "marketplace.json");
@@ -51,21 +52,16 @@ function id(prefix) {
 }
 
 function ensureDir(dir) {
+  if (safeStorage.isProductionRuntime()) return;
   fs.mkdirSync(dir, { recursive: true });
 }
 
 function readJson(file, fallback = DEFAULT_DATA) {
-  try {
-    const parsed = JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
-    return { ...fallback, ...parsed };
-  } catch (_) {
-    return { ...fallback };
-  }
+  return safeStorage.readJson(file, fallback);
 }
 
 function writeJson(file, data) {
-  ensureDir(path.dirname(file));
-  fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n", "utf8");
+  return safeStorage.writeJson(file, data);
 }
 
 class JsonStore {
