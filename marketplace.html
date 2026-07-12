@@ -60,7 +60,7 @@
     main>.top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:1.25rem;margin-bottom:1.35rem}
     main>.top h1{font-size:clamp(1.75rem,3.35vw,3rem);line-height:1.05;letter-spacing:-.045em}
     main>.top .muted{max-width:760px;line-height:1.55}
-    .admin-code{display:grid;grid-template-columns:auto auto auto minmax(150px,190px);gap:.55rem;align-items:center;min-width:0}
+    .admin-code{display:grid;grid-template-columns:auto auto auto auto minmax(150px,190px);gap:.55rem;align-items:center;min-width:0}
     .admin-code>span:first-child{max-width:65px;line-height:1.15}
     .admin-code input{width:100%;max-width:none;margin:0;min-width:0}
     .admin-code .btn{white-space:nowrap}
@@ -80,6 +80,14 @@
     .row .pill{max-width:100%;justify-content:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .actions>*{min-width:0}
     input,select,textarea{max-width:100%}
+    .connection-card{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.85rem;border-color:rgba(37,225,177,.22);background:linear-gradient(135deg,rgba(37,225,177,.09),rgba(125,178,255,.045))}
+    .connection-copy{display:flex;align-items:flex-start;gap:.85rem;min-width:0}
+    .connection-icon{display:grid;flex:0 0 auto;place-items:center;width:42px;height:42px;border-radius:11px;background:rgba(37,225,177,.12);color:var(--accent)}
+    .connection-icon svg{width:21px;height:21px}
+    .connection-copy h2{margin:0 0 .3rem;font-size:1rem}
+    .connection-copy p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.5}
+    .connection-status{display:inline-flex;align-items:center;gap:.45rem;margin-right:.3rem;color:var(--accent);font-size:.76rem;font-weight:800;white-space:nowrap}
+    .connection-status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(37,225,177,.1)}
     @media(max-width:1180px){
       .shell{grid-template-columns:215px minmax(0,1fr)}
       .admin-code{grid-template-columns:auto auto auto}.admin-code input{grid-column:1/-1}
@@ -103,6 +111,7 @@
       .row .pill{justify-self:start;width:auto;max-width:100%}
       .admin-code{grid-template-columns:1fr 1fr}.admin-code>span:first-child{max-width:none}.admin-code input{grid-column:1/-1}.admin-code .btn{width:100%}
       .panel>.top{align-items:flex-start;flex-direction:column}.panel>.top .btn{width:100%}
+      .connection-card{align-items:stretch;flex-direction:column}.connection-card .actions{display:grid;grid-template-columns:1fr 1fr}.connection-card .btn{width:100%}
     }
     @media(max-width:460px){
       .side .sub{display:none}
@@ -204,11 +213,18 @@
     <main>
       <div class="top">
         <div><h1>AI-Powered Service Marketplace</h1><p class="muted">Lead intake, estimates, vendors, quotes, commissions, content, and project follow-up.</p></div>
-        <div class="admin-code"><span class="muted">Current role</span><span class="pill" id="rolePill">Not logged in</span><button class="btn warn" id="logoutButton" type="button">Log Out</button><input id="adminSecret" type="password" autocomplete="current-password" aria-label="Admin code"></div>
+        <div class="admin-code"><span class="muted">Current role</span><span class="pill" id="rolePill">Not logged in</span><a class="btn" href="/" target="_blank" rel="noopener">Live Website</a><button class="btn warn" id="logoutButton" type="button">Log Out</button><input id="adminSecret" type="password" autocomplete="current-password" aria-label="Admin code"></div>
       </div>
 
       <section data-view="dashboard" class="is-active">
         <div class="panel" id="dashboardWarnings" style="display:none;margin-bottom:.85rem"></div>
+        <div class="panel connection-card" id="websiteConnection">
+          <div class="connection-copy">
+            <span class="connection-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1"/></svg></span>
+            <div><h2><span class="connection-status">Bridge active</span> Website → Marketplace</h2><p>Contact forms and chatbot requests enter the Marketplace lead pipeline with source-page and campaign attribution. Google Sheets delivery is active; durable Marketplace history requires the production database connection.</p></div>
+          </div>
+          <div class="actions"><a class="btn" href="/" target="_blank" rel="noopener">Open Website</a><button class="btn primary" type="button" data-open-view="leads">View Website Leads</button></div>
+        </div>
         <div class="panel">
           <div class="top" style="margin-bottom:.85rem">
             <div>

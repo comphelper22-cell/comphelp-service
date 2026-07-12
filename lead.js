@@ -1,4 +1,6 @@
-﻿const BASE_REQUIRED_FIELDS = ["name", "phone", "service"];
+﻿const { intakeWebsiteLead } = require("./api/marketplace");
+
+const BASE_REQUIRED_FIELDS = ["name", "phone", "service"];
 const WEBSITE_REQUIRED_FIELDS = ["email", "message"];
 
 function json(res, status, body) {
@@ -137,11 +139,15 @@ module.exports = async function handler(req, res) {
     }
 
     const results = await Promise.allSettled([
+      intakeWebsiteLead(lead),
       forwardToGoogleSheets(lead),
       sendEmail(lead)
     ]);
-    const failures = results.filter((result) => result.status === "rejected");
-    const successes = results.filter((result) => result.status === "fulfilled" && !result.value.skipped);
+    const marketplaceResult = results[0];
+    if (marketplaceResult.status === "rejected") throw marketplaceResult.reason;
+    const deliveryResults = results.slice(1);
+    const failures = deliveryResults.filter((result) => result.status === "rejected");
+    const successes = deliveryResults.filter((result) => result.status === "fulfilled" && !result.value.skipped);
 
     if (!successes.length && failures.length) {
       throw failures[0].reason;
@@ -150,6 +156,12 @@ module.exports = async function handler(req, res) {
     return json(res, 200, {
       ok: true,
       delivered: successes.length,
+      marketplace: {
+        synced: true,
+        leadId: marketplaceResult.value.id,
+        storage: marketplaceResult.value.storage || "configured_database",
+        warning: marketplaceResult.value.warning || ""
+      },
       configured: {
         googleSheets: Boolean(process.env.GOOGLE_SHEETS_WEBHOOK_URL),
         email: Boolean(process.env.RESEND_API_KEY && process.env.LEAD_TO_EMAIL && process.env.LEAD_FROM_EMAIL)

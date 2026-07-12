@@ -144,6 +144,31 @@ function leadPayload(payload) {
   };
 }
 
+async function intakeWebsiteLead(payload = {}) {
+  const record = {
+    ...leadPayload({ ...payload, status: "new", source: payload.source || "website_form" }),
+    serviceArea: clean(payload.serviceArea || payload.city, 120),
+    pageUrl: clean(payload.pageUrl || payload.page_url, 500),
+    timeline: clean(payload.timeline, 120),
+    utmSource: clean(payload.utmSource, 120),
+    utmMedium: clean(payload.utmMedium, 120),
+    utmCampaign: clean(payload.utmCampaign, 160),
+    gclid: clean(payload.gclid, 200),
+    fbclid: clean(payload.fbclid, 200),
+    submittedAt: clean(payload.submittedAt || payload.timestamp, 80) || new Date().toISOString()
+  };
+  if (!record.name || !record.phone || !record.service) {
+    throw new Error("Website lead is missing required Marketplace fields.");
+  }
+  const saved = await insert("leads", record);
+  await logActivity("website_lead_created", `Website lead created for ${saved.service}.`, {
+    leadId: saved.id,
+    source: saved.source,
+    pageUrl: saved.pageUrl
+  });
+  return saved;
+}
+
 function money(value) {
   return Math.max(0, Number(value || 0));
 }
@@ -1151,7 +1176,7 @@ const PERMISSIONS = {
   
 };
 
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   if (req.method === "OPTIONS") return sendJson(res, 204, {});
   try {
     if (req.method === "GET") {
@@ -1193,4 +1218,8 @@ module.exports = async function handler(req, res) {
     logError("handler:top", error);
     return sendJson(res, 500, { ok: false, error: "server_error", message: clean(error.message || "Marketplace request failed.", 500), where: "handler:top" });
   }
-};
+}
+
+module.exports = handler;
+module.exports.resolveRole = resolveRole;
+module.exports.intakeWebsiteLead = intakeWebsiteLead;

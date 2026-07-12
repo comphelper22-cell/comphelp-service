@@ -4,12 +4,14 @@ const systemHandler = require("../api/system");
 const safeStorage = require("../storage/safe-storage");
 
 const previous = process.env.SAFE_STORAGE_FORCE_MEMORY;
+const previousAdminSecret = process.env.MARKETPLACE_ADMIN_SECRET;
 process.env.SAFE_STORAGE_FORCE_MEMORY = "true";
+process.env.MARKETPLACE_ADMIN_SECRET = "system-storage-test-secret";
 
 function createReq(body) {
   const req = Readable.from([Buffer.from(JSON.stringify(body), "utf8")]);
   req.method = "POST";
-  req.headers = { "content-type": "application/json" };
+  req.headers = { "content-type": "application/json", "x-marketplace-admin-secret": "system-storage-test-secret" };
   return req;
 }
 
@@ -46,6 +48,8 @@ function createRes() {
 
   if (previous === undefined) delete process.env.SAFE_STORAGE_FORCE_MEMORY;
   else process.env.SAFE_STORAGE_FORCE_MEMORY = previous;
+  if (previousAdminSecret === undefined) delete process.env.MARKETPLACE_ADMIN_SECRET;
+  else process.env.MARKETPLACE_ADMIN_SECRET = previousAdminSecret;
 
   console.log(JSON.stringify({
     ok: true,
@@ -55,5 +59,7 @@ function createRes() {
 })().catch((error) => {
   if (previous === undefined) delete process.env.SAFE_STORAGE_FORCE_MEMORY;
   else process.env.SAFE_STORAGE_FORCE_MEMORY = previous;
+  if (previousAdminSecret === undefined) delete process.env.MARKETPLACE_ADMIN_SECRET;
+  else process.env.MARKETPLACE_ADMIN_SECRET = previousAdminSecret;
   throw error;
 });

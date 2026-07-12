@@ -62,17 +62,17 @@
 
   function setSecret(secret) {
     $("#adminSecret").value = secret;
-    localStorage.setItem("marketplaceSecret", secret);
+    sessionStorage.setItem("marketplaceSecret", secret);
   }
 
   function setRole(role) {
     $("#rolePill").textContent = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Not logged in";
-    localStorage.setItem("marketplaceRole", role || "");
+    sessionStorage.setItem("marketplaceRole", role || "");
   }
 
   function setBetaDemoMode(enabled) {
     state.betaDemoMode = Boolean(enabled);
-    localStorage.setItem("marketplaceBetaDemoMode", state.betaDemoMode ? "true" : "");
+    sessionStorage.setItem("marketplaceBetaDemoMode", state.betaDemoMode ? "true" : "");
     $("#betaDemoBanner").classList.toggle("is-visible", state.betaDemoMode);
   }
 
@@ -2194,6 +2194,15 @@
         $("section[data-view='" + button.dataset.target + "']").classList.add("is-active");
       });
     });
+    $all("[data-open-view]").forEach(function (trigger) {
+      trigger.addEventListener("click", function () {
+        var target = $(".nav button[data-target='" + trigger.dataset.openView + "']");
+        if (!target.isMissing) {
+          target.click();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      });
+    });
   }
 
   function attachForms() {
@@ -2219,6 +2228,9 @@
     });
 
     $("#logoutButton").addEventListener("click", function () {
+      sessionStorage.removeItem("marketplaceSecret");
+      sessionStorage.removeItem("marketplaceRole");
+      sessionStorage.removeItem("marketplaceBetaDemoMode");
       localStorage.removeItem("marketplaceSecret");
       localStorage.removeItem("marketplaceRole");
       localStorage.removeItem("marketplaceBetaDemoMode");
@@ -3224,25 +3236,34 @@
     });
   }
 
+  async function restoreAuthenticatedSession() {
+    localStorage.removeItem("marketplaceSecret");
+    localStorage.removeItem("marketplaceRole");
+    localStorage.removeItem("marketplaceBetaDemoMode");
+    var savedSecret = sessionStorage.getItem("marketplaceSecret");
+    if (!savedSecret) return false;
+    try {
+      var restored = await login(savedSecret);
+      setSecret(savedSecret);
+      setRole(restored.role);
+      setBetaDemoMode(Boolean(restored.demoMode));
+      $("#loginPanel").style.display = "none";
+      $("#appShell").classList.add("is-authenticated");
+      await refresh();
+      return true;
+    } catch (error) {
+      sessionStorage.removeItem("marketplaceSecret");
+      sessionStorage.removeItem("marketplaceRole");
+      sessionStorage.removeItem("marketplaceBetaDemoMode");
+      $("#loginStatus").innerHTML = '<span class="danger">Your session expired. Please sign in again.</span>';
+      return false;
+    }
+  }
+
   attachNavigation();
   attachMarketingGrowthTabs();
   attachForms();
-  var savedSecret = localStorage.getItem("marketplaceSecret");
-  var savedRole = localStorage.getItem("marketplaceRole");
-  var savedBetaMode = localStorage.getItem("marketplaceBetaDemoMode") === "true" || ["123456", "222222", "111111"].includes(savedSecret || "");
-  setBetaDemoMode(savedBetaMode);
-  if (savedSecret) {
-    setSecret(savedSecret);
-    setRole(savedRole);
-    $("#loginPanel").style.display = "none";
-    $("#appShell").classList.add("is-authenticated");
-  }
-  refresh().catch(function (error) {
-    if (state.betaDemoMode) {
-      renderBetaCenter("dashboard");
-      renderBetaDemoOperatingData();
-      return;
-    }
-    $("#metrics").innerHTML = '<article class="card danger">' + escapeHtml(error.message) + '</article>';
+  restoreAuthenticatedSession().catch(function (error) {
+    $("#loginStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
   });
 })();

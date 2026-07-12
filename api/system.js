@@ -403,6 +403,15 @@ function clean(value, max = 120) {
   return String(value || "").trim().slice(0, max);
 }
 
+function requireMarketplaceRole(req) {
+  const { resolveRole } = require("./marketplace");
+  return resolveRole(req);
+}
+
+function isMutationAction(action) {
+  return /(?:^|\.)(?:create|update|delete|archive|restore|note|assign|schedule|complete|approve|reject|convertToJob|record|markSent|markPaid|markOverdue|saveLeadToCrm|seed|trigger|build)$/.test(String(action || ""));
+}
+
 function sendJson(res, statusCode, body) {
   res.statusCode = statusCode;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -484,6 +493,13 @@ module.exports = async function handler(req, res) {
     const action = clean(body.action, 120);
     const target = modules[moduleName];
     if (!action) return sendJson(res, 400, { ok: false, error: "missing_system_action" });
+    const role = requireMarketplaceRole(req);
+    if (!role) {
+      return sendJson(res, 401, { ok: false, error: "unauthorized", message: "Invalid or missing Marketplace access code." });
+    }
+    if (role === "viewer" && isMutationAction(action)) {
+      return sendJson(res, 403, { ok: false, error: "forbidden", message: "Viewer access is read-only." });
+    }
     if (moduleName === "memory") {
       const result = runMemoryAction(action, body.payload || {});
       return sendJson(res, result.ok ? 200 : 400, result);
