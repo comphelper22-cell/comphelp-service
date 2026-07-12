@@ -28,6 +28,7 @@ function dashboard(input = {}) {
       demoMode: leads.demoMode,
       leadsToday: leads.leadsToday,
       leadSources: leads.bySource,
+      leadSourceAnalytics: leads.sourceAnalytics,
       topLeadSource: leads.topSource,
       campaignPerformance: campaignData,
       marketingRoi: roiData,

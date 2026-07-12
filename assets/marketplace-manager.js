@@ -7,7 +7,9 @@
     lastEstimateEmail: "",
     lastEstimateUrl: "",
     betaDemoMode: false,
-    dashboard: null
+    dashboard: null,
+    leadSourceAnalytics: {},
+    leadSourceDemoMode: false
   };
 
   var noopElement = {
@@ -1584,11 +1586,122 @@
     marketingDebug("attached", section.querySelectorAll("[data-marketing-action]").length + " tabs");
   }
 
+  function leadSourceMeta(source) {
+    var key = String(source || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (/google|gbp/.test(key)) return { name: "Google Business Profile", icon: "G", color: "#5b8cff", background: "linear-gradient(135deg,#4285f4,#34a853)" };
+    if (/instagram/.test(key)) return { name: "Instagram", icon: "◎", color: "#f45bb4", background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" };
+    if (/facebook|meta/.test(key)) return { name: "Facebook", icon: "f", color: "#4f8cff", background: "linear-gradient(135deg,#1877f2,#0b4ca8)" };
+    if (/yelp/.test(key)) return { name: "Yelp", icon: "Y", color: "#ff5f62", background: "linear-gradient(135deg,#d32323,#ff6b6b)" };
+    if (/referral|refer/.test(key)) return { name: "Referral", icon: "↗", color: "#9b8cff", background: "linear-gradient(135deg,#755cff,#a78bfa)" };
+    if (/website|web|organic|direct/.test(key)) return { name: "Website", icon: "◈", color: "#25e1b1", background: "linear-gradient(135deg,#0aa77d,#25e1b1)" };
+    if (/linkedin/.test(key)) return { name: "LinkedIn", icon: "in", color: "#5ba7ff", background: "linear-gradient(135deg,#0a66c2,#3d8bd9)" };
+    if (/tiktok/.test(key)) return { name: "TikTok", icon: "♪", color: "#50f2ea", background: "linear-gradient(135deg,#111,#25f4ee)" };
+    return { name: String(source || "Unknown").replace(/_/g, " ").replace(/\b\w/g, function (letter) { return letter.toUpperCase(); }), icon: "●", color: "#7db2ff", background: "linear-gradient(135deg,#315b86,#7db2ff)" };
+  }
+
+  function sourceStyle(meta) {
+    return "--source-color:" + meta.color + ";--source-bg:" + meta.background;
+  }
+
+  function renderLeadSourceApps(leadSources, analytics, demoMode) {
+    var target = $("#marketingLeadSources");
+    if (!target || target.isMissing) return;
+    state.leadSourceAnalytics = analytics || {};
+    state.leadSourceDemoMode = Boolean(demoMode);
+    $("#leadSourceMode").innerHTML = state.leadSourceDemoMode ? '<i></i> Demo analytics' : '<i></i> Live analytics';
+    var sources = Object.keys(leadSources || {}).sort(function (a, b) { return Number(leadSources[b] || 0) - Number(leadSources[a] || 0); });
+    if (!sources.length) {
+      target.innerHTML = '<p class="muted">No lead source data yet.</p>';
+      return;
+    }
+    target.innerHTML = sources.map(function (source) {
+      var meta = leadSourceMeta(source);
+      var detail = state.leadSourceAnalytics[source] || { leads: leadSources[source] || 0, growth: 0, conversionRate: 0 };
+      var hasGrowth = detail.growth !== null && detail.growth !== undefined;
+      var growth = hasGrowth ? Number(detail.growth) : null;
+      return '<button class="source-app-card" type="button" data-lead-source="' + encodeURIComponent(source) + '" style="' + sourceStyle(meta) + '" aria-label="Open analytics for ' + escapeHtml(meta.name) + '">' +
+        '<span class="source-app-brand"><span class="source-logo" style="--source-bg:' + meta.background + '">' + escapeHtml(meta.icon) + '</span><strong>' + escapeHtml(meta.name) + '</strong></span>' +
+        '<span class="source-app-stat"><span>Leads</span><b>' + escapeHtml(detail.leads || leadSources[source] || 0) + '</b></span>' +
+        '<span class="source-app-growth"><span>Growth</span><b class="' + (hasGrowth && growth >= 0 ? "is-positive" : "") + '">' + (hasGrowth ? (growth > 0 ? "+" : "") + escapeHtml(growth) + "%" : "N/A") + '</b></span>' +
+        '<span class="source-open-arrow" aria-hidden="true">→</span></button>';
+    }).join("");
+    target.querySelectorAll("[data-lead-source]").forEach(function (button) {
+      button.addEventListener("click", function () { openLeadSourceAnalytics(decodeURIComponent(button.dataset.leadSource)); });
+    });
+  }
+
+  function sourceLineChart(values) {
+    var trend = Array.isArray(values) && values.length ? values.map(Number) : [0, 0, 0, 0, 0, 0];
+    var max = Math.max.apply(Math, trend.concat([1]));
+    var points = trend.map(function (value, index) {
+      return { x: 18 + (index * 92), y: 165 - ((value / max) * 125), value: value };
+    });
+    var line = points.map(function (point) { return point.x + "," + point.y; }).join(" ");
+    var area = "18,165 " + line + " " + points[points.length - 1].x + ",165";
+    return '<svg viewBox="0 0 500 180" role="img" aria-label="Six week lead trend">' +
+      '<defs><linearGradient id="sourceAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--source-color)" stop-opacity=".3"/><stop offset="1" stop-color="var(--source-color)" stop-opacity="0"/></linearGradient></defs>' +
+      [40, 80, 120, 160].map(function (y) { return '<line class="source-chart-grid" x1="18" y1="' + y + '" x2="478" y2="' + y + '"/>'; }).join("") +
+      '<polygon class="source-chart-area" points="' + area + '"/><polyline class="source-chart-line" points="' + line + '"/>' +
+      points.map(function (point) { return '<circle class="source-chart-dot" cx="' + point.x + '" cy="' + point.y + '" r="4"><title>' + point.value + ' leads</title></circle>'; }).join("") + '</svg>';
+  }
+
+  function renderSourceBars(selector, items) {
+    var target = $(selector);
+    var rows = Array.isArray(items) ? items : [];
+    var max = Math.max.apply(Math, rows.map(function (item) { return Number(item.count || 0); }).concat([1]));
+    target.innerHTML = rows.length ? rows.map(function (item) {
+      var width = Math.max(8, Math.round((Number(item.count || 0) / max) * 100));
+      return '<div class="source-bar-row"><span>' + escapeHtml(item.name) + '</span><b>' + escapeHtml(item.count || 0) + '</b><div class="source-bar-track"><i style="width:' + width + '%"></i></div></div>';
+    }).join("") : '<p class="muted">No data recorded yet.</p>';
+  }
+
+  function openLeadSourceAnalytics(source) {
+    var dialog = $("#leadSourceAnalyticsDialog");
+    if (!dialog || dialog.isMissing) return;
+    var detail = state.leadSourceAnalytics[source] || { source: source, leads: 0, growth: 0, conversionRate: 0, converted: 0, sharedFiles: 0, sharedMedia: 0, weeklyTrend: [], topServices: [], topCities: [], recentActivity: [] };
+    var meta = leadSourceMeta(source);
+    dialog.style.setProperty("--source-color", meta.color);
+    $("#leadSourceAnalyticsLogo").textContent = meta.icon;
+    $("#leadSourceAnalyticsLogo").style.setProperty("--source-bg", meta.background);
+    $("#leadSourceAnalyticsTitle").textContent = meta.name;
+    $("#leadSourceAnalyticsSubtitle").textContent = state.leadSourceDemoMode ? "Demo channel performance · sample data" : "Live channel performance · updated now";
+    var growthValue = detail.growth !== null && detail.growth !== undefined ? Number(detail.growth) : null;
+    var growthLabel = growthValue === null ? "N/A" : (growthValue > 0 ? "+" : "") + growthValue + "%";
+    $("#leadSourceKpis").innerHTML = [
+      ["Total leads", detail.leads || 0, state.leadSourceDemoMode ? "Sample inquiries" : "All tracked inquiries"],
+      ["Growth", growthLabel, growthValue === null ? "No prior-period baseline" : "vs previous 7 days"],
+      ["Conversion", Number(detail.conversionRate || 0) + "%", (detail.converted || 0) + " converted leads"],
+      ["Shared files", detail.sharedFiles || 0, "Documents exchanged"],
+      ["Shared media", detail.sharedMedia || 0, "Photos and videos"]
+    ].map(function (item) { return '<article class="source-kpi"><span>' + item[0] + '</span><strong>' + escapeHtml(item[1]) + '</strong><small>' + escapeHtml(item[2]) + '</small></article>'; }).join("");
+    $("#leadSourceGrowthPill").textContent = growthLabel;
+    $("#leadSourceTrendChart").innerHTML = sourceLineChart(detail.weeklyTrend);
+    var filesPercent = Math.min(100, Number(detail.sharedFiles || 0) * 12);
+    var mediaPercent = Math.min(100, Number(detail.sharedMedia || 0) * 12);
+    $("#leadSourceAssets").innerHTML = '<div class="source-asset-ring" style="--ring-value:' + filesPercent + '%"><div><strong>' + escapeHtml(detail.sharedFiles || 0) + '</strong><span>Files</span></div></div><div class="source-asset-ring" style="--ring-value:' + mediaPercent + '%"><div><strong>' + escapeHtml(detail.sharedMedia || 0) + '</strong><span>Media</span></div></div>';
+    renderSourceBars("#leadSourceServices", detail.topServices);
+    renderSourceBars("#leadSourceCities", detail.topCities);
+    $("#leadSourceActivity").innerHTML = (detail.recentActivity || []).length ? detail.recentActivity.map(function (item) {
+      return '<div class="source-activity"><strong>' + escapeHtml(item.name) + '</strong><span>' + escapeHtml([item.service, item.city].filter(Boolean).join(" · ")) + '</span><small>' + escapeHtml(item.status || "new") + '</small></div>';
+    }).join("") : '<p class="muted">No recent source activity.</p>';
+    if (typeof dialog.showModal === "function") dialog.showModal(); else dialog.setAttribute("open", "");
+  }
+
+  function attachLeadSourceAnalytics() {
+    var dialog = $("#leadSourceAnalyticsDialog");
+    var close = $("#closeLeadSourceAnalytics");
+    if (!dialog || dialog.isMissing || dialog.dataset.analyticsAttached === "true") return;
+    dialog.dataset.analyticsAttached = "true";
+    close.addEventListener("click", function () { dialog.close(); });
+    dialog.addEventListener("click", function (event) { if (event.target === dialog) dialog.close(); });
+  }
+
   function renderMarketingGrowthDashboard(payload) {
     var target = $("#marketingGrowthMetrics");
     if (!target || !payload) return;
     var data = payload.data || payload;
     var leadSources = data.leadSources || data.bySource || {};
+    var leadSourceAnalytics = data.leadSourceAnalytics || data.sourceAnalytics || {};
     var topSource = data.topLeadSource || Object.keys(leadSources).sort(function (a, b) {
       return Number(leadSources[b] || 0) - Number(leadSources[a] || 0);
     })[0] || "Not available yet";
@@ -1629,9 +1742,7 @@
     target.innerHTML = cards.map(function (metric) {
       return '<article class="card"><p class="muted">' + metric[0] + '</p><div class="metric">' + escapeHtml(metric[1]) + '</div></article>';
     }).join("");
-    renderList("#marketingLeadSources", Object.keys(leadSources).map(function (source) {
-      return { title: source, meta: leadSources[source] + " leads", detail: "Tracked lead source.", pill: "source" };
-    }), "No lead source data yet.");
+    renderLeadSourceApps(leadSources, leadSourceAnalytics, Boolean(data.demoMode));
     renderList("#marketingCampaignList", campaigns.slice(0, 6).map(function (campaign) {
       return { title: campaign.name || campaign.title, meta: campaign.channel || "campaign", detail: "Leads: " + (campaign.leads || 0) + " | Revenue: " + money(campaign.revenue || 0), pill: campaign.roi !== undefined ? campaign.roi + "%" : "ROI" };
     }), "No campaigns yet.");
@@ -3484,6 +3595,7 @@
   attachNavigation();
   attachFunctionTabs();
   attachMarketingGrowthTabs();
+  attachLeadSourceAnalytics();
   attachForms();
   restoreAuthenticatedSession().catch(function (error) {
     $("#loginStatus").innerHTML = '<span class="danger">' + escapeHtml(error.message) + '</span>';
