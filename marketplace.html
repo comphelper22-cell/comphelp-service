@@ -120,6 +120,25 @@
       .grid>.card{min-height:104px}
     }
   </style>
+  <style>
+    /* Dynamic Job Dispatch */
+    .dispatch-wizard{position:relative;overflow:hidden;padding:1.15rem;background:linear-gradient(155deg,rgba(16,27,39,.98),rgba(8,15,22,.96))}
+    .dispatch-wizard::before{content:"";position:absolute;width:18rem;height:18rem;right:-10rem;top:-11rem;border-radius:50%;background:radial-gradient(circle,rgba(37,225,177,.16),transparent 68%);pointer-events:none}
+    .dispatch-heading{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem}
+    .dispatch-heading h2{margin:.25rem 0 .25rem;font-size:1.55rem;letter-spacing:-.03em}.dispatch-heading p{margin:0}
+    .dispatch-eyebrow{color:var(--accent);font-size:.7rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    .dispatch-progress{display:flex;align-items:center;gap:.35rem;padding-top:.15rem}.dispatch-progress span{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--line);border-radius:50%;color:var(--muted);font-size:.72rem;font-weight:900;transition:.25s ease}.dispatch-progress span.is-current,.dispatch-progress span.is-done{border-color:var(--accent);background:rgba(37,225,177,.15);color:var(--accent);box-shadow:0 0 0 4px rgba(37,225,177,.05)}.dispatch-progress i{display:block;width:18px;height:1px;background:var(--line)}
+    .dispatch-step{min-width:0;margin:0 0 .8rem;padding:.85rem;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.025);opacity:.78;transform:translateY(4px);transition:border-color .25s ease,background .25s ease,opacity .25s ease,transform .25s ease}.dispatch-step.is-visible{opacity:1;transform:none;border-color:rgba(37,225,177,.2);background:rgba(37,225,177,.025)}
+    .dispatch-step legend{display:flex;align-items:center;gap:.55rem;padding:0 .35rem;color:#eaf6f2;font-size:.82rem;font-weight:900}.dispatch-step legend span{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:rgba(37,225,177,.14);color:var(--accent);font-size:.72rem}
+    .dispatch-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}.dispatch-fields label{display:grid;gap:.35rem}.dispatch-fields label>span,.dispatch-option-label{color:var(--muted);font-size:.72rem;font-weight:800}.dispatch-fields input{margin:0;border-color:rgba(255,255,255,.1);background:rgba(3,10,15,.65);transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}.dispatch-fields input:focus{transform:translateY(-1px);border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,225,177,.08)}.dispatch-wide{grid-column:1/-1}
+    .dispatch-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem}.dispatch-choice{position:relative;display:grid;justify-items:start;gap:.15rem;min-height:82px;padding:.72rem;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:rgba(3,10,15,.5);color:var(--text);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}.dispatch-choice:hover{transform:translateY(-2px);border-color:rgba(37,225,177,.35)}.dispatch-choice.is-selected{border-color:var(--accent);background:linear-gradient(145deg,rgba(37,225,177,.14),rgba(37,225,177,.035));box-shadow:0 8px 24px rgba(0,0,0,.18),inset 0 0 0 1px rgba(37,225,177,.08)}.dispatch-choice b{color:var(--accent);font-size:1rem}.dispatch-choice span{font-size:.78rem;font-weight:900}.dispatch-choice small{color:var(--muted);font-size:.66rem}
+    .dispatch-option-row{display:grid;grid-template-columns:90px minmax(0,1fr);align-items:center;gap:.65rem;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.06)}.dispatch-option-row:last-child{border-bottom:0}.dispatch-pills{display:flex;flex-wrap:wrap;gap:.4rem}.dispatch-pills button{padding:.48rem .68rem;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(3,10,15,.52);color:var(--muted);font-size:.7rem;font-weight:850;cursor:pointer;transition:.18s ease}.dispatch-pills button:hover{color:var(--text);border-color:rgba(37,225,177,.35)}.dispatch-pills button.is-selected{border-color:var(--accent);background:var(--accent);color:#032019;box-shadow:0 5px 16px rgba(37,225,177,.18);transform:translateY(-1px)}
+    .dispatch-summary{display:flex;justify-content:space-between;gap:1rem;margin:.85rem 0;padding:.72rem .8rem;border:1px solid rgba(37,225,177,.15);border-radius:10px;background:rgba(37,225,177,.045);animation:dispatchGlow 3s ease-in-out infinite}.dispatch-summary span{color:var(--accent);font-size:.7rem;font-weight:900;text-transform:uppercase;letter-spacing:.07em}.dispatch-summary strong{font-size:.75rem;text-align:right}.dispatch-actions{align-items:center}.dispatch-submit{display:inline-flex;align-items:center;justify-content:space-between;gap:1.2rem;min-width:170px}.dispatch-submit b{font-size:1.05rem;transition:transform .2s ease}.dispatch-submit:hover b{transform:translateX(4px)}
+    @keyframes dispatchGlow{0%,100%{box-shadow:0 0 0 rgba(37,225,177,0)}50%{box-shadow:0 0 24px rgba(37,225,177,.06)}}
+    @media (prefers-reduced-motion:reduce){.dispatch-step,.dispatch-choice,.dispatch-pills button,.dispatch-fields input,.dispatch-submit b{transition:none}.dispatch-summary{animation:none}}
+    @media(max-width:900px){.dispatch-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:620px){.dispatch-heading{display:grid}.dispatch-fields,.dispatch-choice-grid{grid-template-columns:1fr}.dispatch-option-row{grid-template-columns:1fr}.dispatch-summary{display:grid}.dispatch-summary strong{text-align:left}.dispatch-progress{order:-1}.dispatch-actions .btn{flex:1 1 42%}}
+  </style>
 </head>
 <body>
   <div class="beta-banner" id="betaDemoBanner">BETA DEMO MODE</div>
@@ -757,43 +776,94 @@
 
       <section data-view="jobDispatch">
         <div class="two">
-          <form class="panel" id="jobForm">
-            <h2>Job Dispatch</h2>
-            <p class="muted">Create jobs, assign technicians, schedule work, update status, and complete jobs using JSON fallback data.</p>
+          <form class="panel dispatch-wizard" id="jobForm">
+            <div class="dispatch-heading">
+              <div>
+                <span class="dispatch-eyebrow">Quick dispatch</span>
+                <h2>Create a Job</h2>
+                <p class="muted">Type the customer details, then choose the rest.</p>
+              </div>
+              <div class="dispatch-progress" aria-label="Job setup progress">
+                <span class="is-current">1</span><i></i><span>2</span><i></i><span>3</span>
+              </div>
+            </div>
             <input name="id" type="hidden">
-            <input name="customerName" placeholder="Customer name" required>
-            <input name="customerId" placeholder="Customer ID optional">
-            <input name="title" placeholder="Job title">
-            <input name="service" placeholder="Service">
-            <input name="address" placeholder="Job address">
-            <input name="city" placeholder="City" value="Los Angeles">
-            <select name="priority">
-              <option value="normal">Normal</option>
-              <option value="emergency">Emergency</option>
-              <option value="high">High</option>
-              <option value="low">Low</option>
-            </select>
-            <select name="status">
-              <option value="new">New</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="assigned">Assigned</option>
-              <option value="en_route">En Route</option>
-              <option value="on_site">On Site</option>
-              <option value="in_progress">In Progress</option>
-              <option value="waiting_parts">Waiting Parts</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="archived">Archived</option>
-            </select>
-            <input name="assignedTechnician" placeholder="Assigned technician">
-            <input name="startDate" type="datetime-local">
-            <input name="estimatedHours" type="number" min="0" step=".5" placeholder="Estimated hours">
-            <input name="actualHours" type="number" min="0" step=".5" placeholder="Actual hours">
-            <textarea name="internalNotes" placeholder="Internal notes"></textarea>
-            <textarea name="completionNotes" placeholder="Completion notes"></textarea>
-            <div class="actions">
-              <button class="btn primary" type="submit">Save Job</button>
-              <button class="btn" id="resetJobForm" type="button">New Job</button>
+            <input name="customerId" type="hidden">
+            <input name="title" type="hidden" value="Security Camera Installation">
+            <input name="service" type="hidden" value="Security Camera Installation">
+            <input name="city" type="hidden" value="Los Angeles">
+            <input name="priority" type="hidden" value="normal">
+            <input name="status" type="hidden" value="new">
+            <input name="assignedTechnician" type="hidden" value="AI Auto Assign">
+            <input name="startDate" type="hidden">
+            <input name="schedulePreset" type="hidden" value="tomorrow">
+            <input name="estimatedHours" type="hidden" value="2">
+            <input name="actualHours" type="hidden" value="0">
+
+            <fieldset class="dispatch-step is-visible" data-dispatch-step="1">
+              <legend><span>1</span> Customer details</legend>
+              <div class="dispatch-fields">
+                <label><span>Full name</span><input name="customerName" autocomplete="name" placeholder="John Smith" required></label>
+                <label><span>Email</span><input name="email" type="email" autocomplete="email" placeholder="john@email.com" required></label>
+                <label><span>Phone number</span><input name="phone" type="tel" autocomplete="tel" placeholder="(818) 555-0123" required></label>
+                <label class="dispatch-wide"><span>Service address</span><input name="address" autocomplete="street-address" placeholder="123 Main St, Los Angeles" required></label>
+              </div>
+            </fieldset>
+
+            <fieldset class="dispatch-step" data-dispatch-step="2">
+              <legend><span>2</span> Choose a service</legend>
+              <div class="dispatch-choice-grid service-choices">
+                <button type="button" class="dispatch-choice is-selected" data-job-choice="service" data-value="Security Camera Installation"><b>◉</b><span>Security Cameras</span><small>Install or repair</small></button>
+                <button type="button" class="dispatch-choice" data-job-choice="service" data-value="Computer Repair"><b>⌘</b><span>Computer Repair</span><small>Desktop or laptop</small></button>
+                <button type="button" class="dispatch-choice" data-job-choice="service" data-value="Wi-Fi Network Installation"><b>⌁</b><span>Wi-Fi & Network</span><small>Coverage and setup</small></button>
+                <button type="button" class="dispatch-choice" data-job-choice="service" data-value="Smart Home Setup"><b>⌂</b><span>Smart Home</span><small>Devices and automation</small></button>
+                <button type="button" class="dispatch-choice" data-job-choice="service" data-value="Data Recovery"><b>↺</b><span>Data Recovery</span><small>Files and storage</small></button>
+              </div>
+            </fieldset>
+
+            <fieldset class="dispatch-step" data-dispatch-step="3">
+              <legend><span>3</span> Dispatch preferences</legend>
+              <div class="dispatch-option-row">
+                <span class="dispatch-option-label">Urgency</span>
+                <div class="dispatch-pills">
+                  <button type="button" class="is-selected" data-job-choice="priority" data-value="normal">Normal</button>
+                  <button type="button" data-job-choice="priority" data-value="high">High</button>
+                  <button type="button" data-job-choice="priority" data-value="emergency">Emergency</button>
+                </div>
+              </div>
+              <div class="dispatch-option-row">
+                <span class="dispatch-option-label">Schedule</span>
+                <div class="dispatch-pills">
+                  <button type="button" data-job-schedule="today">Today</button>
+                  <button type="button" class="is-selected" data-job-schedule="tomorrow">Tomorrow</button>
+                  <button type="button" data-job-schedule="week">This week</button>
+                </div>
+              </div>
+              <div class="dispatch-option-row">
+                <span class="dispatch-option-label">Technician</span>
+                <div class="dispatch-pills">
+                  <button type="button" class="is-selected" data-job-choice="assignedTechnician" data-value="AI Auto Assign">AI Auto Assign</button>
+                  <button type="button" data-job-choice="assignedTechnician" data-value="Chris Patel">Chris Patel</button>
+                  <button type="button" data-job-choice="assignedTechnician" data-value="Alex Rivera">Alex Rivera</button>
+                </div>
+              </div>
+              <div class="dispatch-option-row">
+                <span class="dispatch-option-label">Duration</span>
+                <div class="dispatch-pills">
+                  <button type="button" data-job-choice="estimatedHours" data-value="1">1 hour</button>
+                  <button type="button" class="is-selected" data-job-choice="estimatedHours" data-value="2">2 hours</button>
+                  <button type="button" data-job-choice="estimatedHours" data-value="4">Half day</button>
+                  <button type="button" data-job-choice="estimatedHours" data-value="8">Full day</button>
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="dispatch-summary" id="jobDispatchSummary" aria-live="polite">
+              <span>Ready to dispatch</span><strong>Security Camera Installation · Tomorrow · AI Auto Assign</strong>
+            </div>
+            <div class="actions dispatch-actions">
+              <button class="btn primary dispatch-submit" type="submit"><span>Save & Dispatch</span><b>→</b></button>
+              <button class="btn" id="resetJobForm" type="button">Start Over</button>
               <button class="btn" id="assignJobButton" type="button">Assign</button>
               <button class="btn" id="scheduleJobButton" type="button">Schedule</button>
               <button class="btn" id="completeJobButton" type="button">Complete</button>
@@ -1624,7 +1694,7 @@
       </section>
     </main>
   </div>
-  <script src="/assets/marketplace-manager.js" defer></script>
+  <script src="/assets/marketplace-manager.js?v=20260712-dispatch1" defer></script>
 </body>
 </html>
 

@@ -1238,6 +1238,143 @@
     }), "No job timeline yet.");
   }
 
+  function setDispatchProgress(step) {
+    var form = $("#jobForm");
+    if (!form) return;
+    form.querySelectorAll(".dispatch-progress span").forEach(function (item, index) {
+      var number = index + 1;
+      item.classList.toggle("is-current", number === step);
+      item.classList.toggle("is-done", number < step);
+    });
+    form.querySelectorAll(".dispatch-step").forEach(function (item) {
+      item.classList.toggle("is-visible", Number(item.dataset.dispatchStep) <= step);
+    });
+  }
+
+  function chooseJobSchedule(form, schedule) {
+    var now = new Date();
+    var date = new Date(now);
+    var button = form.querySelector('[data-job-schedule="' + schedule + '"]');
+    if (schedule === "today") {
+      date.setHours(date.getHours() + 2, 0, 0, 0);
+      if (button) button.textContent = date.getDate() === now.getDate() ? "Today" : "Next available";
+    }
+    if (schedule === "tomorrow") {
+      date.setDate(date.getDate() + 1);
+      date.setHours(9, 0, 0, 0);
+      if (button) button.textContent = "Tomorrow";
+    }
+    if (schedule === "week") {
+      var day = date.getDay();
+      if (day >= 1 && day <= 4) {
+        date.setDate(date.getDate() + Math.min(3, 5 - day));
+        if (button) button.textContent = "This week";
+      } else {
+        var daysToMonday = day === 0 ? 1 : 8 - day;
+        date.setDate(date.getDate() + daysToMonday);
+        if (button) button.textContent = "Next week";
+      }
+      date.setHours(9, 0, 0, 0);
+    }
+    var local = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    form.elements.startDate.value = local;
+    if (form.elements.schedulePreset) form.elements.schedulePreset.value = schedule;
+  }
+
+  function syncJobScheduleChoice(startDate, schedulePreset) {
+    var form = $("#jobForm");
+    if (!form) return;
+    var target = startDate ? new Date(startDate) : null;
+    var now = new Date();
+    var tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    var selected = ["today", "tomorrow", "week"].includes(schedulePreset) ? schedulePreset : "";
+    if (!selected && target && Number.isFinite(target.getTime())) {
+      if (target.toDateString() === now.toDateString()) selected = "today";
+      else if (target.toDateString() === tomorrow.toDateString()) selected = "tomorrow";
+    }
+    form.querySelectorAll("[data-job-schedule]").forEach(function (button) {
+      if (button.dataset.jobSchedule === "week" && selected === "week" && target && Number.isFinite(target.getTime())) {
+        var endOfWeek = new Date(now);
+        endOfWeek.setDate(now.getDate() + (7 - (now.getDay() || 7)));
+        endOfWeek.setHours(23, 59, 59, 999);
+        button.textContent = target <= endOfWeek ? "This week" : "Next week";
+      }
+      var active = button.dataset.jobSchedule === selected;
+      button.classList.toggle("is-selected", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  }
+
+  function updateJobDispatchSummary() {
+    var form = $("#jobForm");
+    var summary = $("#jobDispatchSummary");
+    if (!form || !summary) return;
+    var schedule = form.querySelector("[data-job-schedule].is-selected");
+    var customDate = form.elements.startDate.value ? new Date(form.elements.startDate.value) : null;
+    var scheduleLabel = schedule ? schedule.textContent.trim() : customDate && Number.isFinite(customDate.getTime()) ? customDate.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "Choose schedule";
+    var priority = form.elements.priority.value || "normal";
+    var duration = Number(form.elements.estimatedHours.value || 0);
+    summary.querySelector("strong").textContent = [
+      form.elements.service.value || "Choose service",
+      scheduleLabel,
+      priority.charAt(0).toUpperCase() + priority.slice(1),
+      duration ? duration + (duration === 1 ? " hour" : " hours") : "Choose duration",
+      form.elements.assignedTechnician.value || "AI Auto Assign"
+    ].join(" · ");
+  }
+
+  function syncJobDispatchChoices() {
+    var form = $("#jobForm");
+    if (!form) return;
+    form.querySelectorAll("[data-job-choice]").forEach(function (button) {
+      var field = button.dataset.jobChoice;
+      button.classList.toggle("is-selected", form.elements[field] && String(form.elements[field].value) === button.dataset.value);
+      button.setAttribute("aria-pressed", button.classList.contains("is-selected") ? "true" : "false");
+    });
+    updateJobDispatchSummary();
+  }
+
+  function attachDynamicJobDispatch() {
+    var form = $("#jobForm");
+    if (!form || form.dataset.dynamicDispatchAttached === "true") return;
+    form.dataset.dynamicDispatchAttached = "true";
+    form.querySelectorAll("[data-job-choice]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var field = button.dataset.jobChoice;
+        form.elements[field].value = button.dataset.value;
+        if (field === "service") form.elements.title.value = button.dataset.value;
+        button.parentElement.querySelectorAll("[data-job-choice='" + field + "']").forEach(function (item) { item.classList.remove("is-selected"); item.setAttribute("aria-pressed", "false"); });
+        button.classList.add("is-selected");
+        button.setAttribute("aria-pressed", "true");
+        setDispatchProgress(3);
+        updateJobDispatchSummary();
+      });
+    });
+    form.querySelectorAll("[data-job-schedule]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        form.querySelectorAll("[data-job-schedule]").forEach(function (item) { item.classList.remove("is-selected"); item.setAttribute("aria-pressed", "false"); });
+        button.classList.add("is-selected");
+        button.setAttribute("aria-pressed", "true");
+        chooseJobSchedule(form, button.dataset.jobSchedule);
+        setDispatchProgress(3);
+        updateJobDispatchSummary();
+      });
+    });
+    form.querySelectorAll(".dispatch-fields input").forEach(function (input) {
+      input.addEventListener("focus", function () { setDispatchProgress(1); });
+      input.addEventListener("input", function () {
+        var complete = ["customerName", "email", "phone", "address"].every(function (field) { return form.elements[field].value.trim(); });
+        if (complete) setDispatchProgress(2);
+      });
+    });
+    form.querySelectorAll(".dispatch-step").forEach(function (step) {
+      step.addEventListener("focusin", function () { setDispatchProgress(Number(step.dataset.dispatchStep)); });
+    });
+    chooseJobSchedule(form, "tomorrow");
+    syncJobDispatchChoices();
+  }
+
   function fillJobForm(job) {
     var form = $("#jobForm");
     if (!form || !job) return;
@@ -1245,6 +1382,9 @@
       if (form.elements[key]) form.elements[key].value = job[key] || "";
     });
     if (job.startDate && form.elements.startDate) form.elements.startDate.value = String(job.startDate).slice(0, 16);
+    syncJobScheduleChoice(job.startDate || "", job.schedulePreset || "");
+    syncJobDispatchChoices();
+    setDispatchProgress(3);
   }
 
   function resetJobForm() {
@@ -1253,6 +1393,14 @@
     form.reset();
     form.elements.id.value = "";
     form.elements.city.value = "Los Angeles";
+    form.querySelectorAll("[data-job-schedule]").forEach(function (button) {
+      var selected = button.dataset.jobSchedule === "tomorrow";
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-pressed", selected ? "true" : "false");
+    });
+    chooseJobSchedule(form, "tomorrow");
+    syncJobDispatchChoices();
+    setDispatchProgress(1);
     renderFriendlyPanel("#jobDispatchDetails", null, "Select a job.");
     $("#jobDispatchTimeline").innerHTML = '<p class="muted">Select a job.</p>';
   }
@@ -2418,6 +2566,7 @@
     }
 
     if ($("#jobForm")) {
+      attachDynamicJobDispatch();
       $("#jobForm").addEventListener("submit", async function (event) {
         event.preventDefault();
         var form = event.currentTarget;

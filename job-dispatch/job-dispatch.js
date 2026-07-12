@@ -193,12 +193,16 @@ function normalizeJob(input = {}, data = {}, existing = {}) {
   const customer = findCustomer(data, input.customerId || existing.customerId, input.customerName || existing.customerName);
   const estimatedHours = Number(input.estimatedHours || existing.estimatedHours || 2);
   const startDate = input.startDate || input.scheduledStart || existing.startDate || "";
+  const scheduleChanged = input.startDate !== undefined || input.scheduledStart !== undefined || input.estimatedHours !== undefined;
+  const endDate = input.endDate || (scheduleChanged && startDate ? addHours(startDate, estimatedHours) : existing.endDate || (startDate ? addHours(startDate, estimatedHours) : ""));
   return {
     ...existing,
     id: existing.id || input.id || id("job"),
     jobNumber: existing.jobNumber || input.jobNumber || nextJobNumber(data),
     customerId: input.customerId || existing.customerId || (customer && customer.id) || "",
     customerName: clean(input.customerName || existing.customerName || (customer && (customer.fullName || customer.name)) || "", 140),
+    email: clean(input.email || existing.email || (customer && customer.email) || "", 180),
+    phone: clean(input.phone || existing.phone || (customer && customer.phone) || "", 80),
     assignedTechnician: clean(input.assignedTechnician || existing.assignedTechnician, 140),
     priority: normalizePriority(input.priority || existing.priority || "normal"),
     status: normalizeStatus(input.status || existing.status || "new"),
@@ -207,7 +211,8 @@ function normalizeJob(input = {}, data = {}, existing = {}) {
     address: clean(input.address || existing.address || (customer && customer.address) || "", 240),
     city: clean(input.city || existing.city || (customer && customer.city) || "Los Angeles", 100),
     startDate,
-    endDate: input.endDate || existing.endDate || (startDate ? addHours(startDate, estimatedHours) : ""),
+    schedulePreset: clean(input.schedulePreset || existing.schedulePreset || "", 20),
+    endDate,
     estimatedHours,
     actualHours: Number(input.actualHours || existing.actualHours || 0),
     internalNotes: clean(input.internalNotes || input.notes || existing.internalNotes, 2000),
