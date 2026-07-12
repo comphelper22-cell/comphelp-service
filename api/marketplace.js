@@ -479,43 +479,91 @@ async function insert(tableKey, record) {
 }
 
 async function updateRecord(tableKey, recordId, patch) {
-  if (!recordId) throw new Error("Record id is required.");
+  if (!recordId) {
+    const error = new Error("Record id is required.");
+    error.code = "invalid_request";
+    throw error;
+  }
   if (!supabaseConfigured()) {
     const seed = readSeed();
+    const existing = (seed[tableKey] || []).find((item) => item.id === recordId);
+    if (!existing) {
+      const error = new Error("Record not found.");
+      error.code = "not_found";
+      throw error;
+    }
     seed[tableKey] = (seed[tableKey] || []).map((item) => item.id === recordId ? { ...item, ...patch, updatedAt: new Date().toISOString() } : item);
     const write = tryWriteJson(DATA_FILE, seed);
-    if (!write.ok) return { ...patch, id: recordId, storage: "memory_only", warning: write.warning };
+    if (!write.ok) return { ...existing, ...patch, id: recordId, storage: "memory_only", warning: write.warning };
     return seed[tableKey].find((item) => item.id === recordId);
   }
   try {
     const rows = await supabase(`${TABLES[tableKey]}?id=eq.${encodeURIComponent(recordId)}`, {
       method: "PATCH",
+      headers: { Prefer: "return=representation" },
       body: JSON.stringify(toDbRecord({ ...patch, updatedAt: new Date().toISOString() }))
     });
+    if (!rows[0]) {
+      const error = new Error("Record not found.");
+      error.code = "not_found";
+      throw error;
+    }
     return fromDbRecord(rows[0]);
   } catch (error) {
+    if (error.code === "not_found") throw error;
     logError(`supabase:update:${tableKey}`, error);
     const seed = readSeed();
+    const existing = (seed[tableKey] || []).find((item) => item.id === recordId);
+    if (!existing) {
+      const notFound = new Error("Record not found.");
+      notFound.code = "not_found";
+      throw notFound;
+    }
     seed[tableKey] = (seed[tableKey] || []).map((item) => item.id === recordId ? { ...item, ...patch, updatedAt: new Date().toISOString() } : item);
     const write = tryWriteJson(DATA_FILE, seed);
-    return { ...patch, id: recordId, storage: write.ok ? "data/marketplace.json" : "memory_only", warning: `Supabase unavailable; ${write.warning || "saved to local fallback."}` };
+    return { ...existing, ...patch, id: recordId, storage: write.ok ? "data/marketplace.json" : "memory_only", warning: `Supabase unavailable; ${write.warning || "saved to local fallback."}` };
   }
 }
 
 async function deleteRecord(tableKey, recordId) {
-  if (!recordId) throw new Error("Record id is required.");
+  if (!recordId) {
+    const error = new Error("Record id is required.");
+    error.code = "invalid_request";
+    throw error;
+  }
   if (!supabaseConfigured()) {
     const seed = readSeed();
+    const exists = (seed[tableKey] || []).some((item) => item.id === recordId);
+    if (!exists) {
+      const error = new Error("Record not found.");
+      error.code = "not_found";
+      throw error;
+    }
     seed[tableKey] = (seed[tableKey] || []).filter((item) => item.id !== recordId);
     const write = tryWriteJson(DATA_FILE, seed);
     return { deleted: write.ok, id: recordId, warning: write.warning };
   }
   try {
-    await supabase(`${TABLES[tableKey]}?id=eq.${encodeURIComponent(recordId)}`, { method: "DELETE" });
+    const rows = await supabase(`${TABLES[tableKey]}?id=eq.${encodeURIComponent(recordId)}`, {
+      method: "DELETE",
+      headers: { Prefer: "return=representation" }
+    });
+    if (!rows[0]) {
+      const error = new Error("Record not found.");
+      error.code = "not_found";
+      throw error;
+    }
     return { deleted: true, id: recordId };
   } catch (error) {
+    if (error.code === "not_found") throw error;
     logError(`supabase:delete:${tableKey}`, error);
     const seed = readSeed();
+    const exists = (seed[tableKey] || []).some((item) => item.id === recordId);
+    if (!exists) {
+      const notFound = new Error("Record not found.");
+      notFound.code = "not_found";
+      throw notFound;
+    }
     seed[tableKey] = (seed[tableKey] || []).filter((item) => item.id !== recordId);
     const write = tryWriteJson(DATA_FILE, seed);
     return { deleted: write.ok, id: recordId, warning: `Supabase unavailable; ${write.warning || "deleted in local fallback."}` };
@@ -1092,11 +1140,19 @@ function vendorPatch(payload) {
   Object.entries(stringFields).forEach(([field, max]) => {
     if (payload[field] !== undefined && clean(payload[field], max)) patch[field] = clean(payload[field], max);
   });
-  if (payload.rating !== undefined && clean(payload.rating, 30)) patch.rating = Math.min(5, Math.max(1, Number(payload.rating)));
-  if (payload.commissionPercent !== undefined && clean(payload.commissionPercent, 30)) patch.commissionPercent = money(payload.commissionPercent);
-  if (payload.distanceMiles !== undefined && clean(payload.distanceMiles, 30)) patch.distanceMiles = Math.max(0, Number(payload.distanceMiles));
-  if (patch.category || clean(payload.service, 120)) patch.services = [patch.category, clean(payload.service, 120)].filter(Boolean);
-  if (patch.email || patch.phone) patch.contact = patch.email || patch.phone;
+  function numericField(field, min, max) {
+    if (payload[field] === undefined || !clean(payload[field], 30)) return;
+    const value = Number(payload[field]);
+    if (!Number.isFinite(value) || value < min || value > max) {
+      const error = new Error(`Invalid ${field}.`);
+      error.code = "invalid_request";
+      throw error;
+    }
+    patch[field] = field === "commissionPercent" ? money(value) : value;
+  }
+  numericField("rating", 1, 5);
+  numericField("commissionPercent", 0, 100);
+  numericField("distanceMiles", 0, Number.MAX_SAFE_INTEGER);
   return patch;
 }
 
@@ -1274,8 +1330,14 @@ async function handler(req, res) {
     try {
       return sendJson(res, 200, await handleAction(action, body.payload || {}));
     } catch (error) {
-      logError(`handler:POST:action:${action || "missing"}`, error);
-      return sendJson(res, 500, { ok: false, error: "server_error", message: clean(error.message || "Marketplace action failed.", 500), where: `handler:POST:action:${action || "missing"}` });
+      const status = error.code === "not_found" ? 404 : error.code === "invalid_request" ? 400 : 500;
+      if (status === 500) logError(`handler:POST:action:${action || "missing"}`, error);
+      return sendJson(res, status, {
+        ok: false,
+        error: error.code === "not_found" ? "not_found" : error.code === "invalid_request" ? "invalid_request" : "server_error",
+        message: status === 500 ? "Marketplace action failed." : clean(error.message, 500),
+        where: `handler:POST:action:${action || "missing"}`
+      });
     }
   } catch (error) {
     logError("handler:top", error);

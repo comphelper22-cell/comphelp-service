@@ -1382,10 +1382,10 @@
     }[action] || "Marketing Output";
   }
 
-  function renderMarketingOutput(payload, action) {
-    var targetId = "marketingGrowthResult";
-    var target = $("#" + targetId);
-    if (!target || target.isMissing) return;
+  function renderMarketingOutput(payload, action, targetSelector) {
+    var selector = targetSelector || "#marketingGrowthResult";
+    var target = document.querySelector(selector);
+    if (!target) return;
     var data = payload && payload.data !== undefined ? payload.data : payload;
     var title = marketingActionTitle(action);
     if (!data || (typeof data === "object" && !Array.isArray(data) && !Object.keys(data).length)) {
@@ -1393,7 +1393,7 @@
       return;
     }
     target.innerHTML = '<p class="muted">' + escapeHtml(title) + '</p>';
-    renderFriendlyPanel("#marketingGrowthResult", data, "No demo data available for this section yet.");
+    renderFriendlyPanel(selector, data, "No demo data available for this section yet.");
   }
 
   async function handleMarketingTab(button) {
@@ -1409,9 +1409,9 @@
       var dashboard = await marketingGrowthApi("marketing.dashboard", {});
       renderMarketingGrowthDashboard(dashboard);
       if (action === "marketing.dashboard") {
-        renderMarketingOutput(dashboard, action);
+        renderMarketingOutput(dashboard, action, targetSelector);
       } else {
-        renderMarketingOutput(await marketingGrowthApi(action, {}), action);
+        renderMarketingOutput(await marketingGrowthApi(action, {}), action, targetSelector);
       }
     } catch (error) {
       renderPanelError(targetSelector, error);
@@ -2209,17 +2209,19 @@
     ].forEach(function (view) {
       var section = document.querySelector('section[data-view="' + view + '"]');
       if (!section) return;
-      var group = section.querySelector(".actions");
-      if (!group || group.dataset.functionTabsAttached === "true") return;
-      group.dataset.functionTabsAttached = "true";
-      group.setAttribute("role", "group");
-      group.addEventListener("click", function (event) {
-        var button = event.target && event.target.closest ? event.target.closest("button") : null;
-        if (!button || !group.contains(button)) return;
-        setActiveFunctionTab(group, button);
+      var groups = section.querySelectorAll(".actions");
+      groups.forEach(function (group) {
+        if (group.dataset.functionTabsAttached === "true") return;
+        group.dataset.functionTabsAttached = "true";
+        group.setAttribute("role", "group");
+        group.addEventListener("click", function (event) {
+          var button = event.target && event.target.closest ? event.target.closest("button") : null;
+          if (!button || !group.contains(button)) return;
+          setActiveFunctionTab(group, button);
+        });
+        var active = group.querySelector("button.primary") || group.querySelector("button");
+        if (active) setActiveFunctionTab(group, active);
       });
-      var active = group.querySelector("button.primary") || group.querySelector("button");
-      if (active) setActiveFunctionTab(group, active);
     });
   }
 

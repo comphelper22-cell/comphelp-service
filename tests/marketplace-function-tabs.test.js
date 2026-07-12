@@ -9,6 +9,9 @@ assert.match(source, /function setActiveFunctionTab\(group, button\)/, "Marketpl
 assert.match(source, /attachFunctionTabs\(\);/, "Shared function tabs must be attached during boot.");
 assert.match(source, /aria-pressed/, "Function tabs must expose selected state to assistive technology.");
 assert.ok(!source.includes("!group.contains(button) || button.disabled"), "A handler-disabled button must still receive selected-state feedback during click bubbling.");
+assert.match(source, /section\.querySelectorAll\("\.actions"\)/, "Every action group in each center must receive independent selected-state handling.");
+assert.ok(!source.includes('section.querySelector(".actions")'), "Function-tab handling must not depend on only the first action group.");
+assert.match(source, /functionTabsAttached/, "Function-tab handlers must be attached only once per group.");
 [
   "betaCenter", "releaseCenter", "executiveDashboard", "salesManager",
   "operationsCenter", "financeCenter", "customerSuccessCenter",
