@@ -431,6 +431,9 @@ module.exports = async function handler(req, res) {
   try {
     if (req.method === "OPTIONS") return sendJson(res, 204, {});
     if (req.method === "GET") {
+      if (!requireMarketplaceRole(req)) {
+        return sendJson(res, 401, { ok: false, error: "unauthorized", message: "Invalid or missing Marketplace access code." });
+      }
       return sendJson(res, 200, {
         ok: true,
         data: {

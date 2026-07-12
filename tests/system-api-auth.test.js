@@ -5,9 +5,9 @@ process.env.MARKETPLACE_ADMIN_SECRET = "test-admin-secret";
 process.env.MARKETPLACE_VIEWER_SECRET = "test-viewer-secret";
 const systemHandler = require("../api/system");
 
-function createReq(body, secret = "") {
-  const req = Readable.from([Buffer.from(JSON.stringify(body), "utf8")]);
-  req.method = "POST";
+function createReq(body, secret = "", method = "POST") {
+  const req = Readable.from(method === "GET" ? [] : [Buffer.from(JSON.stringify(body), "utf8")]);
+  req.method = method;
   req.headers = { "content-type": "application/json" };
   if (secret) req.headers["x-marketplace-admin-secret"] = secret;
   return req;
@@ -28,6 +28,14 @@ function createRes() {
 
 (async function run() {
   const payload = { module: "memory", action: "status", payload: {} };
+
+  const publicGetRes = createRes();
+  await systemHandler(createReq({}, "", "GET"), publicGetRes);
+  assert.strictEqual(publicGetRes.statusCode, 401, "System module registry must require Marketplace authentication.");
+
+  const authenticatedGetRes = createRes();
+  await systemHandler(createReq({}, "test-admin-secret", "GET"), authenticatedGetRes);
+  assert.strictEqual(authenticatedGetRes.statusCode, 200, "Authorized owners may inspect the system module registry.");
 
   const missingRes = createRes();
   await systemHandler(createReq(payload), missingRes);

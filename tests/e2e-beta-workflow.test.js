@@ -39,7 +39,7 @@ assert.strictEqual(revenue.approveEstimate(estimate.data.id).data.status, "appro
 const converted = revenue.convertEstimateToJob(estimate.data.id);
 assert.strictEqual(converted.ok, true);
 const jobId = converted.data.job.id;
-assert.strictEqual(dispatch.assign(jobId, { assignedTechnician: "Alex Rivera" }).ok, true);
+assert.strictEqual(dispatch.assign(jobId, { assignedTechnician: "Beta Workflow Technician" }).ok, true);
 assert.strictEqual(dispatch.schedule(jobId, { startDate: new Date(Date.now() + 86400000).toISOString(), estimatedHours: 4 }).ok, true);
 assert.strictEqual(dispatch.complete(jobId, { actualHours: 4, completionNotes: "Installed cameras and verified mobile viewing." }).ok, true);
 

@@ -5,6 +5,7 @@ const safeStorage = require("../storage/safe-storage");
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
 const MAX_FILES = 12;
+const MAX_TOTAL_BYTES = 50 * 1024 * 1024;
 const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
 const GALLERY_FILE = path.join(process.cwd(), "data", "gallery.json");
 
@@ -65,8 +66,10 @@ function rawBody(req) {
     let size = 0;
     req.on("data", (chunk) => {
       size += chunk.length;
-      if (size > MAX_FILE_BYTES * MAX_FILES) {
-        reject(new Error("Upload is too large."));
+      if (size > MAX_TOTAL_BYTES) {
+        const error = new Error("Upload exceeds the 50 MB request limit.");
+        error.code = "payload_too_large";
+        reject(error);
         req.destroy();
         return;
       }
@@ -107,6 +110,37 @@ function parseMultipart(req, body) {
     }
   }
   return { fields, files };
+}
+
+function detectedMediaType(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < 4) return "";
+  if (buffer.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return "image";
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return "image";
+  if (["GIF87a", "GIF89a"].includes(buffer.slice(0, 6).toString("ascii"))) return "image";
+  if (buffer.slice(0, 4).toString("ascii") === "RIFF" && buffer.slice(8, 12).toString("ascii") === "WEBP") return "image";
+  if (buffer.slice(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]))) return "video";
+  if (buffer.slice(4, 8).toString("ascii") === "ftyp") {
+    const brand = buffer.slice(8, 16).toString("ascii").toLowerCase();
+    return /heic|heix|hevc|mif1|msf1/.test(brand) ? "image" : "video";
+  }
+  return "";
+}
+
+function uploadValidationError(message, code = "invalid_upload") {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
+
+function validateUploadFiles(files = []) {
+  if (files.length > MAX_FILES) throw uploadValidationError(`Maximum ${MAX_FILES} files are allowed.`, "payload_too_large");
+  return files.map((file) => {
+    if (file.size > MAX_FILE_BYTES) throw uploadValidationError(`${file.fileName || "Media file"} exceeds 25 MB.`, "payload_too_large");
+    const mediaType = detectedMediaType(file.buffer);
+    const declaredType = /^image\//.test(file.contentType) ? "image" : /^video\//.test(file.contentType) ? "video" : "";
+    if (!mediaType || mediaType !== declaredType) throw uploadValidationError(`Unsupported or spoofed media file: ${file.fileName || "unnamed file"}.`);
+    return { ...file, mediaType };
+  });
 }
 
 function analyze(files) {
@@ -303,6 +337,7 @@ module.exports = async function handler(req, res) {
   if (!auth.ok) return json(res, auth.status, { ok: false, error: auth.error });
   try {
     const parsed = parseMultipart(req, await rawBody(req));
+    parsed.files = validateUploadFiles(parsed.files || []);
     if (parsed.fields.privacyConfirmed !== "on" && parsed.fields.privacyConfirmed !== "true") {
       return json(res, 400, { ok: false, error: "Privacy confirmation is required before uploading project media." });
     }
@@ -350,9 +385,14 @@ module.exports = async function handler(req, res) {
     const saved = await supabaseInsert(project);
     return json(res, 200, { ok: true, project: saved, selectedMedia: uploaded.length, galleryItems, gallerySave, mediaPlan: plan });
   } catch (error) {
-    return json(res, 500, { ok: false, error: error.message || "Project upload failed." });
+    const status = error.code === "payload_too_large" ? 413 : error.code === "invalid_upload" ? 400 : 500;
+    const errorCode = status === 413 ? "payload_too_large" : status === 400 ? "invalid_upload" : "server_error";
+    const message = status === 413 ? "Upload size or file-count limit exceeded." : status === 400 ? "Upload contains an unsupported or invalid media file." : "Project upload failed.";
+    return json(res, status, { ok: false, error: errorCode, message });
   }
 };
+
+module.exports.validateUploadFiles = validateUploadFiles;
 
 module.exports.config = {
   api: {

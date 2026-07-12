@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const safeStorage = require("../storage/safe-storage");
 
 const DATA_FILE = path.join(process.cwd(), "data", "marketplace.json");
@@ -282,7 +283,7 @@ function resolveRole(req) {
   if (match) return match[0];
 
   const hasConfiguredSecret = roles.some((entry) => Boolean(entry[1]));
-  if (!hasConfiguredSecret) {
+  if (!hasConfiguredSecret && process.env.MARKETPLACE_DEMO_MODE === "true") {
     const demoRoles = [
       ["admin", "123456"],
       ["manager", "222222"],
@@ -307,7 +308,7 @@ function loginStatus(req) {
   const code = clean(req.headers["x-marketplace-admin-secret"], 500);
   if (!code) return { ok: false, status: 400, error: "Missing admin code" };
   const role = resolveRole(req);
-  if (role) return { ok: true, role, demoMode: !hasAnyRoleSecretConfigured() };
+  if (role) return { ok: true, role, demoMode: !hasAnyRoleSecretConfigured() && process.env.MARKETPLACE_DEMO_MODE === "true" };
   return { ok: false, status: 401, error: "Invalid code" };
 }
 
@@ -869,12 +870,24 @@ async function dispatcherPlan(payload) {
   };
 }
 
+function signedQuoteUrl(estimateId) {
+  const secret = clean(process.env.MARKETPLACE_QUOTE_SECRET || process.env.MARKETPLACE_ADMIN_SECRET || process.env.ADMIN_UPLOAD_SECRET, 500);
+  if (!secret) return "";
+  const idValue = clean(estimateId, 120);
+  if (!idValue) return "";
+  const expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  const token = crypto.createHmac("sha256", secret).update(`${idValue}.${expires}`).digest("hex");
+  const base = clean(process.env.PUBLIC_SITE_URL || "https://comphelp-service.vercel.app", 240).replace(/\/$/, "");
+  return `${base}/api/marketplace-quote?id=${encodeURIComponent(idValue)}&expires=${expires}&token=${token}`;
+}
+
 async function emailEstimate(payload) {
   if (!payload.approved) return { skipped: true, reason: "Email not sent. Approval is required." };
   if (!process.env.RESEND_API_KEY || !process.env.LEAD_FROM_EMAIL) return { skipped: true, reason: "RESEND_API_KEY and LEAD_FROM_EMAIL are required." };
   const email = clean(payload.email, 180);
   if (!email) return { skipped: true, reason: "Customer email is missing." };
-  const quoteUrl = `${clean(process.env.PUBLIC_SITE_URL || "https://comphelp-service.vercel.app", 240)}/api/marketplace-quote?id=${encodeURIComponent(clean(payload.estimateId, 120))}`;
+  const quoteUrl = signedQuoteUrl(payload.estimateId);
+  if (!quoteUrl) return { skipped: true, reason: "Secure quote links are not configured." };
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Authorization": `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
@@ -887,11 +900,32 @@ function galleryCount() {
   return (readJson(GALLERY_FILE, DEFAULT_GALLERY).items || []).length;
 }
 
+const MAX_JSON_BODY_BYTES = 256 * 1024;
+
+function payloadTooLarge() {
+  const error = new Error("Request body exceeds 256 KB.");
+  error.code = "payload_too_large";
+  return error;
+}
+
 async function readBody(req) {
-  if (typeof req.body === "object" && req.body) return req.body;
-  if (typeof req.body === "string") return JSON.parse(req.body || "{}");
+  const declaredLength = Number(req.headers && req.headers["content-length"] || 0);
+  if (declaredLength > MAX_JSON_BODY_BYTES) throw payloadTooLarge();
+  if (typeof req.body === "object" && req.body) {
+    if (Buffer.byteLength(JSON.stringify(req.body), "utf8") > MAX_JSON_BODY_BYTES) throw payloadTooLarge();
+    return req.body;
+  }
+  if (typeof req.body === "string") {
+    if (Buffer.byteLength(req.body, "utf8") > MAX_JSON_BODY_BYTES) throw payloadTooLarge();
+    return JSON.parse(req.body || "{}");
+  }
   const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
+  let totalBytes = 0;
+  for await (const chunk of req) {
+    totalBytes += chunk.length;
+    if (totalBytes > MAX_JSON_BODY_BYTES) throw payloadTooLarge();
+    chunks.push(chunk);
+  }
   const text = Buffer.concat(chunks).toString("utf8");
   return JSON.parse(text || "{}");
 }
@@ -907,10 +941,10 @@ async function dashboard(req) {
       role: "public",
       warnings: dbConnected ? [] : ["Database not connected"],
       config: { services: seed.services, vendorCategories: seed.vendorCategories, estimateRules: seed.estimateRules, crmStages: seed.crmStages || CRM_STAGES },
-      summary: { leads: 0, vendors: seed.vendors?.length || 0, projects: 0, openProjects: 0, revenue: 0, expectedCommission: 0, publishedGalleryItems: galleryCount(), smmDrafts: 0, conversionRate: 0, crm: crmSummary([]) },
+      summary: { leads: 0, vendors: 0, projects: 0, openProjects: 0, revenue: 0, expectedCommission: 0, publishedGalleryItems: galleryCount(), smmDrafts: 0, conversionRate: 0, crm: crmSummary([]) },
       recentLeads: [],
-      topVendors: (seed.vendors || []).slice(0, 3),
-      vendors: seed.vendors || [],
+      topVendors: [],
+      vendors: [],
       projects: []
     };
   }
@@ -1034,10 +1068,36 @@ function vendorPayload(payload) {
     rating: Math.min(5, Math.max(1, Number(payload.rating || 4))),
     availability: clean(payload.availability, 120),
     commissionPercent: money(payload.commissionPercent),
+    distanceMiles: Math.max(0, Number(payload.distanceMiles || 0)),
     notes: clean(payload.notes, 1200),
     status: clean(payload.status, 80) || "active",
     contact: clean(payload.email || payload.phone, 180)
   };
+}
+
+function vendorPatch(payload) {
+  const patch = {};
+  const stringFields = {
+    name: 140,
+    category: 80,
+    phone: 80,
+    email: 180,
+    website: 240,
+    serviceArea: 240,
+    city: 80,
+    availability: 120,
+    notes: 1200,
+    status: 80
+  };
+  Object.entries(stringFields).forEach(([field, max]) => {
+    if (payload[field] !== undefined && clean(payload[field], max)) patch[field] = clean(payload[field], max);
+  });
+  if (payload.rating !== undefined && clean(payload.rating, 30)) patch.rating = Math.min(5, Math.max(1, Number(payload.rating)));
+  if (payload.commissionPercent !== undefined && clean(payload.commissionPercent, 30)) patch.commissionPercent = money(payload.commissionPercent);
+  if (payload.distanceMiles !== undefined && clean(payload.distanceMiles, 30)) patch.distanceMiles = Math.max(0, Number(payload.distanceMiles));
+  if (patch.category || clean(payload.service, 120)) patch.services = [patch.category, clean(payload.service, 120)].filter(Boolean);
+  if (patch.email || patch.phone) patch.contact = patch.email || patch.phone;
+  return patch;
 }
 
 async function handleAction(action, payload) {
@@ -1088,7 +1148,7 @@ async function handleAction(action, payload) {
     const estimate = await calculateEstimate(payload);
     const saved = await insert("estimates", estimate);
     await logActivity("estimate_created", `Estimate created for ${saved.service}.`, { estimateId: saved.id, recommended: saved.recommended });
-    return { ok: true, estimate: saved, quoteUrl: `/api/marketplace-quote?id=${encodeURIComponent(saved.id || estimate.id)}` };
+    return { ok: true, estimate: saved, quoteUrl: signedQuoteUrl(saved.id || estimate.id) };
   }
   if (action === "emailEstimate") return { ok: true, email: await emailEstimate(payload) };
   if (action === "vendorSearch") {
@@ -1101,7 +1161,7 @@ async function handleAction(action, payload) {
     await logActivity("vendor_saved", `Vendor saved: ${vendor.name || "Vendor"}`, { vendorId: vendor.id, category: vendor.category });
     return { ok: true, vendor };
   }
-  if (action === "vendorUpdate") return { ok: true, vendor: await updateRecord("vendors", clean(payload.id, 120), vendorPayload(payload)) };
+  if (action === "vendorUpdate") return { ok: true, vendor: await updateRecord("vendors", clean(payload.id, 120), vendorPatch(payload)) };
   if (action === "vendorDelete") return { ok: true, vendor: await deleteRecord("vendors", clean(payload.id, 120)) };
   if (action === "vendorMatch") return { ok: true, match: await vendorProjectMatch(payload) };
   if (action === "quoteRequest") {
@@ -1192,6 +1252,9 @@ async function handler(req, res) {
     try {
       body = await readBody(req);
     } catch (error) {
+      if (error.code === "payload_too_large") {
+        return sendJson(res, 413, { ok: false, error: "payload_too_large", message: "Request body exceeds 256 KB.", where: "handler:POST:parseBody" });
+      }
       logError("handler:POST:parseBody", error);
       return sendJson(res, 400, { ok: false, error: "invalid_json", message: clean(error.message || "Invalid JSON body.", 500), where: "handler:POST:parseBody" });
     }
@@ -1223,3 +1286,6 @@ async function handler(req, res) {
 module.exports = handler;
 module.exports.resolveRole = resolveRole;
 module.exports.intakeWebsiteLead = intakeWebsiteLead;
+module.exports.signedQuoteUrl = signedQuoteUrl;
+module.exports.vendorPayload = vendorPayload;
+module.exports.vendorPatch = vendorPatch;

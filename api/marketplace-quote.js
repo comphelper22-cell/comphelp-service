@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 function clean(value, max = 1000) {
   return String(value || "").trim().slice(0, max);
@@ -16,19 +17,12 @@ function quoteHtml(estimate) {
     ["Job Size", estimate.jobSize],
     ["Property Type", estimate.propertyType],
     ["Cameras / Devices", `${estimate.numberOfCamerasDevices || estimate.units || ""} ${estimate.unitLabel || ""}`],
-    ["Labor Hours", estimate.laborHours],
-    ["Labor Cost", estimate.laborCost ? `$${estimate.laborCost}` : ""],
-    ["Material Cost", estimate.materialCost || estimate.materialEstimate ? `$${estimate.materialCost || estimate.materialEstimate}` : ""],
-    ["Profit Target", estimate.profitMargin ? `${estimate.profitMargin}%` : ""],
-    ["Commission", estimate.commission ? `$${estimate.commission} (${estimate.commissionPercent || 0}%)` : ""],
-    ["Internal Cost", estimate.internalCost ? `$${estimate.internalCost}` : ""],
-    ["Expected Profit", estimate.expectedProfit ? `$${estimate.expectedProfit}` : ""],
     ["Estimate Range", estimate.range || (`$${estimate.low || ""} - $${estimate.high || ""}`)],
     ["Recommended Estimate", estimate.recommended ? `$${estimate.recommended}` : ""],
-    ["Customer Quote", estimate.customerQuoteText],
-    ["Notes", estimate.notes]
+    ["Customer Quote", estimate.customerQuoteText]
   ].map((row) => `<tr><td>${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td></tr>`).join("");
-  return `<!doctype html><html><head><meta charset="utf-8"><title>CompHelp Service Quote</title><style>body{font-family:Arial,sans-serif;margin:2rem;color:#111}.box{border:1px solid #ddd;border-radius:10px;padding:1rem}h1{color:#0a5}table{width:100%;border-collapse:collapse;margin:1rem 0}td{border-top:1px solid #ddd;padding:.65rem}.total{font-size:1.4rem;font-weight:800}.muted{color:#555;font-size:.92rem}@media print{button,a.print-hide{display:none}}</style></head><body><button onclick="print()">Save as PDF</button> <a class="print-hide" href="?id=${encodeURIComponent(estimate.id || "")}&format=pdf">Download PDF</a><h1>CompHelp Service Quote</h1><p>Phone: +1 (747) 295-1440<br>Email: comphelper22@gmail.com</p><div class="box"><h2>${escapeHtml(estimate.service || "Service Estimate")}</h2><table>${rows}</table><p class="muted">${escapeHtml(estimate.internalNotes)}</p><p>${escapeHtml(estimate.disclaimer || "Final pricing depends on project details.")}</p></div></body></html>`;
+  const pdfUrl = `?id=${encodeURIComponent(estimate.id || "")}&expires=${encodeURIComponent(estimate.quoteExpires || "")}&token=${encodeURIComponent(estimate.quoteToken || "")}&format=pdf`;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>CompHelp Service Quote</title><style>body{font-family:Arial,sans-serif;margin:2rem;color:#111}.box{border:1px solid #ddd;border-radius:10px;padding:1rem}h1{color:#0a5}table{width:100%;border-collapse:collapse;margin:1rem 0}td{border-top:1px solid #ddd;padding:.65rem}.total{font-size:1.4rem;font-weight:800}.muted{color:#555;font-size:.92rem}@media print{button,a.print-hide{display:none}}</style></head><body><button onclick="print()">Save as PDF</button> <a class="print-hide" href="${pdfUrl}">Download PDF</a><h1>CompHelp Service Quote</h1><p>Phone: +1 (747) 295-1440<br>Email: comphelper22@gmail.com</p><div class="box"><h2>${escapeHtml(estimate.service || "Service Estimate")}</h2><table>${rows}</table><p>${escapeHtml(estimate.disclaimer || "Final pricing depends on project details.")}</p></div></body></html>`;
 }
 
 function pdfEscape(value) {
@@ -47,17 +41,9 @@ function quotePdf(estimate) {
     `Job Size: ${estimate.jobSize || ""}`,
     `Property Type: ${estimate.propertyType || ""}`,
     `Cameras / Devices: ${estimate.numberOfCamerasDevices || estimate.units || 1} ${estimate.unitLabel || "project"}`,
-    `Labor Hours: ${estimate.laborHours || ""}`,
-    `Labor Cost: $${estimate.laborCost || ""}`,
-    `Material Cost: $${estimate.materialCost || estimate.materialEstimate || ""}`,
-    `Profit Target: ${estimate.profitMargin || ""}%`,
-    `Commission: $${estimate.commission || ""} (${estimate.commissionPercent || ""}%)`,
-    `Internal Cost: $${estimate.internalCost || ""}`,
-    `Expected Profit: $${estimate.expectedProfit || ""}`,
     `Estimate Range: ${estimate.range || ("$" + estimate.low + " - $" + estimate.high)}`,
     `Recommended Estimate: $${estimate.recommended || ""}`,
     `Customer Quote: ${estimate.customerQuoteText || ""}`,
-    `Notes: ${estimate.notes || ""}`,
     "",
     estimate.disclaimer || "Final pricing depends on project details."
   ];
@@ -103,34 +89,52 @@ async function loadEstimateFromSupabase(id) {
   return Array.isArray(rows) && rows[0] ? fromDbRecord(rows[0]) : null;
 }
 
+function quoteSecret() {
+  return clean(process.env.MARKETPLACE_QUOTE_SECRET || process.env.MARKETPLACE_ADMIN_SECRET || process.env.ADMIN_UPLOAD_SECRET, 500);
+}
+
+function validQuoteToken(id, expires, token) {
+  const secret = quoteSecret();
+  const expiry = Number(expires);
+  if (!secret || !id || !token || !Number.isFinite(expiry) || expiry <= Date.now()) return false;
+  const expected = crypto.createHmac("sha256", secret).update(`${id}.${expiry}`).digest("hex");
+  const actualBuffer = Buffer.from(String(token), "utf8");
+  const expectedBuffer = Buffer.from(expected, "utf8");
+  return actualBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(actualBuffer, expectedBuffer);
+}
+
+function sendError(res, statusCode, message) {
+  res.statusCode = statusCode;
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  return res.end(`<!doctype html><html><head><meta charset="utf-8"><title>Quote unavailable</title></head><body><h1>Quote unavailable</h1><p>${escapeHtml(message)}</p></body></html>`);
+}
+
 module.exports = async function handler(req, res) {
   const id = clean(req.query && req.query.id, 120);
-  const fallback = {
-    id,
-    customerName: "Customer",
-    service: "CompHelp Service",
-    city: "Los Angeles",
-    units: 1,
-    unitLabel: "project",
-    range: "Estimate pending",
-    notes: "Open this quote after generating an estimate from Marketplace Manager.",
-    disclaimer: "Final pricing depends on project details."
-  };
+  const expires = clean(req.query && req.query.expires, 30);
+  const token = clean(req.query && req.query.token, 200);
+  if (!id || !expires || !token) return sendError(res, 400, "This quote link is incomplete.");
+  if (!quoteSecret()) return sendError(res, 503, "Quote links are temporarily unavailable.");
+  if (!validQuoteToken(id, expires, token)) return sendError(res, 403, "This quote link is invalid or expired.");
 
-  let estimate = fallback;
+  let estimate = null;
   try {
-    estimate = await loadEstimateFromSupabase(id) || estimate;
-    const seed = JSON.parse(fs.readFileSync(path.join(process.cwd(), "data", "marketplace.json"), "utf8"));
-    estimate = estimate.id !== id ? ((seed.estimates || []).find((item) => item.id === id) || estimate) : estimate;
+    estimate = await loadEstimateFromSupabase(id);
+    if (!estimate) {
+      const seed = JSON.parse(fs.readFileSync(path.join(process.cwd(), "data", "marketplace.json"), "utf8"));
+      estimate = (seed.estimates || []).find((item) => item.id === id) || null;
+    }
   } catch (_) {
-    estimate = fallback;
+    return sendError(res, 500, "The quote could not be loaded. Please contact CompHelp Service.");
   }
+  if (!estimate) return sendError(res, 404, "This quote was not found.");
+  estimate = { ...estimate, quoteExpires: expires, quoteToken: token };
 
   res.statusCode = 200;
   if (req.query && req.query.format === "pdf") {
     const pdf = quotePdf(estimate);
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="comphelp-service-quote-${id || "estimate"}.pdf"`);
+    res.setHeader("Content-Disposition", `attachment; filename="comphelp-service-quote-${id}.pdf"`);
     return res.end(pdf);
   }
   res.setHeader("Content-Type", "text/html; charset=utf-8");

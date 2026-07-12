@@ -5,6 +5,7 @@
     config: null,
     lastEstimateId: "",
     lastEstimateEmail: "",
+    lastEstimateUrl: "",
     betaDemoMode: false,
     dashboard: null
   };
@@ -2185,6 +2186,43 @@
     renderBetaDemoOperatingData();
   }
 
+  function setActiveFunctionTab(group, button) {
+    if (!group || !button) return;
+    group.querySelectorAll("button").forEach(function (item) {
+      item.classList.remove("primary");
+      item.classList.remove("is-active");
+      item.setAttribute("aria-pressed", "false");
+    });
+    button.classList.add("primary");
+    button.classList.add("is-active");
+    button.setAttribute("aria-pressed", "true");
+  }
+
+  function attachFunctionTabs() {
+    [
+      "betaCenter", "releaseCenter", "businessDashboard", "executiveDashboard",
+      "salesManager", "operationsCenter", "financeCenter", "customerSuccessCenter",
+      "marketingGrowthCenter", "analyticsReports", "dispatchAICenter", "saasAdminCenter",
+      "billingCenter", "integrationsCenter", "recommendations", "developer",
+      "comphelpBrain", "contextCenter", "memoryCenter", "decisionCenter",
+      "projectTitan", "projectControl"
+    ].forEach(function (view) {
+      var section = document.querySelector('section[data-view="' + view + '"]');
+      if (!section) return;
+      var group = section.querySelector(".actions");
+      if (!group || group.dataset.functionTabsAttached === "true") return;
+      group.dataset.functionTabsAttached = "true";
+      group.setAttribute("role", "group");
+      group.addEventListener("click", function (event) {
+        var button = event.target && event.target.closest ? event.target.closest("button") : null;
+        if (!button || !group.contains(button)) return;
+        setActiveFunctionTab(group, button);
+      });
+      var active = group.querySelector("button.primary") || group.querySelector("button");
+      if (active) setActiveFunctionTab(group, active);
+    });
+  }
+
   function attachNavigation() {
     $all(".nav button").forEach(function (button) {
       button.addEventListener("click", function () {
@@ -2205,7 +2243,27 @@
     });
   }
 
+  function updateVendorCrudMode() {
+    var form = document.querySelector('form[data-action="vendor"]');
+    if (!form) return;
+    var mode = form.elements.crudMode.value || "vendor";
+    var category = form.elements.category;
+    var recordId = form.elements.id;
+    var button = form.querySelector("button");
+    category.required = mode === "vendor";
+    recordId.required = mode !== "vendor";
+    button.textContent = mode === "vendorDelete" ? "Delete Vendor" : mode === "vendorUpdate" ? "Update Vendor" : "Save Vendor";
+    button.classList.toggle("warn", mode === "vendorDelete");
+    button.classList.toggle("primary", mode !== "vendorDelete");
+  }
+
   function attachForms() {
+    var vendorMode = document.querySelector('form[data-action="vendor"] select[name="crudMode"]');
+    if (vendorMode) {
+      vendorMode.addEventListener("change", updateVendorCrudMode);
+      updateVendorCrudMode();
+    }
+
     $("#loginForm").addEventListener("submit", async function (event) {
       event.preventDefault();
       var secret = $("#loginSecret").value.trim();
@@ -2557,6 +2615,7 @@
           if (action === "estimate") {
             state.lastEstimateId = result.estimate.id;
             state.lastEstimateEmail = form.email.value || "";
+            state.lastEstimateUrl = result.quoteUrl || "";
             renderEstimate(result.estimate);
             renderFriendlyPanel("#estimateResult", result, "No estimate output yet.");
           }
@@ -2584,18 +2643,29 @@
     });
 
     $("#downloadQuote").addEventListener("click", function () {
-      if (!state.lastEstimateId) return;
-      window.open("/api/marketplace-quote?id=" + encodeURIComponent(state.lastEstimateId), "_blank", "noopener");
+      if (!state.lastEstimateUrl) return;
+      window.open(state.lastEstimateUrl, "_blank", "noopener");
     });
 
     $("#emailEstimate").addEventListener("click", async function () {
-      if (!state.lastEstimateId) return;
-      var result = await api("emailEstimate", {
-        estimateId: state.lastEstimateId,
-        email: state.lastEstimateEmail,
-        approved: true
-      });
-      renderFriendlyPanel("#estimateResult", result, "No email estimate output yet.");
+      var button = $("#emailEstimate");
+      if (!state.lastEstimateId) {
+        renderFriendlyPanel("#estimateResult", "Create or select an estimate before emailing it.");
+        return;
+      }
+      button.disabled = true;
+      try {
+        var result = await api("emailEstimate", {
+          estimateId: state.lastEstimateId,
+          email: state.lastEstimateEmail,
+          approved: true
+        });
+        renderFriendlyPanel("#estimateResult", result, "No email estimate output yet.");
+      } catch (error) {
+        renderPanelError("#estimateResult", error);
+      } finally {
+        button.disabled = false;
+      }
     });
 
     $("#adminSecret").addEventListener("change", refresh);
@@ -3261,6 +3331,7 @@
   }
 
   attachNavigation();
+  attachFunctionTabs();
   attachMarketingGrowthTabs();
   attachForms();
   restoreAuthenticatedSession().catch(function (error) {
