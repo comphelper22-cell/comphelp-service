@@ -1,9 +1,8 @@
+node_modules/
 .env
-.env.local
-.vercel
-logs/*.jsonl
-logs/*-report.json
-backups/
-*.zip
-*.7z
-*.rar
+.env.*
+!.env.example
+.DS_Store
+coverage/
+.hermes/
+data/workflow-history.json
